@@ -127,25 +127,46 @@ def _extract_title(text: str) -> str:
     return m.group(1).strip() if m else "call"
 
 
+# ── Auto-detect cliente dalla trascrizione ────────────────────────────────────
+
+def _detect_client(trascrizione: str) -> str | None:
+    """Usa Claude per rilevare il cliente dalla trascrizione. Restituisce il nome-cartella o None."""
+    if not VALID_CLIENTS:
+        return None
+
+    clienti_list = "\n".join(f"- {c}" for c in VALID_CLIENTS)
+    prompt = f"""Leggi questa trascrizione di una call e rispondi SOLO con il nome del cliente tra quelli elencati sotto (esattamente come scritto), oppure con "sconosciuto" se non riesci a determinarlo.
+
+Clienti disponibili:
+{clienti_list}
+
+Regole:
+- Cerca nomi, aziende, prodotti o riferimenti che identifichino il cliente
+- Se la trascrizione menziona vino, cantina, Paolo → probabilmente "bergamo-vini"
+- Se menziona Le Rive, vigneti, hotel veneto → "le-rive"
+- Se menziona coaching, Riccardo, sessioni → "riccardo-coach"
+- Rispondi SOLO con il nome-cartella esatto o "sconosciuto"
+
+Trascrizione (prime 2000 caratteri):
+{trascrizione[:2000]}"""
+
+    client = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
+    msg = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=50,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    rilevato = msg.content[0].text.strip().lower()
+
+    if rilevato in VALID_CLIENTS:
+        return rilevato
+    return None
+
+
 # ── Wizard interattivo ────────────────────────────────────────────────────────
 
-def _wizard() -> tuple[str, str]:
-    print("\n=== Process Call ===\n")
-    print("Clienti disponibili:")
-    for i, c in enumerate(VALID_CLIENTS, 1):
-        print(f"  {i}. {c}")
-    print()
-
-    scelta = input("Scegli cliente (numero o nome): ").strip()
-    if scelta.isdigit():
-        idx = int(scelta) - 1
-        cliente = VALID_CLIENTS[idx] if 0 <= idx < len(VALID_CLIENTS) else scelta
-    else:
-        cliente = scelta
-
-    print(f"\nIncolla la trascrizione della call con {cliente}.")
-    print("Quando hai finito, premi INVIO due volte + digita 'END' + INVIO:\n")
-
+def _leggi_trascrizione() -> str:
+    print("Incolla la trascrizione. Finisci con 'END' su una riga vuota:\n")
     lines = []
     while True:
         try:
@@ -155,8 +176,38 @@ def _wizard() -> tuple[str, str]:
             lines.append(line)
         except EOFError:
             break
+    return "\n".join(lines).strip()
 
-    trascrizione = "\n".join(lines).strip()
+
+def _wizard() -> tuple[str, str]:
+    print("\n=== Process Call ===\n")
+    print("Incolla la trascrizione — il cliente verrà rilevato automaticamente.")
+    print("Finisci con 'END' su una riga vuota:\n")
+
+    trascrizione = _leggi_trascrizione()
+    if not trascrizione:
+        raise RuntimeError("Trascrizione vuota.")
+
+    print("\n  → Rilevamento cliente in corso...")
+    cliente = _detect_client(trascrizione)
+
+    if cliente:
+        print(f"  ✓ Cliente rilevato: {cliente}")
+        conferma = input(f"  Confermi? [Invio = sì / digita altro nome]: ").strip()
+        if conferma:
+            cliente = conferma
+    else:
+        print("  ⚠ Cliente non rilevato automaticamente.")
+        print("  Clienti disponibili:")
+        for i, c in enumerate(VALID_CLIENTS, 1):
+            print(f"    {i}. {c}")
+        scelta = input("  Scegli (numero o nome): ").strip()
+        if scelta.isdigit():
+            idx = int(scelta) - 1
+            cliente = VALID_CLIENTS[idx] if 0 <= idx < len(VALID_CLIENTS) else scelta
+        else:
+            cliente = scelta
+
     return cliente, trascrizione
 
 
@@ -220,22 +271,26 @@ if __name__ == "__main__":
 
     try:
         if len(sys.argv) == 1:
-            # Wizard interattivo
+            # Wizard interattivo con auto-detect cliente
             cliente, trascrizione = _wizard()
         elif len(sys.argv) == 2:
-            # Solo cliente → wizard per la trascrizione
-            cliente = sys.argv[1]
-            print(f"Incolla la trascrizione per {cliente}. Finisci con 'END' su una riga:")
-            lines = []
-            while True:
-                try:
-                    line = input()
-                    if line.strip() == "END":
-                        break
-                    lines.append(line)
-                except EOFError:
-                    break
-            trascrizione = "\n".join(lines)
+            # Solo cliente specificato → leggi trascrizione + auto-detect come fallback
+            cliente_arg = sys.argv[1]
+            trascrizione = _leggi_trascrizione()
+            if cliente_arg in VALID_CLIENTS:
+                cliente = cliente_arg
+            else:
+                # Potrebbe essere un file invece di un nome cliente
+                p = Path(cliente_arg)
+                if p.exists():
+                    trascrizione = p.read_text()
+                    print("  → Rilevamento cliente in corso...")
+                    cliente = _detect_client(trascrizione)
+                    if not cliente:
+                        raise RuntimeError(f"Impossibile rilevare il cliente da {cliente_arg}. Usa: process_call.py <cliente> <file>")
+                    print(f"  ✓ Cliente rilevato: {cliente}")
+                else:
+                    cliente = cliente_arg
         elif len(sys.argv) == 3:
             cliente = sys.argv[1]
             src     = sys.argv[2]
@@ -243,6 +298,15 @@ if __name__ == "__main__":
                 trascrizione = sys.stdin.read()
             else:
                 trascrizione = Path(src).read_text()
+            # Se il cliente non esiste nella lista, prova auto-detect e suggerisci
+            if cliente not in VALID_CLIENTS:
+                print(f"  ⚠ '{cliente}' non trovato tra i clienti. Rilevamento automatico...")
+                rilevato = _detect_client(trascrizione)
+                if rilevato:
+                    conferma = input(f"  Cliente rilevato: {rilevato}. Usa questo? [Invio = sì]: ").strip()
+                    cliente = rilevato if not conferma else conferma
+                else:
+                    print(f"  → Creo nuovo cliente: {cliente}")
         else:
             print(__doc__)
             sys.exit(1)

@@ -60,9 +60,26 @@ This loop is how the framework improves over time.
 .tmp/           # Temporary files (scraped data, intermediate exports). Regenerated as needed.
 tools/          # Python scripts for deterministic execution
 workflows/      # Markdown SOPs defining what to do and how
+clients/        # Contesto aggiornato per ogni cliente (README + trascrizioni call)
+knowledge/      # Knowledge base Mailift (posizionamento, listino, copy sito)
 .env            # API keys and environment variables (NEVER store secrets anywhere else)
 credentials.json, token.json  # Google OAuth (gitignored)
 ```
+
+## Contesto clienti (leggi sempre all'inizio di ogni sessione)
+
+Quando menzioni o lavori su un cliente specifico, leggi **sempre** il suo `clients/<cliente>/README.md` prima di agire. Contiene il contesto aggiornato, le ultime decisioni e i prossimi step emersi dalle call.
+
+Clienti attivi:
+- `clients/bergamo-vini/README.md` — €500 MRR, email 2x/settimana sabato 9:30
+- `clients/le-rive/README.md` — €1.500 MRR
+- `clients/riccardo-coach/README.md` — €1.000 MRR, coaching
+
+Per processare una nuova trascrizione call:
+```
+python tools/process_call.py <nome-cliente> <file-trascrizione.txt>
+```
+Poi: `git add clients/ && git commit -m "Call <cliente> YYYY-MM-DD" && git push`
 
 **Core principle:** Local files are just for processing. Anything I need to see or use lives in cloud services. Everything in `.tmp/` is disposable.
 

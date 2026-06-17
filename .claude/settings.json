@@ -7,5 +7,17 @@
   },
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"systemMessage\": \"Esegui subito lo skill mailift-context: leggi git log, git status, i README di clients/bergamo-vini, clients/le-rive, clients/riccardo-coach e i file call più recenti, poi produci il briefing completo in italiano.\"}'"
+          }
+        ]
+      }
+    ]
   }
 }
