@@ -12,32 +12,26 @@
 Calzature (linea "Sposa" + linea "old day"). AOV ~€140, costo ~€40, margine lordo ~€100 (60-70%). ROAS attuale ~6.2 (ultimi 30gg, €2k spesa → €13.8k revenue). Budget attuale ~€20-25/gg sulla linea Sposa. No Black Friday — usano Outlet. Stagionalità Sposa: picco feb-ott. Cambio numero (GLS) ~€22, attualmente gratuito per il cliente.
 
 ## Ultime decisioni
-_Ultima call: [2025-12-02](calls/2025-12-02_check-performance-campagne-treemme.md)_
+_Ultima call: [2025-11-06](calls/2025-11-06_pre-proposta-treemme-calzature.md)_
 
-- Mantenere pop-up high-performing ed espandere flows correlati
-- Lanciare newsletter settimanali su temi wedding/holiday con template da flow
-- Implementare segmentazione 30/60/90 giorni engaged (target: >40% open rate)
-- Facebook: consolidare best-performing ad sets in meno campagne
-- Google Shopping: rilancio con selezione prodotti (non full catalog) + Brand campaigns
-- TikTok: ads con video nativi educazionali/promozionali (styling, must-haves), non via Shop feed
-- Pinterest: test ads bridal discovery con budget contenuti (20-30€) e imagery "indossato"
-- Dicembre: campagna "Regali" con free gift-wrapping + evento armocromista in-store
+- Implementazione lead capture pop-up customizzato (target: 240 email/mese vs attuali 30)
+- Adozione email marketing strategy completa (welcome series, abandoned cart, post-purchase)
+- Accesso a 300 template email + 600 content ideas + content planning tool interno
+- Presentazione di 2 package: Setup (€1.500) e Completo con WhatsApp automation (€2.005)
+- Garanzia performance 30 giorni con adjustments gratuiti
 
 
 ## Prossimi step
 ### Lorenzo / Mailift
-- [ ] Condividere template Figma/Canva per newsletter
-- [ ] Costruire e lanciare newsletter settimanali reusando creative da flow
-- [ ] Implementare segmenti engaged 30/60/90 giorni in email platform
-- [ ] Fornire brief creativo per TikTok (video styling/must-haves)
-- [ ] Setup Pinterest ads test per bridal discovery
+- [ ] Inviare proposal dettagliato con specifiche pop-up e email flows
+- [ ] Preparare case study con risultati (8-10% conversion rate) da clienti simili
+- [ ] Attendere feedback Alessio entro 1 settimana
+- [ ] Schedulare follow-up call per validazione proposal
 
-### Cliente (Treemme)
-- [ ] Preparare asset holiday/regali per newsletter
-- [ ] Consolidare campagne Facebook (best-performing ad sets)
-- [ ] Rilancio Google Shopping (lista prodotti selezionati)
-- [ ] Produrre/testare creative TikTok nativi (video educazionali)
-- [ ] Definire logistica evento dicembre (gift-wrapping, armocromista)
+### Cliente (Treemme/Alessio)
+- [ ] Revisionare i 2 package e decidere configurazione
+- [ ] Confermare go-ahead per implementazione
+- [ ] Definire preferenze contenuto email (tone, frequency, segmentazione)
 
 
 ## Note operative

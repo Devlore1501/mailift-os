@@ -12,24 +12,27 @@
 eCommerce B2B/B2C palloncini e gonfiabili. Due audience principali: privati (palloncini) e agenzie/intermediari (gonfiabili). Sito custom con backend proprietario gestito da Roberto. Checkout con bonifico (ordine "sospeso" fino a pagamento). Sito spagnolo Prim Globos con quasi zero conversioni. Server-side pixel Facebook già attivo.
 
 ## Ultime decisioni
-_Ultima call: [2026-04-08](calls/2026-04-08_analisi-copy-e-offerte-popup-partylandia.md)_
+_Ultima call: [2026-03-25](calls/2026-03-25_review-pre-kickoff-partylandia---email-marketing-s.md)_
 
-- **Offerta Palloncini:** +100 palloncini personalizzati omaggio su ordini >500€ (da erogare via codice promo o processo manuale)
-- **Offerta Gonfiabili:** compressore elettrico gratuito (costo ~25€, retail ~70€)
-- **Percorso Agenzie:** Partner Program con benefici scalabili (attivazione da 10+ ordini/anno)
-- **Prossimo passo:** Bozze copy per 3 popup + connessione con designer per catalogo agenzie
+- Avvio ottimizzazione checkout (riduzione friction, pre-compilazione campi, popup lead capture)
+- Implementazione automazioni email: welcome series, abandoned cart recovery, campagne segmentate
+- Accesso Lorenzo agli account advertising e piattaforme per audit dettagliato
+- Timeline setup: 72 ore da kickoff
+- Esplorazione canali alternativi: TikTok, Facebook/Google Ads ottimizzate
 
 
 ## Prossimi step
 ### Lorenzo / Mailift
-- [ ] Contattare Roberto per fix tracking analytics
-- [ ] Redigere 3 bozze copy per popup (Palloncini, Gonfiabili, Agenzie)
-- [ ] Connettere prospect con designer per sviluppo catalogo agenzie
+- [ ] Richiedere e documentare accesso ai sistemi (Google Ads, e-commerce, email platform, social ads)
+- [ ] Preparare audit dettagliato dei costi e performance Google Ads
+- [ ] Delineare roadmap TikTok e social paid (briefing pre-kickoff)
+- [ ] Schedulare call follow-up settimanale
+- [ ] Confermare setup 72 ore con checklist pre-30 marzo
 
-### Cliente
-- [ ] Risolvere situazione logistica gazebo in dogana
-- [ ] Confermare preferenza formato promozione Palloncini (codice promo vs. manuale)
-- [ ] Validare bozze copy
+### Cliente (Partylandia)
+- [ ] Fornire credenziali accesso account advertising e CRM/email
+- [ ] Condividere histórico dati clienti (4.000+ database)
+- [ ] Confirmación partecipazione kickoff 30 marzo
 
 
 ## Note operative
