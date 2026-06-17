@@ -5,7 +5,7 @@
 |-------|--------|
 | **MRR** | €1.500 |
 | **Stato** | Retainer attivo |
-| **Owner** | — |
+| **Owner** | Andrea |
 | **Email** | — |
 | **Inizio** | — |
 
