@@ -122,7 +122,7 @@ def get_contact(contact_id: str) -> dict:
 
 
 def create_contact(
-    email: str,
+    email: str = "",
     first_name: str = "",
     last_name: str = "",
     company_name: str = "",
@@ -131,10 +131,9 @@ def create_contact(
     tags: list[str] | None = None,
 ) -> dict:
     """Crea un nuovo contatto. Side-effect: scrive su GHL."""
-    payload: dict[str, Any] = {
-        "locationId": LOCATION_ID,
-        "email": email,
-    }
+    payload: dict[str, Any] = {"locationId": LOCATION_ID}
+    if email:
+        payload["email"] = email
     if first_name:
         payload["firstName"] = first_name
     if last_name:
@@ -151,8 +150,24 @@ def create_contact(
     return _request("POST", "/contacts/", json=payload).get("contact", {})
 
 
+def search_contacts_by_name(query: str, limit: int = 5) -> list[dict]:
+    """Cerca contatti per nome o azienda. Read-only."""
+    data = _request(
+        "GET",
+        "/contacts/",
+        params={"locationId": LOCATION_ID, "query": query, "limit": limit},
+    )
+    return data.get("contacts", [])
+
+
+def update_contact(contact_id: str, **fields) -> dict:
+    """Aggiorna campi di un contatto esistente. Side-effect."""
+    payload = {k: v for k, v in fields.items() if v}
+    return _request("PUT", f"/contacts/{contact_id}", json=payload).get("contact", {})
+
+
 def find_or_create_contact(
-    email: str,
+    email: str = "",
     first_name: str = "",
     last_name: str = "",
     company_name: str = "",
@@ -160,12 +175,27 @@ def find_or_create_contact(
     source: str = "discovery_call",
     tags: list[str] | None = None,
 ) -> tuple[dict, bool]:
-    """Cerca per email; se non trovato lo crea. Ritorna (contact, was_created)."""
-    existing = search_contacts_by_email(email)
-    # Filtro stretto: match esatto sull'email per evitare falsi positivi del search
-    for contact in existing:
-        if (contact.get("email") or "").lower() == email.lower():
-            return contact, False
+    """Cerca per email (o nome+azienda se email mancante); se non trovato lo crea.
+    Ritorna (contact, was_created)."""
+    if email:
+        existing = search_contacts_by_email(email)
+        for contact in existing:
+            if (contact.get("email") or "").lower() == email.lower():
+                return contact, False
+    else:
+        # fallback: cerca per nome o azienda
+        query = company_name or f"{first_name} {last_name}".strip()
+        if query:
+            candidates = search_contacts_by_name(query)
+            for contact in candidates:
+                cn = (contact.get("companyName") or "").lower()
+                fn = (contact.get("firstName") or "").lower()
+                ln = (contact.get("lastName") or "").lower()
+                if (company_name and company_name.lower() in cn) or (
+                    first_name and first_name.lower() in fn and last_name and last_name.lower() in ln
+                ):
+                    return contact, False
+
     new_contact = create_contact(
         email=email,
         first_name=first_name,
@@ -176,6 +206,51 @@ def find_or_create_contact(
         tags=tags,
     )
     return new_contact, True
+
+
+# ─── Pipelines / Opportunities ────────────────────────────────────────────────
+
+
+def list_pipelines() -> list[dict]:
+    """Lista le pipeline della location. Read-only."""
+    data = _request("GET", "/opportunities/pipelines", params={"locationId": LOCATION_ID})
+    return data.get("pipelines", [])
+
+
+def get_opportunities_for_contact(contact_id: str) -> list[dict]:
+    """Opportunità associate a un contatto. Read-only."""
+    data = _request(
+        "GET",
+        "/opportunities/search",
+        params={"location_id": LOCATION_ID, "contact_id": contact_id, "limit": 10},
+    )
+    return data.get("opportunities", [])
+
+
+def create_opportunity(
+    contact_id: str,
+    pipeline_id: str,
+    stage_id: str,
+    name: str,
+    monetary_value: float = 0,
+    status: str = "open",
+) -> dict:
+    """Crea un'opportunità nella pipeline. Side-effect."""
+    payload = {
+        "locationId": LOCATION_ID,
+        "contactId": contact_id,
+        "pipelineId": pipeline_id,
+        "pipelineStageId": stage_id,
+        "name": name,
+        "monetaryValue": monetary_value,
+        "status": status,
+    }
+    return _request("POST", "/opportunities/", json=payload).get("opportunity", {})
+
+
+def update_opportunity(opportunity_id: str, **fields) -> dict:
+    """Aggiorna un'opportunità esistente. Side-effect."""
+    return _request("PUT", f"/opportunities/{opportunity_id}", json=fields).get("opportunity", {})
 
 
 # ─── Notes ───────────────────────────────────────────────────────────────────
