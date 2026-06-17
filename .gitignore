@@ -1,0 +1,44 @@
+# Credenziali e segreti — MAI committare
+.env
+*.env
+.env.*
+credentials*.json
+token*.json
+tokens/
+*.p12
+*.pem
+
+# Estratti conto e file finanziari
+inbox/
+
+# File temporanei e cache
+.tmp/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Ambienti virtuali
+.venv/
+venv/
+env/
+
+# IDE e OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# Log
+*.log
+logs/
+
+# Apps Script token cache
+apps_script_id.txt
+
+# Claude Code internals (trascrizioni sessioni)
+.claude/projects/

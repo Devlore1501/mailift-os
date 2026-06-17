@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vite:*)",
+      "Bash(curl -s -X POST -F \"file=@inbox/processed/20260408-042103_account-statement_01-Jan-2026_13-Mar-2026.csv\" http://localhost:8765/api/statements/upload)",
+      "Bash(python3 -c ':*)",
+      "Bash(curl -s -X POST -H \"Content-Type: application/json\" -d @/tmp/create_body.json http://localhost:8765/api/autofatture/create)",
+      "Bash(kill %1)",
+      "Bash(pkill -f \"uvicorn app.main\")",
+      "Bash(wc -l backend/app/*.py backend/app/api/*.py backend/app/services/*.py backend/app/models/*.py)",
+      "Bash(wc -l frontend/src/*.tsx frontend/src/api/*.ts frontend/src/pages/*.tsx)",
+      "Bash(python3 -c \"import json,sys; p=json.load\\(sys.stdin\\); print\\('name:',p.get\\('name'\\)\\); print\\('scripts:'\\); [print\\(' ',k,'=',v\\) for k,v in p.get\\('scripts',{}\\).items\\(\\)]; print\\('deps:'\\); [print\\(' ',k,v\\) for k,v in p.get\\('dependencies',{}\\).items\\(\\)]\")",
+      "Bash(.venv/bin/python -c ':*)",
+      "WebFetch(domain:github.com)"
+    ]
+  }
+}
