@@ -253,6 +253,35 @@ def update_opportunity(opportunity_id: str, **fields) -> dict:
     return _request("PUT", f"/opportunities/{opportunity_id}", json=fields).get("opportunity", {})
 
 
+# ─── Tasks ───────────────────────────────────────────────────────────────────
+
+
+def create_task(
+    contact_id: str,
+    title: str,
+    due_date: str,
+    assigned_to: str = "",
+) -> dict:
+    """Crea un task su una scheda contatto GHL. Side-effect.
+
+    due_date: ISO 8601 string, es. '2026-07-15T09:00:00+02:00'
+    L'API GHL tasks accetta solo: title, dueDate, completed, assignedTo.
+    """
+    payload: dict = {
+        "title": title,
+        "dueDate": due_date,
+        "completed": False,
+    }
+    if assigned_to:
+        payload["assignedTo"] = assigned_to
+    return _request("POST", f"/contacts/{contact_id}/tasks", json=payload).get("task", {})
+
+
+def list_tasks(contact_id: str) -> list[dict]:
+    """Lista i task di un contatto. Read-only."""
+    return _request("GET", f"/contacts/{contact_id}/tasks").get("tasks", [])
+
+
 # ─── Notes ───────────────────────────────────────────────────────────────────
 
 

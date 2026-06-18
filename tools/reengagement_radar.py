@@ -9,19 +9,24 @@ Ogni README prospect può avere una sezione:
   **Messaggio suggerito:** ...
 
 Usage:
-    python tools/reengagement_radar.py              # mostra prospect da contattare oggi (±30gg)
-    python tools/reengagement_radar.py --all        # mostra tutti i trigger indipendentemente dalla data
-    python tools/reengagement_radar.py --days 60    # finestra ±60 giorni
+    python tools/reengagement_radar.py              # mostra prospect nella finestra 30gg
+    python tools/reengagement_radar.py --all        # mostra tutti i trigger
+    python tools/reengagement_radar.py --days 60    # finestra personalizzata
+    python tools/reengagement_radar.py --ghl        # crea task nelle schede contatto GHL
+    python tools/reengagement_radar.py --all --ghl  # tutti i prospect → task GHL
 """
 
 from __future__ import annotations
 
 import re
 import sys
-from datetime import date, datetime
+from datetime import date, datetime, timezone, timedelta
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT / "tools"))
+
+import ghl_client as ghl
 
 SKIP_FOLDERS = {"_mailift-team"}
 RETAINER_STATI = {"retainer attivo", "retainer", "ex cliente", "non attivo"}
@@ -183,9 +188,99 @@ def print_report(results: list[dict], window_days: int) -> None:
     print(f"{'='*60}\n")
 
 
+def _due_date_iso(d: date) -> str:
+    """Converte una data in ISO 8601 con ora 09:00 Europe/Rome (UTC+2)."""
+    rome_offset = timezone(timedelta(hours=2))
+    dt = datetime(d.year, d.month, d.day, 9, 0, 0, tzinfo=rome_offset)
+    return dt.isoformat()
+
+
+def sync_to_ghl(results: list[dict]) -> None:
+    """Crea un task nella scheda contatto GHL per ogni prospect del radar."""
+    print(f"\n{'='*60}")
+    print("  SYNC → GHL")
+    print(f"{'='*60}\n")
+
+    for r in results:
+        t = r["trigger"]
+        nome = r["nome"]
+        folder = r["folder"]
+        messaggio = t["messaggio"]
+        condizione = t["condizione"]
+        blocco = t["blocco"]
+        data_reminder = t["data_reminder"] or (TODAY + timedelta(days=7))
+
+        # Task title conciso
+        title = f"Reengagement: {nome}"
+
+        # Descrizione completa — questa appare nella scheda GHL
+        description = (
+            f"BLOCCO ORIGINALE: {blocco}\n\n"
+            f"CONDIZIONE TRIGGER: {condizione}\n\n"
+            f"MESSAGGIO PRONTO:\n{messaggio}"
+        )
+
+        due_iso = _due_date_iso(data_reminder)
+
+        print(f"  📁 {nome} [{folder}]")
+
+        try:
+            # Cerca il contatto per nome azienda
+            contacts = ghl.search_contacts_by_name(nome)
+            contact = None
+            for c in contacts:
+                cn = (c.get("companyName") or "").lower()
+                if nome.lower() in cn or cn in nome.lower():
+                    contact = c
+                    break
+
+            if not contact:
+                print(f"     ⚠️  Contatto non trovato in GHL — esegui prima ghl_sync.py")
+                continue
+
+            contact_id = contact.get("id", "")
+
+            # Verifica se esiste già un task reengagement per non duplicare
+            existing = ghl.list_tasks(contact_id)
+            already_exists = any(
+                "reengagement" in (task.get("title") or "").lower()
+                for task in existing
+            )
+            if already_exists:
+                print(f"     ⏭  Task reengagement già presente — skip")
+                continue
+
+            # Task: titolo conciso con la condizione + scadenza
+            # (GHL tasks non supporta campo description — usiamo nota separata)
+            task_title = f"📞 Reengagement: {nome} — {condizione[:80]}"
+            ghl.create_task(
+                contact_id=contact_id,
+                title=task_title,
+                due_date=due_iso,
+            )
+
+            # Nota separata con messaggio pronto e contesto completo
+            note_body = (
+                f"🔄 REENGAGEMENT RADAR\n\n"
+                f"Blocco originale: {blocco}\n\n"
+                f"Condizione trigger: {condizione}\n\n"
+                f"✉️ MESSAGGIO PRONTO:\n{messaggio}"
+            )
+            ghl.add_note(contact_id, note_body)
+
+            print(f"     ✓ Task + nota creati | Scadenza: {data_reminder}")
+            print(f"       Messaggio: \"{messaggio[:70]}...\"")
+
+        except ghl.GHLError as exc:
+            print(f"     ❌ GHL error: {exc}")
+
+    print()
+
+
 def main() -> None:
     args = sys.argv[1:]
     show_all = "--all" in args
+    sync_ghl = "--ghl" in args
 
     window_days = 30
     for i, a in enumerate(args):
@@ -197,6 +292,9 @@ def main() -> None:
 
     results = scan_clients(window_days=window_days, show_all=show_all)
     print_report(results, window_days)
+
+    if sync_ghl:
+        sync_to_ghl(results)
 
 
 if __name__ == "__main__":
