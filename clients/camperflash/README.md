@@ -37,6 +37,13 @@ _Ultima call: [2026-04-21](calls/2026-04-21_discovery-camperflash-email-marketin
 - [ ] Riconivarsi con Lorenzo con feedback entro 7 giorni
 
 
+## Trigger di riapertura
+**Blocco originale:** ERP Ridipro non ha app nativa Klaviyo — richiede sviluppo plugin custom prima di partire
+**Tipo trigger:** evento-esterno
+**Condizione:** Giovanni/Massimo/vendor Ridipro confermano fattibilità tecnica dell'integrazione API
+**Data reminder:** 2026-08-01
+**Messaggio suggerito:** Giovanni, avevamo lasciato in sospeso la questione Ridipro. Avete avuto modo di parlare col vendor? Un sì tecnico da parte loro sblocca tutto — e la stagione peak è appena finita, timing ideale per partire ora.
+
 ## Note operative
 - ERP Ridipro (San Marino): nessuna app nativa Klaviyo/Omnisend, richiede sviluppo custom
 - Mercato: EU, Italia sotto-penetrata (UX/lingua confusa sul sito multilingue)

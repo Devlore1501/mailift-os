@@ -32,5 +32,12 @@ _Ultima call: [2026-03-04](calls/2026-03-04_analisi-ads-e-performance-rever.md)_
 - [ ] Identificare product insights per content creation
 
 
+## Trigger di riapertura
+**Blocco originale:** Proposta mai inviata — stallo da marzo 2026 (Lorenzo non ha mai mandato la proposta)
+**Tipo trigger:** time-based
+**Condizione:** 3+ mesi di silenzio — riaprire con case study moda + ammettere il ritardo
+**Data reminder:** 2026-06-25
+**Messaggio suggerito:** Giulio, avevo promesso una proposta a marzo — non l'ho mai mandata. Nel frattempo ho chiuso altri brand moda con risultati concreti. Vale 20 minuti per aggiornarci?
+
 ## Note operative
 - Giulio Baima = ads manager di riferimento (appare anche in call EV8)

@@ -36,6 +36,13 @@ _Ultima call: [2026-04-21](calls/2026-04-21_discovery-dabor-email-marketing.md)_
 - [ ] Monitorare metriche GA4 e performance provider attuale prossimo mese
 
 
+## Trigger di riapertura
+**Blocco originale:** Contratto in corso con ItaliaOnline (ads), vuole aspettare agosto per valutare
+**Tipo trigger:** data
+**Condizione:** Agosto 2026 — contratto/accordo con ItaliaOnline in revisione
+**Data reminder:** 2026-07-15
+**Messaggio suggerito:** A aprile mi avevi detto di aspettare agosto per rivedere il contratto con ItaliaOnline. Ci siamo quasi — ha senso riprendere il discorso questa settimana?
+
 ## Note operative
 - Cliente usa Mailchimp, non Klaviyo — migrazione necessaria
 - 2 audience: Professionisti vs Privati → messaggi distinti (segmentazione al popup)

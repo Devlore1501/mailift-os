@@ -39,6 +39,13 @@ _Ultima call: [2026-05-18](calls/2026-05-18_onboarding-zampette---strategia-offe
 - [ ] Outreach manuale aos checkout abandoners (supporto Mailift) per capire obiezioni
 
 
+## Trigger di riapertura
+**Blocco originale:** Contratto con agenzia attuale ancora attivo — non può cambiare fino alla scadenza
+**Tipo trigger:** data
+**Condizione:** Luglio 2026 — contratto agenzia scade, finestra di chiusura URGENTE
+**Data reminder:** 2026-06-25
+**Messaggio suggerito:** Stefania, il contratto con l'agenzia scade questo mese. Abbiamo già i flow pronti e il piano chiaro — quando possiamo firmare?
+
 ## Note operative
 - Sender name: usare "Stefania" (non brand name) per email testuali personali
 - Domain verification Klaviyo: verificare zampette.shop come sending domain
