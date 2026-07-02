@@ -42,3 +42,7 @@ apps_script_id.txt
 
 # Claude Code internals (trascrizioni sessioni)
 .claude/projects/
+
+# Mailift Planner
+planner/backend/data/
+node_modules/
