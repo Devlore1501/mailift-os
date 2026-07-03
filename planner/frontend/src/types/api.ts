@@ -241,6 +241,17 @@ export interface PreviewUploadResult {
 // -------------------- Piani editoriali
 
 export type EmailObjective = "nurturing" | "promo" | "storytelling" | "vendita";
+export type EmailFormat = "grafica" | "testuale";
+
+/** Blocco copy della scaletta per il designer (email grafiche). */
+export interface EmailBlock {
+  type: "banner" | "sezione" | "info" | "cta_finale" | string;
+  headline: string;
+  subheadline: string;
+  text: string;
+  cta: string;
+  visual: string;
+}
 export type EmailStatus = "draft" | "edited" | "approved";
 
 export interface PlanSummary {
@@ -289,12 +300,14 @@ export interface PlanEmail {
   send_day: string;
   send_time: string;
   objective: EmailObjective;
+  format: EmailFormat;
   theme: string;
   angle: string;
   segment: EmailSegment | null;
   subject_variants: string[];
   preview_text: string;
   body: string;
+  blocks: EmailBlock[];
   products: EmailProductRef[];
   offer: EmailOfferRef | null;
   canva_template: EmailCanvaTemplate | null;
@@ -323,6 +336,8 @@ export interface PlanEmailUpdate {
   subject_variants?: string[];
   preview_text?: string;
   body?: string;
+  blocks?: EmailBlock[];
+  format?: EmailFormat;
   segment?: EmailSegment;
   status?: EmailStatus;
 }

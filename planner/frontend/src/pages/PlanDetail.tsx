@@ -91,6 +91,16 @@ function BalanceIndicator({ plan }: { plan: PlanDetailType }) {
         <div className="bg-emerald-500" style={{ width: `${pct(prod)}%` }} />
         <div className="bg-amber-500" style={{ width: `${pct(promo)}%` }} />
       </div>
+      <div className="text-xs text-muted-foreground">
+        Formati:{" "}
+        <span className="font-medium text-fuchsia-700">
+          {plan.emails.filter((e) => e.format !== "testuale").length} grafiche
+        </span>
+        {" · "}
+        <span className="font-medium">
+          {plan.emails.filter((e) => e.format === "testuale").length} testuali
+        </span>
+      </div>
     </div>
   );
 }

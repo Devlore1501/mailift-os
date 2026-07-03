@@ -151,6 +151,7 @@ def _email_page_properties(email: dict, subject: str) -> dict:
         "Data": {"date": {"start": email["send_date"]}} if email.get("send_date") else None,
         "Orario": {"rich_text": [{"text": {"content": email.get("send_time", "")}}]},
         "Obiettivo": {"select": {"name": email.get("objective", "nurturing")}},
+        "Formato": {"select": {"name": email.get("format", "grafica")}},
         "Segmento": {
             "rich_text": [{"text": {"content": (email.get("segment") or {}).get("name", "")[:200]}}]
         },
@@ -194,10 +195,32 @@ def _body_blocks(email: dict) -> list[dict]:
                 "bulleted_list_item": {"rich_text": [{"text": {"content": s[:200]}}]},
             }
         )
-    blocks.append(heading("Testo email"))
-    body = email.get("body", "")
-    for chunk in [body[i : i + 1900] for i in range(0, len(body), 1900)] or [""]:
-        blocks.append(para(chunk))
+    copy_blocks = email.get("blocks") or []
+    if copy_blocks:
+        _LABEL = {
+            "banner": "Banner principale",
+            "sezione": "Sezione",
+            "info": "Info",
+            "cta_finale": "CTA finale",
+        }
+        blocks.append(heading("Scaletta per il designer"))
+        for cb in copy_blocks:
+            blocks.append(heading(_LABEL.get(cb.get("type", ""), cb.get("type", "Blocco"))))
+            for label, key in (
+                ("Headline", "headline"),
+                ("Sub-headline", "subheadline"),
+                ("Testo", "text"),
+                ("CTA", "cta"),
+                ("Visual", "visual"),
+            ):
+                value = (cb.get(key) or "").strip()
+                if value:
+                    blocks.append(para(f"{label}: {value}"))
+    else:
+        blocks.append(heading("Testo email"))
+        body = email.get("body", "")
+        for chunk in [body[i : i + 1900] for i in range(0, len(body), 1900)] or [""]:
+            blocks.append(para(chunk))
     tpl = email.get("canva_template") or {}
     if tpl.get("name"):
         blocks.append(heading("Template Canva"))
@@ -246,6 +269,14 @@ def publish_plan(db: Session, brand_name: str, month_start: str, emails: list[di
                             {"name": "promo", "color": "yellow"},
                             {"name": "storytelling", "color": "purple"},
                             {"name": "vendita", "color": "green"},
+                        ]
+                    }
+                },
+                "Formato": {
+                    "select": {
+                        "options": [
+                            {"name": "grafica", "color": "pink"},
+                            {"name": "testuale", "color": "default"},
                         ]
                     }
                 },

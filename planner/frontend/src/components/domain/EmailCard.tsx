@@ -3,11 +3,13 @@ import {
   ChevronDown,
   Clock,
   ExternalLink,
+  Image as ImageIcon,
   Loader2,
   Package,
   Pencil,
   RefreshCw,
   Tag,
+  Type as TypeIcon,
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -33,7 +35,88 @@ import {
 import { ObjectiveBadge } from "@/components/domain/ObjectiveBadge";
 import { useRegenerateEmail, useUpdatePlanEmail } from "@/lib/queries";
 import { cn, formatDate } from "@/lib/utils";
-import type { PlanEmail } from "@/types/api";
+import type { EmailBlock, PlanEmail } from "@/types/api";
+
+const BLOCK_LABELS: Record<string, string> = {
+  banner: "Banner principale",
+  sezione: "Sezione",
+  info: "Info",
+  cta_finale: "CTA finale",
+};
+
+const BLOCK_FIELDS: { key: keyof EmailBlock; label: string }[] = [
+  { key: "headline", label: "Headline" },
+  { key: "subheadline", label: "Sub-headline" },
+  { key: "text", label: "Testo" },
+  { key: "cta", label: "CTA" },
+  { key: "visual", label: "Visual" },
+];
+
+function FormatBadge({ format }: { format: PlanEmail["format"] }) {
+  const isGraphic = format !== "testuale";
+  return (
+    <Badge
+      variant="outline"
+      className={cn(
+        "gap-1 text-[11px]",
+        isGraphic
+          ? "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700"
+          : "border-slate-300 bg-slate-50 text-slate-700"
+      )}
+    >
+      {isGraphic ? (
+        <ImageIcon className="h-3 w-3" />
+      ) : (
+        <TypeIcon className="h-3 w-3" />
+      )}
+      {isGraphic ? "Grafica" : "Testuale"}
+    </Badge>
+  );
+}
+
+/** Scaletta per il designer: i blocchi copy di un'email grafica. */
+function BlocksView({ blocks }: { blocks: EmailBlock[] }) {
+  return (
+    <div className="space-y-2 border-t border-border/60 px-3 py-3">
+      {blocks.map((block, i) => (
+        <div
+          key={i}
+          className="rounded-md border border-border/60 bg-muted/30 px-3 py-2"
+        >
+          <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-primary">
+            {BLOCK_LABELS[block.type] ?? block.type}
+          </div>
+          <dl className="space-y-0.5 text-sm">
+            {BLOCK_FIELDS.map(({ key, label }) =>
+              block[key] ? (
+                <div key={key} className="flex gap-2">
+                  <dt
+                    className={cn(
+                      "w-24 shrink-0 text-xs uppercase tracking-wide",
+                      key === "visual"
+                        ? "font-semibold text-amber-600"
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    {label}
+                  </dt>
+                  <dd
+                    className={cn(
+                      key === "headline" && "font-semibold",
+                      key === "visual" && "italic text-muted-foreground"
+                    )}
+                  >
+                    {block[key]}
+                  </dd>
+                </div>
+              ) : null
+            )}
+          </dl>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 interface EmailCardProps {
   email: PlanEmail;
@@ -51,7 +134,10 @@ export function EmailCard({ email, planId, readOnly = false }: EmailCardProps) {
   const [subjects, setSubjects] = useState(email.subject_variants.join("\n"));
   const [previewText, setPreviewText] = useState(email.preview_text);
   const [body, setBody] = useState(email.body);
+  const [blocks, setBlocks] = useState<EmailBlock[]>(email.blocks ?? []);
   const [instructions, setInstructions] = useState("");
+
+  const isGraphic = email.format !== "testuale" && (email.blocks?.length ?? 0) > 0;
 
   const updateEmail = useUpdatePlanEmail(planId);
   const regenerate = useRegenerateEmail(planId);
@@ -64,6 +150,7 @@ export function EmailCard({ email, planId, readOnly = false }: EmailCardProps) {
     setSubjects(email.subject_variants.join("\n"));
     setPreviewText(email.preview_text);
     setBody(email.body);
+    setBlocks((email.blocks ?? []).map((b) => ({ ...b })));
     setEditOpen(true);
   }
 
@@ -83,7 +170,7 @@ export function EmailCard({ email, planId, readOnly = false }: EmailCardProps) {
           send_time: sendTime,
           subject_variants: variants,
           preview_text: previewText,
-          body,
+          ...(isGraphic ? { blocks } : { body }),
         },
       },
       {
@@ -146,6 +233,7 @@ export function EmailCard({ email, planId, readOnly = false }: EmailCardProps) {
                 Modificata
               </Badge>
             )}
+            <FormatBadge format={email.format} />
             <ObjectiveBadge objective={email.objective} />
             {!readOnly && (
               <>
@@ -236,7 +324,7 @@ export function EmailCard({ email, planId, readOnly = false }: EmailCardProps) {
             onClick={() => setBodyOpen((o) => !o)}
             aria-expanded={bodyOpen}
           >
-            Corpo email
+            {isGraphic ? "Scaletta per il designer" : "Corpo email"}
             <ChevronDown
               className={cn(
                 "h-4 w-4 text-muted-foreground transition-transform",
@@ -244,13 +332,16 @@ export function EmailCard({ email, planId, readOnly = false }: EmailCardProps) {
               )}
             />
           </button>
-          {bodyOpen && (
-            <div className="border-t border-border/60 px-3 py-3">
-              <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground">
-                {email.body}
-              </pre>
-            </div>
-          )}
+          {bodyOpen &&
+            (isGraphic ? (
+              <BlocksView blocks={email.blocks} />
+            ) : (
+              <div className="border-t border-border/60 px-3 py-3">
+                <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground">
+                  {email.body}
+                </pre>
+              </div>
+            ))}
         </div>
 
         {/* Prodotti + offerta */}
@@ -354,16 +445,51 @@ export function EmailCard({ email, planId, readOnly = false }: EmailCardProps) {
                 onChange={(e) => setPreviewText(e.target.value)}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor={`body-${email.id}`}>Corpo email</Label>
-              <Textarea
-                id={`body-${email.id}`}
-                rows={12}
-                className="font-mono text-xs"
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-              />
-            </div>
+            {isGraphic ? (
+              <div className="space-y-3">
+                <Label>Scaletta per il designer</Label>
+                {blocks.map((block, i) => (
+                  <div
+                    key={i}
+                    className="space-y-2 rounded-md border border-border/60 bg-muted/30 p-3"
+                  >
+                    <div className="text-[11px] font-semibold uppercase tracking-wide text-primary">
+                      {BLOCK_LABELS[block.type] ?? block.type}
+                    </div>
+                    {BLOCK_FIELDS.map(({ key, label }) => (
+                      <div key={key} className="flex items-center gap-2">
+                        <span className="w-24 shrink-0 text-xs text-muted-foreground">
+                          {label}
+                        </span>
+                        <Input
+                          className="h-8 text-sm"
+                          value={block[key]}
+                          placeholder={key === "visual" ? "indicazione per il designer" : ""}
+                          onChange={(e) =>
+                            setBlocks((prev) =>
+                              prev.map((b, j) =>
+                                j === i ? { ...b, [key]: e.target.value } : b
+                              )
+                            )
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor={`body-${email.id}`}>Corpo email</Label>
+                <Textarea
+                  id={`body-${email.id}`}
+                  rows={12}
+                  className="font-mono text-xs"
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                />
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditOpen(false)}>

@@ -22,6 +22,11 @@ _EMAIL_SCHEMA: dict[str, Any] = {
             "type": "string",
             "enum": ["nurturing", "promo", "storytelling", "vendita"],
         },
+        "format": {
+            "type": "string",
+            "enum": ["grafica", "testuale"],
+            "description": "grafica = email visuale montata in Canva; testuale = email in prosa stile 1:1",
+        },
         "theme": {"type": "string"},
         "angle": {"type": "string"},
         "segment": {
@@ -42,7 +47,34 @@ _EMAIL_SCHEMA: dict[str, Any] = {
         "preview_text": {"type": "string"},
         "body": {
             "type": "string",
-            "description": "Testo email completo: hook, corpo, CTA. Markdown leggero.",
+            "description": "Solo per format=testuale: email completa in prosa (hook, corpo, CTA). "
+            "Stringa vuota per le email grafiche.",
+        },
+        "blocks": {
+            "type": "array",
+            "description": "Solo per format=grafica: scaletta copy per il designer, un blocco "
+            "per sezione della grafica. Lista vuota per le email testuali.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": ["banner", "sezione", "info", "cta_finale"],
+                    },
+                    "headline": {"type": "string", "description": "Max 7 parole. Vuota se non serve."},
+                    "subheadline": {"type": "string", "description": "Max 14 parole. Vuota se non serve."},
+                    "text": {"type": "string", "description": "Micro-copy, max 25 parole. Vuota se non serve."},
+                    "cta": {"type": "string", "description": "Testo bottone, max 4 parole. Vuota se non serve."},
+                    "visual": {
+                        "type": "string",
+                        "description": "Indicazione visiva per il designer: cosa mostrare e come "
+                        "(es. 'infografica 3 step numerati con icone', 'griglia 2x2 prodotti', "
+                        "'confronto prima/dopo', 'badge sconto grande'). Vuota se non serve.",
+                    },
+                },
+                "required": ["type", "headline", "subheadline", "text", "cta", "visual"],
+                "additionalProperties": False,
+            },
         },
         "products": {
             "type": "array",
@@ -74,12 +106,14 @@ _EMAIL_SCHEMA: dict[str, Any] = {
         "send_day",
         "send_time",
         "objective",
+        "format",
         "theme",
         "angle",
         "segment",
         "subject_variants",
         "preview_text",
         "body",
+        "blocks",
         "products",
         "offer",
         "template_notion_page_id",
@@ -112,12 +146,25 @@ senso, senza forzature.
 - Scegli i segmenti in base ai DATI Klaviyo forniti: se l'engagement è basso ("poor"), \
 restringi gli invii ai segmenti engaged e includi una email di re-engagement verso gli inattivi. \
 Se non ci sono dati, proponi segmenti standard e spiegalo nel rationale.
-- Ogni corpo email è completo e pronto all'uso: hook forte nelle prime 2 righe, corpo che \
-sviluppa UN solo angolo, una CTA chiara. Usa {{ first_name|default:'' }} come merge tag Klaviyo \
-se serve personalizzazione. Lunghezza 120-250 parole.
+- Due FORMATI di email, da bilanciare sul mese: ~60% "grafica" e ~40% "testuale", mai più di \
+due email dello stesso formato consecutive quando possibile. Promo e prodotto tendenzialmente \
+grafiche; storytelling/nurturing in prima persona funzionano meglio testuali. Alternare i \
+formati evita di mandare solo immagini (engagement e deliverability).
+- Email TESTUALI: body in prosa completa e pronta all'uso, come una mail personale 1:1 \
+(hook forte nelle prime 2 righe, UN solo angolo, una CTA chiara, 120-250 parole, niente \
+riferimenti a elementi grafici). blocks = [] e template_notion_page_id = null.
+- Email GRAFICHE: body = "" e compila blocks, la SCALETTA PER IL DESIGNER che semplifica la \
+creazione in Canva. Struttura: primo blocco "banner" (headline ≤ 7 parole, subheadline ≤ 14, \
+CTA breve, visual d'impatto); poi 2-4 blocchi "sezione" con micro-copy (≤ 25 parole l'uno) e \
+campo visual che dice COSA mostrare; eventuale blocco "info" (spedizione, garanzia, codice \
+sconto); chiudi con "cta_finale". EVITA MURI DI TESTO: quando il contenuto lo permette, \
+trasforma il testo in infografica (step numerati, icone + micro-copy, griglie prodotto, \
+confronti prima/dopo, percentuali grandi, badge) e descrivilo nel campo visual.
+- Usa {{ first_name|default:'' }} come merge tag Klaviyo se serve personalizzazione.
 - Oggetti: 2-3 varianti brevi (max ~45 caratteri), curiosità o beneficio, mai clickbait vuoto.
-- Per ogni email scegli dal catalogo template fornito il template Canva più adatto al tipo di \
-email e ritorna il suo notion_page_id (null solo se il catalogo è vuoto).
+- Per ogni email GRAFICA scegli dal catalogo template fornito il template Canva più adatto al \
+tipo di email e ritorna il suo notion_page_id (null solo se il catalogo è vuoto). Per le \
+email testuali template_notion_page_id = null.
 - Distribuisci gli invii lungo TUTTO il mese in modo regolare (mai due email nello stesso \
 giorno, evita buchi di oltre una settimana), orari mattina 8:30-10:00 nei feriali; il weekend \
 va bene 9:30-11:00. Se le performance passate suggeriscono altro, adeguati.

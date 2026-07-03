@@ -92,12 +92,14 @@ def apply_email_payload(db: Session, email: PlanEmail, payload: dict) -> None:
     email.send_day = payload.get("send_day", email.send_day)
     email.send_time = payload.get("send_time", email.send_time)
     email.objective = payload.get("objective", email.objective)
+    email.format = payload.get("format", email.format or "grafica")
     email.theme = payload.get("theme", email.theme)
     email.angle = payload.get("angle", email.angle)
     email.segment = payload.get("segment") or email.segment or {}
     email.subject_variants = payload.get("subject_variants") or email.subject_variants or []
     email.preview_text = payload.get("preview_text", email.preview_text)
     email.body = payload.get("body", email.body)
+    email.blocks = payload.get("blocks") if payload.get("blocks") is not None else (email.blocks or [])
     email.products = payload.get("products") or []
     email.offer = payload.get("offer")
     email.canva_template = _resolve_template(db, payload.get("template_notion_page_id")) or (

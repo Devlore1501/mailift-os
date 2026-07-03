@@ -30,6 +30,13 @@ def _migrate() -> None:
             conn.execute(
                 text("ALTER TABLE templates ADD COLUMN preview_url VARCHAR(600) DEFAULT ''")
             )
+        ecols = {row[1] for row in conn.execute(text("PRAGMA table_info(plan_emails)"))}
+        if ecols and "format" not in ecols:
+            conn.execute(
+                text("ALTER TABLE plan_emails ADD COLUMN format VARCHAR(20) DEFAULT 'grafica'")
+            )
+        if ecols and "blocks" not in ecols:
+            conn.execute(text("ALTER TABLE plan_emails ADD COLUMN blocks JSON DEFAULT '[]'"))
 
 
 _migrate()

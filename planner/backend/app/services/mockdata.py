@@ -134,25 +134,71 @@ def mock_plan(context: dict) -> dict:
             templates[i % len(templates)] if templates else None
         )
 
-        first_line = f"Ciao {{{{ first_name|default:'' }}}},"
         product_name = prod["name"] if prod else "il nostro prodotto di punta"
-        body_lines = [
-            first_line,
-            "",
-            f"[DEMO — generazione senza API Claude] {angle}.",
-            "",
-            f"Questa settimana parliamo di {product_name}: perché è rilevante per te, "
-            f"come usarlo al meglio e cosa lo rende diverso.",
-            "",
-        ]
-        if offer:
-            body_lines += [
-                f"In più, con il codice {offer.get('code') or offer['name']} hai "
-                f"{offer.get('discount') or 'uno sconto dedicato'} fino al "
-                f"{offer.get('valid_to') or 'fine settimana'}.",
+
+        # bilanciamento formati: promo/vendita grafiche; metà delle educative testuali
+        if objective in ("promo", "vendita"):
+            email_format = "grafica"
+        else:
+            email_format = "testuale" if i % 2 == 1 else "grafica"
+
+        body = ""
+        blocks: list[dict] = []
+        if email_format == "testuale":
+            body_lines = [
+                f"Ciao {{{{ first_name|default:'' }}}},",
                 "",
+                f"[DEMO — generazione senza API Claude] {angle}.",
+                "",
+                f"Oggi ti parlo di {product_name}: perché è rilevante per te, "
+                f"come usarlo al meglio e cosa lo rende diverso.",
+                "",
+                "👉 Scopri di più sul sito.",
+                "",
+                f"A presto,\nIl team {brand['name']}",
             ]
-        body_lines += ["👉 Scopri di più sul sito.", "", f"A presto,\nIl team {brand['name']}"]
+            body = "\n".join(body_lines)
+        else:
+            blocks = [
+                {
+                    "type": "banner",
+                    "headline": f"[DEMO] {theme}"[:60],
+                    "subheadline": angle[:90],
+                    "text": "",
+                    "cta": "Scopri ora",
+                    "visual": f"Foto hero di {product_name} su sfondo brand",
+                },
+                {
+                    "type": "sezione",
+                    "headline": "Perché sceglierlo",
+                    "subheadline": "",
+                    "text": "3 benefici concreti in una riga ciascuno.",
+                    "cta": "",
+                    "visual": "Infografica: 3 step numerati con icone, niente muri di testo",
+                },
+            ]
+            if offer:
+                blocks.append(
+                    {
+                        "type": "info",
+                        "headline": "",
+                        "subheadline": "",
+                        "text": f"Codice {offer.get('code') or offer['name']} · "
+                        f"{offer.get('discount') or 'sconto dedicato'}",
+                        "cta": "",
+                        "visual": "Badge sconto grande in evidenza",
+                    }
+                )
+            blocks.append(
+                {
+                    "type": "cta_finale",
+                    "headline": "Pronto a provarlo?",
+                    "subheadline": "",
+                    "text": "",
+                    "cta": "Vai allo shop",
+                    "visual": "Bottone pieno colore primario",
+                }
+            )
 
         emails.append(
             {
@@ -161,6 +207,7 @@ def mock_plan(context: dict) -> dict:
                 "send_day": DAY_NAMES[d.weekday()],
                 "send_time": "09:30" if d.weekday() >= 5 else "08:30",
                 "objective": objective,
+                "format": email_format,
                 "theme": theme,
                 "angle": angle,
                 "segment": dict(default_segment),
@@ -170,7 +217,8 @@ def mock_plan(context: dict) -> dict:
                     "Questa la devi leggere",
                 ],
                 "preview_text": angle[:80],
-                "body": "\n".join(body_lines),
+                "body": body,
+                "blocks": blocks,
                 "products": (
                     [{"name": prod["name"], "reason": "prodotto centrale dell'email"}]
                     if prod
@@ -185,7 +233,9 @@ def mock_plan(context: dict) -> dict:
                     if offer
                     else None
                 ),
-                "template_notion_page_id": tpl["notion_page_id"] if tpl else None,
+                "template_notion_page_id": (
+                    tpl["notion_page_id"] if (tpl and email_format == "grafica") else None
+                ),
             }
         )
     return {"emails": emails}
@@ -198,7 +248,13 @@ def mock_regenerated_email(email: dict, instructions: str) -> dict:
         "Nuovo oggetto A",
         "Nuovo oggetto B",
     ]
-    out["body"] = (email.get("body") or "") + f"\n\n[DEMO{note}]"
+    if email.get("format") == "testuale" or email.get("body"):
+        out["body"] = (email.get("body") or "") + f"\n\n[DEMO{note}]"
+    else:
+        blocks = [dict(b) for b in email.get("blocks") or []]
+        if blocks:
+            blocks[0]["headline"] = (blocks[0].get("headline") or "") + " ✨"
+        out["blocks"] = blocks
     return out
 
 

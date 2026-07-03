@@ -219,12 +219,14 @@ class PlanEmailOut(BaseModel):
     send_day: str
     send_time: str
     objective: str
+    format: str = "grafica"
     theme: str
     angle: str
     segment: dict
     subject_variants: list
     preview_text: str
     body: str
+    blocks: list = Field(default_factory=list)
     products: list
     offer: dict | None
     canva_template: dict | None
@@ -238,12 +240,14 @@ class PlanEmailPatch(BaseModel):
     send_day: str | None = None
     send_time: str | None = None
     objective: Literal["nurturing", "promo", "storytelling", "vendita"] | None = None
+    format: Literal["grafica", "testuale"] | None = None
     theme: str | None = None
     angle: str | None = None
     segment: dict | None = None
     subject_variants: list[str] | None = None
     preview_text: str | None = None
     body: str | None = None
+    blocks: list | None = None
     products: list | None = None
     offer: dict | None = None
     canva_template: dict | None = None

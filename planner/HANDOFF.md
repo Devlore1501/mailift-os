@@ -39,8 +39,15 @@ pubblicazione del calendario approvato su Notion.
    `week_start` per compatibilità): asincrona (thread + polling 2s), structured output.
    **Regola 70/20/10**: ~70% educativo (nurturing/storytelling), ~20% prodotto (vendita),
    ~10% promo. Barra a 3 segmenti nella UI. Claude considera festività del paese
-8. **Card email**: giorno+orario, obiettivo (badge), tema/angolo, segmento+rationale,
-   2-3 oggetti A/B, preview, corpo completo, prodotti/offerta, template Canva con link.
+8. **Card email**: giorno+orario, obiettivo (badge), FORMATO (badge grafica/testuale),
+   tema/angolo, segmento+rationale, 2-3 oggetti A/B, preview, prodotti/offerta, template
+   Canva con link+anteprima. **Formati bilanciati ~60% grafiche / 40% testuali** (prompt),
+   mai solo immagini; promo/prodotto grafiche, storytelling/nurturing spesso testuali.
+   TESTUALI: body in prosa 1:1, niente template. GRAFICHE: body vuoto e `blocks` = scaletta
+   per il designer (banner: headline≤7/sub≤14/CTA/visual; sezioni con micro-copy ≤25 parole
+   e campo visual che spinge INFOGRAFICHE per evitare muri di testo; info; cta_finale).
+   UI: vista "Scaletta per il designer" + editor per-blocco nel dialog; contatore formati
+   sotto la barra 70/20/10; pubblicazione Notion con select Formato e scaletta a sezioni.
    Modifica inline + rigenerazione singola con istruzioni
 9. **Template Canva**: due sorgenti (una attiva alla volta, ogni import rimpiazza la libreria):
    a) **set tipi × varianti** — il flusso reale di Lorenzo: elenco Notion "About x3, Flash

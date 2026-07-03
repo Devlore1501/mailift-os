@@ -147,7 +147,7 @@ check(
             email["segment"].get("name"),
             len(email["subject_variants"]) >= 2,
             email["preview_text"],
-            email["body"],
+            email["body"] or email["blocks"],  # prosa (testuale) o scaletta (grafica)
         ]
     ),
 )
@@ -166,6 +166,25 @@ check(
 dates = [e["send_date"] for e in plan["emails"]]
 check("date nel mese", all(d.startswith("2026-08") for d in dates), str(dates[:3]))
 check("date distinte", len(set(dates)) == len(dates))
+
+# formati grafica/testuale bilanciati e strutture coerenti
+graf = [e for e in plan["emails"] if e["format"] == "grafica"]
+test = [e for e in plan["emails"] if e["format"] == "testuale"]
+check("entrambi i formati presenti", len(graf) >= 2 and len(test) >= 2, f"{len(graf)}g/{len(test)}t")
+check(
+    "grafiche: blocks presenti, body vuoto, banner in testa",
+    all(e["blocks"] and not e["body"] and e["blocks"][0]["type"] == "banner" for e in graf),
+)
+check(
+    "grafiche: headline banner e visual compilati",
+    all(e["blocks"][0]["headline"] and any(b.get("visual") for b in e["blocks"]) for e in graf),
+)
+check(
+    "testuali: body presente, blocks vuoti, nessun template",
+    all(e["body"] and not e["blocks"] and e["canva_template"] is None for e in test),
+)
+check("promo/vendita sempre grafiche",
+      all(e["format"] == "grafica" for e in plan["emails"] if e["objective"] in ("promo", "vendita")))
 
 # suggerimenti festività/ponti per paese
 r = client.post(
