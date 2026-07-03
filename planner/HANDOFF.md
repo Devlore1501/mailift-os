@@ -14,11 +14,13 @@ con testi scritti da Claude, template Canva abbinati da un DB Notion, e
 pubblicazione del calendario approvato su Notion.
 
 - Codice in `planner/` (separato dalla webapp autofatture in `webapp/`)
-- Backend FastAPI + SQLAlchemy/SQLite (`planner/backend`, porta 8001)
+- Backend FastAPI + SQLAlchemy (SQLite in locale, Postgres in produzione) (`planner/backend`, porta 8001)
 - Frontend React 18 + Vite + TS + Tailwind + shadcn + react-query (`planner/frontend`, porta 5174)
-- Contratto API: `planner/design/api_contract.md` (v1 + aggiornamenti v1.1 in coda)
-- Avvio: `./planner/start.sh` (kill automatico istanze zombie; fix bash 3.2 macOS)
-- Test: `cd planner/backend && ../../.venv/bin/python tests/smoke_test.py` (~35 check, mock mode)
+- Contratto API: `planner/design/api_contract.md` (v1 + aggiornamenti fino a v1.5 in coda)
+- Avvio locale: `./planner/start.sh` (kill automatico istanze zombie; fix bash 3.2 macOS)
+- Deploy produzione: **Railway**, vedi `planner/DEPLOY.md` — Docker multi-stage
+  (`planner/Dockerfile`) che serve backend+frontend da un solo servizio/URL
+- Test: `cd planner/backend && ../../.venv/bin/python tests/smoke_test.py` (~65 check, mock mode)
 
 ## Funzionalità completate
 
@@ -80,6 +82,24 @@ pubblicazione del calendario approvato su Notion.
     proposte extra (`plan.campaigns`). Le sequenze contano nelle quote 70/20/10.
     API: CRUD `/brands/{id}/launches` + `PATCH /launches/{id}`; prompt/schema in
     `claude_ai.py`, mock in `mockdata.py::_mock_sequence`
+
+## Deploy (nuovo)
+
+- `planner/Dockerfile`: build multi-stage, frontend compilato e servito dal
+  backend FastAPI (mount statico + fallback SPA in `app/main.py`, attivo solo
+  se `PLANNER_FRONTEND_DIST` è impostata — in dev locale non lo è, Vite gira
+  separato come sempre)
+- `app/db.py`: `DATABASE_URL` in ambiente → Postgres (schema `postgres://`
+  riscritto in `postgresql+psycopg://`); senza → SQLite come prima
+- `_migrate()` in `main.py` ora dialect-agnostic (usa `sqlalchemy.inspect`,
+  non più `PRAGMA table_info`) — stessa funzione per SQLite e Postgres
+- Guida passo-passo Railway (root directory, Postgres plugin, volume `/data`
+  per le anteprime Canva, env vars): `planner/DEPLOY.md`
+- Verificato: build Docker equivalente testata manualmente (daemon Docker non
+  disponibile nel sandbox di sessione) avviando uvicorn con
+  `PLANNER_FRONTEND_DIST` puntato alla `dist/` compilata — API, asset statici
+  e fallback SPA su rotte profonde tutti confermati funzionanti; route
+  `/api/*` non esistenti ritornano 404 pulito (non più HTML del fallback)
 
 ## Configurazione (stato di Lorenzo)
 

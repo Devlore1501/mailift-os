@@ -8,4 +8,5 @@ notion-client>=2.2.1
 python-dotenv>=1.0.0
 python-multipart>=0.0.9
 pypdf>=4.0
+psycopg[binary]>=3.1
 
