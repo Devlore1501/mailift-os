@@ -52,9 +52,9 @@ def get_account(api_key: str) -> dict:
     }
 
 
-def list_segments(api_key: str) -> list[dict]:
+def _list_segments_paginated(api_key: str, extra_params: dict | None) -> list[dict]:
     out: list[dict] = []
-    params = {"additional-fields[segment]": "profile_count", "page[size]": 50}
+    params: dict | None = {"page[size]": 50, **(extra_params or {})}
     url_path = "/segments/"
     while True:
         data = _get(api_key, url_path, params)
@@ -74,6 +74,31 @@ def list_segments(api_key: str) -> list[dict]:
         url_path = next_url.replace(BASE_URL, "")
         params = None
     return out
+
+
+def list_segments(api_key: str) -> list[dict]:
+    # profile_count sulla lista non è supportato da tutte le revision/account:
+    # prova, e in caso di 400 rileggi senza e recupera i conteggi per-segmento.
+    try:
+        return _list_segments_paginated(
+            api_key, {"additional-fields[segment]": "profile_count"}
+        )
+    except KlaviyoError as e:
+        if "400" not in str(e):
+            raise
+    segments = _list_segments_paginated(api_key, None)
+    for seg in segments[:30]:  # cap per non esaurire i rate limit
+        try:
+            data = _get(
+                api_key,
+                f"/segments/{seg['klaviyo_id']}/",
+                {"additional-fields[segment]": "profile_count"},
+            )
+            attrs = (data.get("data") or {}).get("attributes", {})
+            seg["profile_count"] = attrs.get("profile_count")
+        except KlaviyoError:
+            pass  # il conteggio resta None, il resto dello snapshot è valido
+    return segments
 
 
 def list_recent_campaigns(api_key: str, days_back: int = 60) -> list[dict]:
