@@ -11,6 +11,8 @@ from ..models.schemas import (
     OccasionBase,
     OccasionCreate,
     OccasionOut,
+    OccasionSuggestIn,
+    OccasionSuggestOut,
     OfferBase,
     OfferCreate,
     OfferOut,
@@ -18,6 +20,7 @@ from ..models.schemas import (
     ProductCreate,
     ProductOut,
 )
+from ..services import claude_ai
 from .brands import get_brand_or_404
 
 router = APIRouter(prefix="/api", tags=["catalog"])
@@ -128,6 +131,31 @@ def create_occasion(brand_id: int, payload: OccasionCreate, db: Session = Depend
     db.commit()
     db.refresh(occasion)
     return occasion
+
+
+@router.post("/brands/{brand_id}/occasions/suggest", response_model=OccasionSuggestOut)
+def suggest_occasions(
+    brand_id: int, payload: OccasionSuggestIn, db: Session = Depends(get_db)
+):
+    """Analizza festività, ponti e ricorrenze del paese del brand nel mese
+    indicato e propone date + idee email da inserire a calendario."""
+    brand = get_brand_or_404(db, brand_id)
+    month = payload.month[:7]
+    if len(month) != 7 or month[4] != "-":
+        raise HTTPException(400, "Mese non valido, formato atteso YYYY-MM")
+    country = brand.country or "IT"
+    brand_ctx = {
+        "name": brand.name,
+        "description": brand.description,
+        "positioning": brand.positioning,
+        "avatar": brand.avatar or {},
+        "prodotti": [p.name for p in brand.products][:20],
+    }
+    try:
+        suggestions = claude_ai.suggest_occasions(brand_ctx, country, month)
+    except Exception as e:
+        raise HTTPException(502, f"Analisi festività fallita: {e}")
+    return OccasionSuggestOut(country=country, month=month, suggestions=suggestions)
 
 
 @router.patch("/occasions/{occasion_id}", response_model=OccasionOut)

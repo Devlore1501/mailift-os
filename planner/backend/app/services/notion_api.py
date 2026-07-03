@@ -205,7 +205,7 @@ def _body_blocks(email: dict) -> list[dict]:
     return blocks
 
 
-def publish_plan(db: Session, brand_name: str, week_start: str, emails: list[dict]) -> dict:
+def publish_plan(db: Session, brand_name: str, month_start: str, emails: list[dict]) -> dict:
     conf = notion_config(db)
 
     if not conf["token"] or not conf["calendar_parent_page_id"]:
@@ -232,7 +232,7 @@ def publish_plan(db: Session, brand_name: str, week_start: str, emails: list[dic
             title=[
                 {
                     "type": "text",
-                    "text": {"content": f"Piano editoriale {brand_name} — settimana {week_start}"},
+                    "text": {"content": f"Calendario editoriale {brand_name} — mese {month_start[:7]}"},
                 }
             ],
             properties={

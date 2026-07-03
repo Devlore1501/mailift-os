@@ -16,7 +16,7 @@ from . import claude_ai
 log = logging.getLogger("planner")
 
 
-def build_context(db: Session, brand: Brand, week_start: str, num_emails: int, notes: str) -> dict:
+def build_context(db: Session, brand: Brand, month_start: str, num_emails: int, notes: str) -> dict:
     templates = [
         {
             "notion_page_id": t.notion_page_id,
@@ -28,7 +28,8 @@ def build_context(db: Session, brand: Brand, week_start: str, num_emails: int, n
         for t in db.query(Template).all()
     ]
     return {
-        "week_start": week_start,
+        "month_start": month_start,
+        "country": brand.country or "IT",
         "num_emails": num_emails,
         "notes": notes,
         "brand": {

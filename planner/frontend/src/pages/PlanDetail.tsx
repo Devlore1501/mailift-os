@@ -16,7 +16,6 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmailCard } from "@/components/domain/EmailCard";
 import { PlanStatusBadge } from "@/components/domain/PlanStatusBadge";
-import { isPromoObjective } from "@/components/domain/ObjectiveBadge";
 import {
   useDeletePlan,
   useGeneratePlan,
@@ -24,7 +23,7 @@ import {
   usePublishPlan,
   useUpdatePlan,
 } from "@/lib/queries";
-import { formatDate } from "@/lib/utils";
+import { formatMonth } from "@/lib/utils";
 import type { PlanDetail as PlanDetailType } from "@/types/api";
 
 function GeneratingScreen({ plan }: { plan: PlanDetailType }) {
@@ -37,9 +36,9 @@ function GeneratingScreen({ plan }: { plan: PlanDetailType }) {
             Generazione del piano in corso…
           </h2>
           <p className="text-sm text-muted-foreground">
-            Claude sta creando {plan.num_emails} email per la settimana del{" "}
-            {formatDate(plan.week_start)}. Di solito richiede meno di un
-            minuto.
+            Claude sta creando il calendario di {plan.num_emails} email per{" "}
+            <span className="capitalize">{formatMonth(plan.month_start)}</span>.
+            Può richiedere qualche minuto.
           </p>
         </div>
       </div>
@@ -62,25 +61,36 @@ function GeneratingScreen({ plan }: { plan: PlanDetailType }) {
 
 function BalanceIndicator({ plan }: { plan: PlanDetailType }) {
   const total = plan.emails.length;
-  const promo = plan.emails.filter((e) => isPromoObjective(e.objective)).length;
-  const content = total - promo;
-  const contentPct = total > 0 ? Math.round((content / total) * 100) : 0;
+  const edu = plan.emails.filter((e) =>
+    ["nurturing", "storytelling"].includes(e.objective)
+  ).length;
+  const prod = plan.emails.filter((e) => e.objective === "vendita").length;
+  const promo = plan.emails.filter((e) => e.objective === "promo").length;
+  const pct = (v: number) => (total > 0 ? (v / total) * 100 : 0);
 
   return (
-    <div className="w-full max-w-sm space-y-1.5">
+    <div className="w-full max-w-md space-y-1.5">
       <div className="flex items-center justify-between gap-3 whitespace-nowrap text-xs">
         <span className="font-semibold uppercase tracking-wide text-muted-foreground">
-          Bilanciamento 80/20
+          Regola 70 / 20 / 10
         </span>
         <span className="tabular-nums">
-          <span className="font-semibold text-primary">
-            {content} contenuto
-          </span>
+          <span className="font-semibold text-primary">{edu} edu</span>
+          <span className="text-muted-foreground"> · </span>
+          <span className="font-semibold text-emerald-600">{prod} prodotto</span>
           <span className="text-muted-foreground"> · </span>
           <span className="font-semibold text-amber-600">{promo} promo</span>
         </span>
       </div>
-      <Progress value={contentPct} className="h-2" />
+      <div
+        className="flex h-2 w-full overflow-hidden rounded-full bg-muted"
+        role="img"
+        aria-label={`${edu} educative, ${prod} prodotto, ${promo} promozionali su ${total}`}
+      >
+        <div className="bg-primary" style={{ width: `${pct(edu)}%` }} />
+        <div className="bg-emerald-500" style={{ width: `${pct(prod)}%` }} />
+        <div className="bg-amber-500" style={{ width: `${pct(promo)}%` }} />
+      </div>
     </div>
   );
 }
@@ -99,13 +109,13 @@ export function PlanDetail() {
 
   function handleRetry() {
     if (!plan) return;
-    const { week_start, num_emails, notes } = plan;
+    const { month_start, num_emails, notes } = plan;
     deletePlan.mutate(planId, {
       onSuccess: () => {
         generatePlan.mutate(
           {
-            week_start,
-            num_emails: num_emails || 3,
+            month_start,
+            num_emails: num_emails || 12,
             notes: notes ?? undefined,
           },
           {
@@ -214,7 +224,7 @@ export function PlanDetail() {
           <div className="space-y-1">
             <div className="flex items-center gap-3">
               <h1 className="font-display text-2xl font-semibold tracking-tight">
-                Settimana del {formatDate(plan.week_start)}
+                <span className="capitalize">{formatMonth(plan.month_start)}</span>
               </h1>
               <PlanStatusBadge status={plan.status} />
             </div>

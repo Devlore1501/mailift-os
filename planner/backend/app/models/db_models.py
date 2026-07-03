@@ -25,6 +25,7 @@ class Brand(Base):
     positioning: Mapped[str] = mapped_column(Text, default="")
     avatar: Mapped[dict] = mapped_column(JSON, default=dict)
     emails_per_week: Mapped[int] = mapped_column(Integer, default=3)
+    country: Mapped[str] = mapped_column(String(5), default="IT")
 
     klaviyo_api_key: Mapped[str] = mapped_column(String(200), default="")
     klaviyo_account_name: Mapped[str] = mapped_column(String(200), default="")
@@ -97,7 +98,9 @@ class Plan(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     brand_id: Mapped[int] = mapped_column(ForeignKey("brands.id"), index=True)
-    week_start: Mapped[str] = mapped_column(String(20), nullable=False)  # ISO date (lunedì)
+    # primo giorno del mese pianificato (la colonna si chiama week_start per
+    # compatibilità con i DB creati quando il piano era settimanale)
+    month_start: Mapped[str] = mapped_column("week_start", String(20), nullable=False)
     status: Mapped[str] = mapped_column(String(20), default="generating")
     notes: Mapped[str] = mapped_column(Text, default="")
     error: Mapped[str | None] = mapped_column(Text, nullable=True)

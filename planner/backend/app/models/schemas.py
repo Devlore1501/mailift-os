@@ -24,6 +24,7 @@ class BrandBase(BaseModel):
     positioning: str | None = None
     avatar: AvatarSchema | None = None
     emails_per_week: int | None = None
+    country: str | None = None
 
 
 class BrandCreate(BrandBase):
@@ -41,6 +42,7 @@ class BrandOut(BaseModel):
     positioning: str
     avatar: dict
     emails_per_week: int
+    country: str
     klaviyo_configured: bool = False
     created_at: datetime
     updated_at: datetime
@@ -55,7 +57,7 @@ class BrandSummary(BaseModel):
     num_products: int
     num_active_offers: int
     last_plan_status: str | None = None
-    last_plan_week_start: str | None = None
+    last_plan_month_start: str | None = None
     created_at: datetime
 
 
@@ -175,7 +177,7 @@ class TemplateOut(BaseModel):
 
 
 class PlanGenerateIn(BaseModel):
-    week_start: str
+    month_start: str  # primo giorno del mese, YYYY-MM-01
     num_emails: int | None = None
     notes: str = ""
 
@@ -236,7 +238,7 @@ class PlanSummary(BaseModel):
 
     id: int
     brand_id: int
-    week_start: str
+    month_start: str
     status: str
     num_emails: int = 0
     notes: str
@@ -269,3 +271,20 @@ class SystemStatus(BaseModel):
     anthropic_configured: bool
     notion_configured: bool
     mock_mode: bool
+
+
+class OccasionSuggestIn(BaseModel):
+    month: str  # "YYYY-MM"
+
+
+class OccasionSuggestion(BaseModel):
+    name: str
+    date: str  # ISO
+    kind: str  # festività | ponte | ricorrenza
+    idea: str
+
+
+class OccasionSuggestOut(BaseModel):
+    country: str
+    month: str
+    suggestions: list[OccasionSuggestion]

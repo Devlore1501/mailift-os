@@ -95,12 +95,20 @@ _PLAN_SCHEMA: dict[str, Any] = {
 }
 
 _SYSTEM = """Sei un email marketing strategist senior specializzato in eCommerce DTC su Klaviyo.
-Lavori per un'agenzia italiana e produci piani editoriali email settimanali pronti da eseguire.
+Lavori per un'agenzia italiana e produci calendari editoriali email MENSILI pronti da eseguire.
 
 Regole non negoziabili:
 - Scrivi SEMPRE in italiano, nel tono di voce del brand e nel linguaggio del suo avatar.
-- Regola 80/20: la maggioranza delle email deve essere contenuto (nurturing/storytelling), \
-massimo ~20-40% promo/vendita. Con 3 email: al più 1 promo. Con 4-5: al più 2.
+- Regola 70/20/10 sul mese: ~70% email EDUCATIVE (objective "nurturing" o "storytelling": \
+consigli, guide, dietro le quinte, storie), ~20% email PRODOTTO (objective "vendita": focus \
+su un prodotto, benefici e casi d'uso, senza sconti aggressivi), ~10% email PROMOZIONALI \
+(objective "promo": sconti e offerte). Esempio con 12 email: 8-9 educative, 2-3 prodotto, \
+1 promo. Le promo vanno collocate nei momenti a maggiore intento d'acquisto del mese.
+- Calendario per paese: considera festività nazionali, ponti, ricorrenze e momenti \
+commerciali del paese di destinazione indicato nel contesto, nel mese pianificato. Usa le \
+occasioni fornite dall'utente e integra quelle rilevanti che conosci (es. festività \
+nazionali, giornate a tema pertinenti al brand). Collega le email a queste date quando ha \
+senso, senza forzature.
 - Scegli i segmenti in base ai DATI Klaviyo forniti: se l'engagement è basso ("poor"), \
 restringi gli invii ai segmenti engaged e includi una email di re-engagement verso gli inattivi. \
 Se non ci sono dati, proponi segmenti standard e spiegalo nel rationale.
@@ -110,10 +118,47 @@ se serve personalizzazione. Lunghezza 120-250 parole.
 - Oggetti: 2-3 varianti brevi (max ~45 caratteri), curiosità o beneficio, mai clickbait vuoto.
 - Per ogni email scegli dal catalogo template fornito il template Canva più adatto al tipo di \
 email e ritorna il suo notion_page_id (null solo se il catalogo è vuoto).
-- Distribuisci gli invii nella settimana (mai due email nello stesso giorno), orari mattina \
-8:30-10:00 nei feriali; il weekend va bene 9:30-11:00. Se le performance passate suggeriscono \
-altro, adeguati.
+- Distribuisci gli invii lungo TUTTO il mese in modo regolare (mai due email nello stesso \
+giorno, evita buchi di oltre una settimana), orari mattina 8:30-10:00 nei feriali; il weekend \
+va bene 9:30-11:00. Se le performance passate suggeriscono altro, adeguati.
 - Usa solo prodotti e offerte realmente forniti; non inventare sconti o codici."""
+
+_OCCASIONS_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "suggestions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "date": {"type": "string", "description": "ISO YYYY-MM-DD"},
+                    "kind": {
+                        "type": "string",
+                        "enum": ["festività", "ponte", "ricorrenza"],
+                    },
+                    "idea": {
+                        "type": "string",
+                        "description": "Idea concreta di email/contenuto per il brand su questa data",
+                    },
+                },
+                "required": ["name", "date", "kind", "idea"],
+                "additionalProperties": False,
+            },
+        }
+    },
+    "required": ["suggestions"],
+    "additionalProperties": False,
+}
+
+_OCCASIONS_SYSTEM = """Sei un calendar strategist di un'agenzia di email marketing italiana.
+Dato un paese, un mese e il contesto di un brand eCommerce, elenchi le date utili del mese:
+- festività nazionali e ricorrenze religiose/civili del paese
+- ponti e long weekend (indica il ponte, non solo la festività)
+- ricorrenze commerciali e giornate a tema RILEVANTI per il brand (es. giornata mondiale
+  del vino per una cantina); ometti quelle irrilevanti.
+Per ogni data proponi UN'idea concreta di email coerente con brand e avatar (in italiano).
+Includi solo date che cadono nel mese richiesto. 4-10 suggerimenti, i più rilevanti."""
 
 
 def _fmt_context(context: dict) -> str:
@@ -122,6 +167,7 @@ def _fmt_context(context: dict) -> str:
     parts = [
         "## Brand",
         f"Nome: {brand['name']}",
+        f"Paese di destinazione: {context.get('country') or brand.get('country') or 'IT'}",
         f"Descrizione: {brand.get('description') or '-'}",
         f"Tono di voce: {brand.get('tone_of_voice') or '-'}",
         f"Mission: {brand.get('mission') or '-'}",
@@ -182,8 +228,9 @@ def generate_plan(context: dict) -> dict:
         return mockdata.mock_plan(context)
 
     user = (
-        f"Genera il piano editoriale email per la settimana che inizia lunedì "
-        f"{context['week_start']}. Numero email richieste: {context['num_emails']}.\n"
+        f"Genera il calendario editoriale email per il mese che inizia il "
+        f"{context['month_start']}. Numero email richieste: {context['num_emails']} "
+        f"(rispetta la regola 70/20/10).\n"
         + (f"Indicazioni extra dell'utente: {context['notes']}\n" if context.get("notes") else "")
         + "\n"
         + _fmt_context(context)
@@ -202,9 +249,9 @@ def regenerate_email(context: dict, current_email: dict, instructions: str) -> d
         return mockdata.mock_regenerated_email(current_email, instructions)
 
     user = (
-        "Rigenera UNA singola email di un piano editoriale già esistente. "
+        "Rigenera UNA singola email di un calendario editoriale mensile già esistente. "
         "Mantieni la stessa data/posizione salvo indicazione contraria e resta coerente "
-        "con brand, avatar e regola 80/20 del piano.\n\n"
+        "con brand, avatar e regola 70/20/10 del piano.\n\n"
         f"Email attuale da rigenerare:\n{json.dumps(current_email, ensure_ascii=False, indent=1)}\n\n"
         + (f"Istruzioni dell'utente: {instructions}\n\n" if instructions else "")
         + "Altre email del piano (NON rigenerarle, servono solo per coerenza):\n"
@@ -213,3 +260,19 @@ def regenerate_email(context: dict, current_email: dict, instructions: str) -> d
         + _fmt_context(context)
     )
     return _call_claude(_SYSTEM, user, _EMAIL_SCHEMA, max_tokens=8000)
+
+
+def suggest_occasions(brand: dict, country: str, month: str) -> list[dict]:
+    """Analizza festività/ponti/ricorrenze del paese nel mese e propone idee email."""
+    if cfg.mock_mode():
+        return mockdata.mock_occasion_suggestions(country, month)
+
+    user = (
+        f"Paese: {country}\nMese: {month}\n\n"
+        "## Brand\n"
+        + json.dumps(brand, ensure_ascii=False, indent=1)
+        + "\n\nElenca le date utili del mese con un'idea email per ciascuna."
+    )
+    result = _call_claude(_OCCASIONS_SYSTEM, user, _OCCASIONS_SCHEMA, max_tokens=4000)
+    # tieni solo le date effettivamente nel mese richiesto
+    return [s for s in result.get("suggestions", []) if s.get("date", "").startswith(month)]

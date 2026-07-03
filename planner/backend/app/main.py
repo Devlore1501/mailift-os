@@ -9,10 +9,25 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from sqlalchemy import text
+
 from .db import Base, engine
 from .api import brands, catalog, integrations, plans, system, templates
 
 Base.metadata.create_all(bind=engine)
+
+
+def _migrate() -> None:
+    """Micro-migrazioni per DB SQLite già esistenti (create_all non altera tabelle)."""
+    with engine.begin() as conn:
+        cols = {row[1] for row in conn.execute(text("PRAGMA table_info(brands)"))}
+        if "country" not in cols:
+            conn.execute(
+                text("ALTER TABLE brands ADD COLUMN country VARCHAR(5) DEFAULT 'IT'")
+            )
+
+
+_migrate()
 
 app = FastAPI(title="Mailift Planner", version="0.1.0")
 

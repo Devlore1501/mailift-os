@@ -113,15 +113,15 @@ check("notion settings get", r.status_code == 200)
 # plan generation
 r = client.post(
     f"/api/brands/{brand_id}/plans/generate",
-    json={"week_start": "2026-07-06", "num_emails": 3, "notes": "focus estate"},
+    json={"month_start": "2026-08-01", "num_emails": 10, "notes": "focus estate"},
 )
 check("generate plan (202)", r.status_code == 202, str(r.status_code))
 plan_id = r.json()["id"]
 
 r = client.post(
-    f"/api/brands/{brand_id}/plans/generate", json={"week_start": "2026-07-06"}
+    f"/api/brands/{brand_id}/plans/generate", json={"month_start": "2026-08-15"}
 )
-check("duplicate week → 409", r.status_code == 409)
+check("duplicate month → 409", r.status_code == 409)
 
 # polling fino a draft
 plan = None
@@ -132,7 +132,7 @@ for _ in range(30):
         break
     time.sleep(0.3)
 check("plan generated", plan is not None and plan["status"] == "draft", plan.get("error") or "")
-check("plan has 3 emails", len(plan["emails"]) == 3, str(len(plan["emails"])))
+check("plan has 10 emails", len(plan["emails"]) == 10, str(len(plan["emails"])))
 
 email = plan["emails"][0]
 check(
@@ -153,9 +153,30 @@ check(
 )
 check("template abbinato", email.get("canva_template") is not None, str(email.get("canva_template")))
 
-# regola 80/20: con 3 email al più 1 promo/vendita
-promo = sum(1 for e in plan["emails"] if e["objective"] in ("promo", "vendita"))
-check("bilanciamento 80/20", promo <= 1, f"{promo} promo su 3")
+# regola 70/20/10 su base mensile
+n = len(plan["emails"])
+edu = sum(1 for e in plan["emails"] if e["objective"] in ("nurturing", "storytelling"))
+prod = sum(1 for e in plan["emails"] if e["objective"] == "vendita")
+promo = sum(1 for e in plan["emails"] if e["objective"] == "promo")
+check(
+    "bilanciamento 70/20/10",
+    edu >= round(0.6 * n) and promo <= max(1, round(0.15 * n)),
+    f"{edu} edu / {prod} prodotto / {promo} promo su {n}",
+)
+dates = [e["send_date"] for e in plan["emails"]]
+check("date nel mese", all(d.startswith("2026-08") for d in dates), str(dates[:3]))
+check("date distinte", len(set(dates)) == len(dates))
+
+# suggerimenti festività/ponti per paese
+r = client.post(
+    f"/api/brands/{brand_id}/occasions/suggest", json={"month": "2026-08"}
+)
+sugg = r.json().get("suggestions", [])
+check(
+    "occasions suggest (mock)",
+    r.status_code == 200 and any("Ferragosto" in x["name"] for x in sugg),
+    str([x["name"] for x in sugg]),
+)
 
 # edit email
 r = client.patch(

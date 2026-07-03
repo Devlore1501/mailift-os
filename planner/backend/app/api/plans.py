@@ -49,7 +49,7 @@ def list_plans(brand_id: int, db: Session = Depends(get_db)):
     plans = (
         db.query(Plan)
         .filter(Plan.brand_id == brand_id)
-        .order_by(Plan.week_start.desc())
+        .order_by(Plan.month_start.desc())
         .all()
     )
     return [_summary(p) for p in plans]
@@ -58,21 +58,23 @@ def list_plans(brand_id: int, db: Session = Depends(get_db)):
 @router.post("/brands/{brand_id}/plans/generate", response_model=PlanSummary, status_code=202)
 def generate_plan(brand_id: int, payload: PlanGenerateIn, db: Session = Depends(get_db)):
     brand = get_brand_or_404(db, brand_id)
+    # normalizza al primo giorno del mese
+    month_start = payload.month_start[:7] + "-01"
     existing = (
         db.query(Plan)
-        .filter(Plan.brand_id == brand_id, Plan.week_start == payload.week_start)
+        .filter(Plan.brand_id == brand_id, Plan.month_start == month_start)
         .first()
     )
     if existing is not None:
-        raise HTTPException(409, f"Esiste già un piano per la settimana {payload.week_start}")
+        raise HTTPException(409, f"Esiste già un piano per il mese {month_start[:7]}")
 
-    num_emails = payload.num_emails or brand.emails_per_week or 3
-    num_emails = max(1, min(num_emails, 7))
-    context = build_context(db, brand, payload.week_start, num_emails, payload.notes)
+    num_emails = payload.num_emails or (brand.emails_per_week or 3) * 4
+    num_emails = max(2, min(num_emails, 31))
+    context = build_context(db, brand, month_start, num_emails, payload.notes)
 
     plan = Plan(
         brand_id=brand_id,
-        week_start=payload.week_start,
+        month_start=month_start,
         status="generating",
         notes=payload.notes,
         context_snapshot=context,
@@ -213,7 +215,7 @@ def publish(plan_id: int, db: Session = Depends(get_db)):
         for e in plan.emails
     ]
     try:
-        result = publish_plan(db, plan.brand.name, plan.week_start, emails)
+        result = publish_plan(db, plan.brand.name, plan.month_start, emails)
     except (NotionNotConfigured, NotionAPIError) as e:
         raise HTTPException(502, str(e))
 

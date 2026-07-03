@@ -31,7 +31,7 @@ def list_brands(db: Session = Depends(get_db)):
         last_plan = (
             db.query(Plan)
             .filter(Plan.brand_id == b.id)
-            .order_by(Plan.week_start.desc())
+            .order_by(Plan.month_start.desc())
             .first()
         )
         result.append(
@@ -44,7 +44,7 @@ def list_brands(db: Session = Depends(get_db)):
                 num_products=len(b.products),
                 num_active_offers=sum(1 for o in b.offers if o.active),
                 last_plan_status=last_plan.status if last_plan else None,
-                last_plan_week_start=last_plan.week_start if last_plan else None,
+                last_plan_month_start=last_plan.month_start if last_plan else None,
                 created_at=b.created_at,
             )
         )

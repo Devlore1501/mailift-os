@@ -16,6 +16,7 @@ import type {
   NotionSettingsUpdate,
   Occasion,
   OccasionInput,
+  OccasionSuggestOut,
   Offer,
   OfferInput,
   PlanDetail,
@@ -97,6 +98,13 @@ export function useUpdateBrand(brandId: number) {
       qc.setQueryData(keys.brand(brandId), brand);
       qc.invalidateQueries({ queryKey: keys.brands });
     },
+  });
+}
+
+export function useSuggestOccasions(brandId: number) {
+  return useMutation<OccasionSuggestOut, ApiError, { month: string }>({
+    mutationFn: (data) =>
+      apiPost<OccasionSuggestOut>(`/brands/${brandId}/occasions/suggest`, data),
   });
 }
 

@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   CalendarHeart,
+  Loader2,
   Package,
   Pencil,
   Plus,
+  Sparkles,
   Star,
   Tag,
   Trash2,
@@ -35,6 +37,7 @@ import {
 } from "@/components/ui/table";
 import { EmptyState } from "@/components/domain/EmptyState";
 import {
+  useBrand,
   useCreateOccasion,
   useCreateOffer,
   useCreateProduct,
@@ -44,6 +47,7 @@ import {
   useOccasions,
   useOffers,
   useProducts,
+  useSuggestOccasions,
   useUpdateOccasion,
   useUpdateOffer,
   useUpdateProduct,
@@ -604,6 +608,169 @@ interface OccasionForm {
 
 const EMPTY_OCCASION: OccasionForm = { name: "", date: "", notes: "" };
 
+function currentMonth(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+const KIND_STYLES: Record<string, string> = {
+  festività: "border-rose-200 bg-rose-50 text-rose-700",
+  ponte: "border-sky-200 bg-sky-50 text-sky-700",
+  ricorrenza: "border-amber-200 bg-amber-50 text-amber-700",
+};
+
+function SuggestOccasionsCard({
+  brandId,
+  existingNames,
+}: {
+  brandId: number;
+  existingNames: Set<string>;
+}) {
+  const { data: brand } = useBrand(brandId);
+  const suggest = useSuggestOccasions(brandId);
+  const createOccasion = useCreateOccasion(brandId);
+  const [month, setMonth] = useState(currentMonth());
+  const [checked, setChecked] = useState<Set<number>>(new Set());
+
+  const suggestions = suggest.data?.suggestions ?? [];
+
+  function handleSuggest() {
+    setChecked(new Set());
+    suggest.mutate(
+      { month },
+      {
+        onSuccess: (out) => {
+          if (out.suggestions.length === 0) {
+            toast.info("Nessuna data rilevante trovata per quel mese");
+          } else {
+            // preseleziona tutte quelle non già presenti a calendario
+            setChecked(
+              new Set(
+                out.suggestions
+                  .map((s, i) => (existingNames.has(s.name.toLowerCase()) ? -1 : i))
+                  .filter((i) => i >= 0)
+              )
+            );
+          }
+        },
+        onError: (err) => toast.error(`Analisi fallita: ${err.message}`),
+      }
+    );
+  }
+
+  async function handleAddSelected() {
+    const selected = suggestions.filter((_, i) => checked.has(i));
+    if (selected.length === 0) {
+      toast.error("Seleziona almeno un suggerimento");
+      return;
+    }
+    let done = 0;
+    for (const s of selected) {
+      await new Promise<void>((resolve) => {
+        createOccasion.mutate(
+          {
+            name: s.name,
+            date: s.date,
+            notes: `[${s.kind}] ${s.idea}`,
+          },
+          { onSettled: () => resolve(), onSuccess: () => done++ }
+        );
+      });
+    }
+    toast.success(`${done} occasioni aggiunte al calendario`);
+    setChecked(new Set());
+    suggest.reset();
+  }
+
+  return (
+    <div className="rounded-xl border border-primary/25 bg-gradient-to-br from-primary/[0.04] to-transparent p-4">
+      <div className="flex items-center gap-2 font-medium">
+        <Sparkles className="h-4 w-4 text-primary" />
+        Suggerisci date dal calendario del paese
+      </div>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Analizza festività, ponti e ricorrenze rilevanti in{" "}
+        {brand?.country || "IT"} e propone idee email da inserire a calendario.
+        Il paese si imposta nel Profilo brand.
+      </p>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <Input
+          type="month"
+          className="w-44"
+          value={month}
+          onChange={(e) => setMonth(e.target.value)}
+          aria-label="Mese da analizzare"
+        />
+        <Button onClick={handleSuggest} disabled={suggest.isPending || !month}>
+          {suggest.isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Sparkles className="h-4 w-4" />
+          )}
+          {suggest.isPending ? "Analisi…" : "Suggerisci date"}
+        </Button>
+      </div>
+
+      {suggestions.length > 0 && (
+        <div className="mt-4 space-y-2">
+          {suggestions.map((s, i) => {
+            const already = existingNames.has(s.name.toLowerCase());
+            return (
+              <label
+                key={`${s.date}-${s.name}`}
+                className={`flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-card px-3 py-2.5 ${
+                  already ? "opacity-60" : ""
+                }`}
+              >
+                <Checkbox
+                  className="mt-0.5"
+                  checked={checked.has(i)}
+                  disabled={already}
+                  onCheckedChange={(v) =>
+                    setChecked((prev) => {
+                      const next = new Set(prev);
+                      if (v) next.add(i);
+                      else next.delete(i);
+                      return next;
+                    })
+                  }
+                />
+                <div className="min-w-0 text-sm">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-medium">{s.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {formatDate(s.date)}
+                    </span>
+                    <span
+                      className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${
+                        KIND_STYLES[s.kind] ?? "border-border bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {s.kind}
+                    </span>
+                    {already && (
+                      <span className="text-[11px] text-muted-foreground">
+                        già a calendario
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{s.idea}</p>
+                </div>
+              </label>
+            );
+          })}
+          <div className="flex justify-end pt-1">
+            <Button onClick={handleAddSelected} disabled={createOccasion.isPending}>
+              <Plus className="h-4 w-4" />
+              Aggiungi selezionate ({checked.size})
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function OccasionsTab({ brandId }: { brandId: number }) {
   const { data: occasions, isLoading } = useOccasions(brandId);
   const createOccasion = useCreateOccasion(brandId);
@@ -613,6 +780,10 @@ function OccasionsTab({ brandId }: { brandId: number }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Occasion | null>(null);
   const [form, setForm] = useState<OccasionForm>(EMPTY_OCCASION);
+
+  const existingNames = new Set(
+    (occasions ?? []).map((o) => o.name.toLowerCase())
+  );
 
   function openCreate() {
     setEditing(null);
@@ -658,8 +829,10 @@ function OccasionsTab({ brandId }: { brandId: number }) {
 
   return (
     <div className="space-y-4">
+      <SuggestOccasionsCard brandId={brandId} existingNames={existingNames} />
+
       <div className="flex justify-end">
-        <Button onClick={openCreate}>
+        <Button variant="outline" onClick={openCreate}>
           <Plus className="h-4 w-4" />
           Aggiungi occasione
         </Button>

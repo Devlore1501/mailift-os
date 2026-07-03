@@ -29,6 +29,7 @@ export interface Brand {
   positioning: string;
   avatar: BrandAvatar;
   emails_per_week: number;
+  country: string;
   klaviyo_configured: boolean;
   created_at: string;
   updated_at: string;
@@ -50,7 +51,7 @@ export interface BrandSummary {
   num_products: number;
   num_active_offers: number;
   last_plan_status: PlanStatus | null;
-  last_plan_week_start: string | null;
+  last_plan_month_start: string | null;
   created_at: string;
 }
 
@@ -62,6 +63,7 @@ export interface BrandCreate {
   positioning?: string;
   avatar?: Partial<BrandAvatar>;
   emails_per_week?: number;
+  country?: string;
 }
 
 export type BrandUpdate = Partial<Omit<Brand, "id" | "created_at" | "updated_at" | "klaviyo_configured">>;
@@ -219,7 +221,7 @@ export type EmailStatus = "draft" | "edited" | "approved";
 export interface PlanSummary {
   id: number;
   brand_id: number;
-  week_start: string;
+  month_start: string;
   status: PlanStatus;
   num_emails: number;
   notes: string | null;
@@ -280,7 +282,7 @@ export interface PlanDetail extends PlanSummary {
 }
 
 export interface PlanGenerateRequest {
-  week_start: string;
+  month_start: string;
   num_emails: number;
   notes?: string;
 }
@@ -323,4 +325,17 @@ export interface ExtractedProfile {
   extraction_notes: string;
   applied: boolean;
   products_created: number;
+}
+
+export interface OccasionSuggestion {
+  name: string;
+  date: string;
+  kind: string; // festività | ponte | ricorrenza
+  idea: string;
+}
+
+export interface OccasionSuggestOut {
+  country: string;
+  month: string;
+  suggestions: OccasionSuggestion[];
 }

@@ -37,7 +37,7 @@ import { EmptyState } from "@/components/domain/EmptyState";
 import { PlanStatusBadge } from "@/components/domain/PlanStatusBadge";
 import { useBrands, useCreateBrand } from "@/lib/queries";
 import { setLastBrandId } from "@/lib/brand";
-import { formatDate } from "@/lib/utils";
+import { formatMonth } from "@/lib/utils";
 import type { BrandSummary } from "@/types/api";
 
 /* Gradiente deterministico per l'avatar del brand */
@@ -131,8 +131,8 @@ function BrandCard({ brand }: { brand: BrandSummary }) {
         <div className="flex items-center justify-between border-t border-border/60 pt-3">
           <span className="text-xs text-muted-foreground">
             Ultimo piano
-            {brand.last_plan_week_start
-              ? ` · ${formatDate(brand.last_plan_week_start)}`
+            {brand.last_plan_month_start
+              ? ` · ${formatMonth(brand.last_plan_month_start)}`
               : ""}
           </span>
           <PlanStatusBadge status={brand.last_plan_status} />

@@ -1,6 +1,6 @@
 # Mailift Planner — API Contract v1
 
-SaaS multi-cliente per generare piani editoriali email settimanali (Klaviyo + Claude + Notion/Canva).
+SaaS multi-cliente per generare calendari editoriali email mensili (Klaviyo + Claude + Notion/Canva).
 
 - Backend: FastAPI su `http://localhost:8001`, tutte le route sotto `/api`.
 - Frontend: Vite dev su `:5174` con proxy `/api` → `http://localhost:8001`.
@@ -41,6 +41,7 @@ SaaS multi-cliente per generare piani editoriali email settimanali (Klaviyo + Cl
     "notes": ""
   },
   "emails_per_week": 3,
+  "country": "IT",
   "klaviyo_configured": true,
   "created_at": "2026-07-01T10:00:00Z",
   "updated_at": "2026-07-01T10:00:00Z"
@@ -219,4 +220,20 @@ Categorie note (aperte, non enum rigido): `promo`, `newsletter`, `lancio prodott
 - Brand switcher sempre visibile (topbar): dropdown/command con ricerca, ricorda l'ultimo brand in localStorage.
 - Route: `/` dashboard agenzia (griglia brand) · `/brands/:brandId/plans` (default workspace) · `/brands/:brandId/plans/:planId` · `/brands/:brandId/profile` · `/brands/:brandId/catalog` · `/brands/:brandId/integrations` · `/templates` · `/settings`.
 - La card email del piano mostra tutti gli 8 elementi: giorno+orario, tema/angolo+obiettivo (badge colorato), segmento con rationale, 2-3 oggetti A/B, preview text, corpo espandibile, prodotti/offerta, template Canva con link.
-- Regola 80/20 visibile: nel piano un indicatore contenuto vs promo (conteggio obiettivi).
+- Regola 70/20/10 visibile: barra a tre segmenti (educativo/prodotto/promo).
+
+## Aggiornamenti v1.1 (mensile + festività + estrazione PDF)
+
+- I piani sono MENSILI: `week_start` → `month_start` ("YYYY-MM-01") in PlanSummary,
+  PlanDetail e nel body di `POST /brands/{id}/plans/generate` (num_emails default =
+  emails_per_week × 4, max 31). BrandSummary: `last_plan_month_start`.
+- Regola 70/20/10: ~70% educativo (nurturing/storytelling), ~20% prodotto (vendita),
+  ~10% promozionale (promo).
+- Brand.country (ISO2, default "IT"): paese di destinazione per festività/ponti.
+- `POST /brands/{id}/occasions/suggest` body `{"month": "YYYY-MM"}` →
+  `{country, month, suggestions: [{name, date, kind: "festività|ponte|ricorrenza", idea}]}`.
+  Analizza il calendario del paese del brand e propone idee email.
+- `POST /brands/{id}/extract-profile?apply=bool` (multipart, 1-3 file PDF/TXT/MD,
+  max 20MB) → profilo estratto {description, tone_of_voice, mission, positioning,
+  avatar, products[], extraction_notes, applied, products_created}. Con apply=true
+  compila i campi vuoti del brand e crea i prodotti trovati.

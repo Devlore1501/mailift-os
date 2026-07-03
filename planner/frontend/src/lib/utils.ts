@@ -87,3 +87,16 @@ export function truncate(str: string, max: number): string {
   if (str.length <= max) return str;
   return str.slice(0, max - 1).trimEnd() + "…";
 }
+
+/** Primo giorno del mese prossimo, ISO YYYY-MM-01. */
+export function nextMonthStart(from = new Date()): string {
+  const d = new Date(from.getFullYear(), from.getMonth() + 1, 1);
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-01`;
+}
+
+/** "2026-08-01" → "agosto 2026". */
+export function formatMonth(monthStart: string): string {
+  const d = new Date(monthStart + "T00:00:00");
+  return d.toLocaleDateString("it-IT", { month: "long", year: "numeric" });
+}

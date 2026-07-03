@@ -31,7 +31,7 @@ import {
   useGeneratePlan,
   usePlans,
 } from "@/lib/queries";
-import { formatDate, nextMonday } from "@/lib/utils";
+import { formatMonth, nextMonthStart } from "@/lib/utils";
 
 export function Plans() {
   const { brandId: brandIdParam } = useParams();
@@ -44,29 +44,29 @@ export function Plans() {
   const deletePlan = useDeletePlan(brandId);
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [weekStart, setWeekStart] = useState(nextMonday());
+  const [monthStart, setMonthStart] = useState(nextMonthStart());
   const [numEmails, setNumEmails] = useState<number | "">("");
   const [notes, setNotes] = useState("");
 
-  const effectiveNumEmails =
-    numEmails === "" ? (brand?.emails_per_week ?? 3) : numEmails;
+  const defaultMonthly = (brand?.emails_per_week ?? 3) * 4;
+  const effectiveNumEmails = numEmails === "" ? defaultMonthly : numEmails;
 
   function openDialog() {
-    setWeekStart(nextMonday());
-    setNumEmails(brand?.emails_per_week ?? 3);
+    setMonthStart(nextMonthStart());
+    setNumEmails(defaultMonthly);
     setNotes("");
     setDialogOpen(true);
   }
 
   function handleGenerate() {
-    if (!weekStart) {
-      toast.error("Seleziona la settimana di inizio");
+    if (!monthStart) {
+      toast.error("Seleziona il mese");
       return;
     }
     generatePlan.mutate(
       {
-        week_start: weekStart,
-        num_emails: Number(effectiveNumEmails) || 3,
+        month_start: monthStart,
+        num_emails: Number(effectiveNumEmails) || defaultMonthly,
         notes: notes.trim() || undefined,
       },
       {
@@ -77,7 +77,7 @@ export function Plans() {
         },
         onError: (err) => {
           if (err.status === 409) {
-            toast.error("Esiste già un piano per quella settimana");
+            toast.error("Esiste già un piano per quel mese");
           } else {
             toast.error(`Errore: ${err.message}`);
           }
@@ -94,12 +94,12 @@ export function Plans() {
             Piani editoriali
           </h1>
           <p className="text-sm text-muted-foreground">
-            {brand ? `Piani settimanali di ${brand.name}` : "Piani settimanali"}
+            {brand ? `Calendari mensili di ${brand.name}` : "Calendari mensili"}
           </p>
         </div>
         <Button size="lg" onClick={openDialog}>
           <Sparkles className="h-4 w-4" />
-          Genera piano settimanale
+          Genera piano mensile
         </Button>
       </div>
 
@@ -113,11 +113,11 @@ export function Plans() {
         <EmptyState
           icon={CalendarDays}
           title="Nessun piano"
-          description="Genera il primo piano editoriale settimanale per questo brand: Claude userà profilo, catalogo e dati Klaviyo."
+          description="Genera il primo calendario editoriale mensile per questo brand: Claude userà profilo, catalogo, dati Klaviyo e le festività del paese."
           action={
             <Button onClick={openDialog}>
               <Sparkles className="h-4 w-4" />
-              Genera piano settimanale
+              Genera piano mensile
             </Button>
           }
         />
@@ -126,7 +126,7 @@ export function Plans() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Settimana</TableHead>
+                <TableHead>Mese</TableHead>
                 <TableHead>Stato</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Note</TableHead>
@@ -148,7 +148,7 @@ export function Plans() {
                       className="font-medium hover:underline"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      Settimana del {formatDate(plan.week_start)}
+                      <span className="capitalize">{formatMonth(plan.month_start)}</span>
                     </Link>
                   </TableCell>
                   <TableCell>
@@ -172,7 +172,7 @@ export function Plans() {
                         e.stopPropagation();
                         if (
                           window.confirm(
-                            `Eliminare il piano della settimana del ${formatDate(plan.week_start)}?`
+                            `Eliminare il piano di ${formatMonth(plan.month_start)}?`
                           )
                         ) {
                           deletePlan.mutate(plan.id, {
@@ -196,29 +196,32 @@ export function Plans() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Genera piano settimanale</DialogTitle>
+            <DialogTitle>Genera piano mensile</DialogTitle>
             <DialogDescription>
-              Claude genererà un piano completo usando profilo brand, catalogo,
-              offerte e insight Klaviyo.
+              Claude genererà il calendario del mese (regola 70% educativo /
+              20% prodotto / 10% promo) usando profilo brand, catalogo, offerte,
+              insight Klaviyo e le festività del paese.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="week-start">Settimana (lunedì di inizio)</Label>
+              <Label htmlFor="month-start">Mese</Label>
               <Input
-                id="week-start"
-                type="date"
-                value={weekStart}
-                onChange={(e) => setWeekStart(e.target.value)}
+                id="month-start"
+                type="month"
+                value={monthStart.slice(0, 7)}
+                onChange={(e) =>
+                  setMonthStart(e.target.value ? `${e.target.value}-01` : "")
+                }
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="num-emails">Numero email</Label>
+              <Label htmlFor="num-emails">Numero email nel mese</Label>
               <Input
                 id="num-emails"
                 type="number"
-                min={1}
-                max={7}
+                min={2}
+                max={31}
                 value={effectiveNumEmails}
                 onChange={(e) =>
                   setNumEmails(
@@ -227,8 +230,8 @@ export function Plans() {
                 }
               />
               <p className="text-xs text-muted-foreground">
-                Default: {brand?.emails_per_week ?? 3} email a settimana (dal
-                profilo brand).
+                Default: {defaultMonthly} email al mese ({brand?.emails_per_week ?? 3}
+                /settimana × 4, dal profilo brand).
               </p>
             </div>
             <div className="space-y-2">

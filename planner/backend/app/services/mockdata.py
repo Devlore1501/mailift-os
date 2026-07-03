@@ -10,15 +10,6 @@ from datetime import date, timedelta
 
 DAY_NAMES = ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "domenica"]
 
-# Cadenza consigliata per numero email/settimana → offset giorni dal lunedì
-DAY_PATTERNS = {
-    1: [1],
-    2: [1, 4],
-    3: [0, 2, 4],
-    4: [0, 2, 4, 6],
-    5: [0, 1, 3, 4, 6],
-}
-
 MOCK_TEMPLATES = [
     ("Promo Bold 04", "promo", ["sconto", "urgenza"]),
     ("Promo Minimal 11", "promo", ["flash sale"]),
@@ -55,7 +46,20 @@ def mock_template_rows() -> list[dict]:
     return rows
 
 
-_OBJECTIVE_CYCLE = ["nurturing", "storytelling", "promo", "nurturing", "vendita"]
+def _month_objectives(n: int) -> list[str]:
+    """Sequenza obiettivi 70/20/10: educative + prodotto a metà mese + promo in coda."""
+    n_promo = max(1, round(0.1 * n)) if n >= 4 else 0
+    n_prod = max(1, round(0.2 * n)) if n >= 3 else 0
+    n_edu = n - n_promo - n_prod
+    edu = ["nurturing" if i % 2 == 0 else "storytelling" for i in range(n_edu)]
+    out = list(edu)
+    # prodotto distribuito nel mese, promo verso fine mese
+    step = max(1, len(out) // (n_prod + 1)) if n_prod else 1
+    for i in range(n_prod):
+        out.insert(min(len(out), (i + 1) * step + i), "vendita")
+    out.extend(["promo"] * n_promo)
+    return out[:n]
+
 
 _THEMES = {
     "nurturing": (
@@ -67,7 +71,7 @@ _THEMES = {
         "La storia che ci ha portato fin qui (e cosa c'entra con te)",
     ),
     "promo": (
-        "Offerta della settimana",
+        "Offerta del mese",
         "Solo per pochi giorni: un'occasione da non perdere",
     ),
     "vendita": (
@@ -85,9 +89,13 @@ _TEMPLATE_BY_OBJECTIVE = {
 
 
 def mock_plan(context: dict) -> dict:
-    """Piano demo coerente con i dati reali del brand (prodotti, offerte, segmenti)."""
+    """Piano mensile demo coerente con i dati reali del brand."""
     brand = context["brand"]
-    week_start = date.fromisoformat(context["week_start"])
+    month_start = date.fromisoformat(context["month_start"])
+    if month_start.month == 12:
+        month_days = 31
+    else:
+        month_days = (month_start.replace(month=month_start.month + 1) - month_start).days
     num_emails = context["num_emails"]
     products = context.get("products", [])
     offers = [o for o in context.get("offers", []) if o.get("active")]
@@ -107,12 +115,14 @@ def mock_plan(context: dict) -> dict:
         ),
     }
 
-    offsets = DAY_PATTERNS.get(num_emails) or list(range(min(num_emails, 7)))
+    objectives = _month_objectives(num_emails)
+    step = month_days / max(num_emails, 1)
     emails = []
     for i in range(num_emails):
-        objective = _OBJECTIVE_CYCLE[i % len(_OBJECTIVE_CYCLE)]
+        objective = objectives[i]
         theme, angle = _THEMES[objective]
-        d = week_start + timedelta(days=offsets[i % len(offsets)])
+        offset = min(int(round(i * step)), month_days - 1)
+        d = month_start + timedelta(days=offset)
         best = next((p for p in products if p.get("is_best_seller")), None)
         prod = best or (products[i % len(products)] if products else None)
         offer = offers[0] if (offers and objective in ("promo", "vendita")) else None
@@ -233,3 +243,72 @@ def mock_klaviyo_snapshot() -> dict:
             "Segmento 'Unengaged 90 days' con 4.1k profili: pianificare re-engagement.",
         ],
     }
+
+
+# Festività a data fissa per paese (demo): MM-DD → nome
+_FIXED_HOLIDAYS: dict[str, dict[str, str]] = {
+    "IT": {
+        "01-01": "Capodanno", "01-06": "Epifania", "04-25": "Festa della Liberazione",
+        "05-01": "Festa dei Lavoratori", "06-02": "Festa della Repubblica",
+        "08-15": "Ferragosto", "11-01": "Ognissanti", "12-08": "Immacolata Concezione",
+        "12-25": "Natale", "12-26": "Santo Stefano",
+    },
+    "FR": {
+        "01-01": "Jour de l'an", "05-01": "Fête du Travail", "05-08": "Victoire 1945",
+        "07-14": "Fête nationale", "08-15": "Assomption", "11-01": "Toussaint",
+        "11-11": "Armistice", "12-25": "Noël",
+    },
+    "DE": {
+        "01-01": "Neujahr", "05-01": "Tag der Arbeit", "10-03": "Tag der Deutschen Einheit",
+        "12-25": "1. Weihnachtstag", "12-26": "2. Weihnachtstag",
+    },
+    "ES": {
+        "01-01": "Año Nuevo", "01-06": "Reyes", "05-01": "Día del Trabajador",
+        "08-15": "Asunción", "10-12": "Fiesta Nacional", "11-01": "Todos los Santos",
+        "12-06": "Constitución", "12-08": "Inmaculada", "12-25": "Navidad",
+    },
+    "US": {
+        "01-01": "New Year's Day", "07-04": "Independence Day", "11-11": "Veterans Day",
+        "12-25": "Christmas",
+    },
+    "GB": {"01-01": "New Year's Day", "12-25": "Christmas", "12-26": "Boxing Day"},
+}
+
+_COMMERCIAL_DATES: dict[str, str] = {
+    "02-14": "San Valentino", "03-08": "Festa della Donna", "03-19": "Festa del Papà",
+    "10-31": "Halloween",
+}
+
+
+def mock_occasion_suggestions(country: str, month: str) -> list[dict]:
+    """Suggerimenti demo: festività a data fissa + ponti calcolati + ricorrenze."""
+    country = (country or "IT").upper()
+    holidays = _FIXED_HOLIDAYS.get(country, _FIXED_HOLIDAYS["IT"])
+    year, month_num = month.split("-")
+    out: list[dict] = []
+    for mmdd, name in sorted({**holidays, **_COMMERCIAL_DATES}.items()):
+        if not mmdd.startswith(f"{month_num}-"):
+            continue
+        iso = f"{year}-{mmdd}"
+        kind = "festività" if mmdd in holidays else "ricorrenza"
+        out.append(
+            {
+                "name": name,
+                "date": iso,
+                "kind": kind,
+                "idea": f"[DEMO] Email a tema {name}: contenuto o selezione prodotti dedicata.",
+            }
+        )
+        # ponte: festività di martedì o giovedì
+        d = date.fromisoformat(iso)
+        if kind == "festività" and d.weekday() in (1, 3):
+            bridge = d - timedelta(days=1) if d.weekday() == 1 else d + timedelta(days=1)
+            out.append(
+                {
+                    "name": f"Ponte di {name}",
+                    "date": bridge.isoformat(),
+                    "kind": "ponte",
+                    "idea": "[DEMO] Long weekend: email 'idee per il ponte' con i prodotti giusti.",
+                }
+            )
+    return out

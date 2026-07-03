@@ -19,6 +19,7 @@ import type { Brand, ExtractedProfile } from "@/types/api";
 
 interface FormState {
   name: string;
+  country: string;
   description: string;
   tone_of_voice: string;
   mission: string;
@@ -34,6 +35,7 @@ interface FormState {
 function toFormState(brand: Brand): FormState {
   return {
     name: brand.name ?? "",
+    country: brand.country ?? "IT",
     description: brand.description ?? "",
     tone_of_voice: brand.tone_of_voice ?? "",
     mission: brand.mission ?? "",
@@ -132,6 +134,7 @@ export function BrandProfile() {
         mission: form.mission,
         positioning: form.positioning,
         emails_per_week: Number(form.emails_per_week) || 3,
+        country: form.country,
         avatar: {
           who: form.avatar_who,
           desires: splitLines(form.avatar_desires),
@@ -269,17 +272,45 @@ export function BrandProfile() {
               onChange={(e) => set("positioning", e.target.value)}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="epw">Email a settimana</Label>
-            <Input
-              id="epw"
-              type="number"
-              min={1}
-              max={7}
-              className="w-32"
-              value={form.emails_per_week}
-              onChange={(e) => set("emails_per_week", Number(e.target.value))}
-            />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="epw">Email a settimana</Label>
+              <Input
+                id="epw"
+                type="number"
+                min={1}
+                max={7}
+                className="w-32"
+                value={form.emails_per_week}
+                onChange={(e) => set("emails_per_week", Number(e.target.value))}
+              />
+              <p className="text-xs text-muted-foreground">
+                Base del piano mensile (×4).
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="country">Paese di destinazione</Label>
+              <select
+                id="country"
+                className="flex h-10 w-full max-w-[220px] cursor-pointer rounded-md border border-input bg-card px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                value={form.country}
+                onChange={(e) => set("country", e.target.value)}
+              >
+                <option value="IT">Italia</option>
+                <option value="FR">Francia</option>
+                <option value="DE">Germania</option>
+                <option value="ES">Spagna</option>
+                <option value="GB">Regno Unito</option>
+                <option value="US">Stati Uniti</option>
+                <option value="CH">Svizzera</option>
+                <option value="AT">Austria</option>
+                <option value="NL">Paesi Bassi</option>
+                <option value="BE">Belgio</option>
+              </select>
+              <p className="text-xs text-muted-foreground">
+                Usato per festività, ponti e ricorrenze nel calendario.
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>

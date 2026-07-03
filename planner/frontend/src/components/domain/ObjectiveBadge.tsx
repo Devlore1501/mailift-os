@@ -23,7 +23,7 @@ const OBJECTIVE_CONFIG: Record<
   },
 };
 
-/** Obiettivi considerati "promo/vendita" per la regola 80/20. */
+/** Obiettivi considerati promozionali per la regola 70/20/10. */
 export function isPromoObjective(objective: EmailObjective): boolean {
   return objective === "promo" || objective === "vendita";
 }
