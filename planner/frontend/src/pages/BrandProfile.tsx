@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Save } from "lucide-react";
+import { FileUp, Loader2, Save, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,8 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useBrand, useUpdateBrand } from "@/lib/queries";
-import type { Brand } from "@/types/api";
+import { useBrand, useExtractProfile, useUpdateBrand } from "@/lib/queries";
+import type { Brand, ExtractedProfile } from "@/types/api";
 
 interface FormState {
   name: string;
@@ -59,8 +59,55 @@ export function BrandProfile() {
   const brandId = Number(brandIdParam);
   const { data: brand, isLoading } = useBrand(brandId);
   const updateBrand = useUpdateBrand(brandId);
+  const extract = useExtractProfile(brandId);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const [form, setForm] = useState<FormState | null>(null);
+
+  function applyExtraction(result: ExtractedProfile) {
+    setForm((f) => {
+      if (!f) return f;
+      const merged = { ...f };
+      if (result.description) merged.description = result.description;
+      if (result.tone_of_voice) merged.tone_of_voice = result.tone_of_voice;
+      if (result.mission) merged.mission = result.mission;
+      if (result.positioning) merged.positioning = result.positioning;
+      if (result.avatar?.who) merged.avatar_who = result.avatar.who;
+      if (result.avatar?.desires?.length)
+        merged.avatar_desires = result.avatar.desires.join("\n");
+      if (result.avatar?.objections?.length)
+        merged.avatar_objections = result.avatar.objections.join("\n");
+      if (result.avatar?.language) merged.avatar_language = result.avatar.language;
+      if (result.avatar?.notes) merged.avatar_notes = result.avatar.notes;
+      return merged;
+    });
+  }
+
+  function handleExtract() {
+    if (selectedFiles.length === 0) {
+      toast.error("Seleziona prima un PDF (o TXT/MD)");
+      return;
+    }
+    extract.mutate(
+      { files: selectedFiles },
+      {
+        onSuccess: (result) => {
+          applyExtraction(result);
+          setSelectedFiles([]);
+          if (fileInputRef.current) fileInputRef.current.value = "";
+          toast.success(
+            "Profilo estratto dal documento: rivedi i campi e premi Salva",
+            { duration: 6000 }
+          );
+          if (result.extraction_notes) {
+            toast.info(result.extraction_notes, { duration: 8000 });
+          }
+        },
+        onError: (err) => toast.error(`Estrazione fallita: ${err.message}`),
+      }
+    );
+  }
 
   useEffect(() => {
     if (brand && !form) setForm(toFormState(brand));
@@ -126,6 +173,47 @@ export function BrandProfile() {
           {updateBrand.isPending ? "Salvataggio…" : "Salva profilo"}
         </Button>
       </div>
+
+      <Card className="border-primary/25 bg-gradient-to-br from-primary/[0.04] to-transparent">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            Compila da documento
+          </CardTitle>
+          <CardDescription>
+            Carica il brand book o il questionario del cliente (PDF, fino a 3
+            file): l'AI estrae identità, tono di voce e avatar. Poi rivedi e
+            salva.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.txt,.md,application/pdf,text/plain,text/markdown"
+              multiple
+              className="max-w-md cursor-pointer"
+              onChange={(e) =>
+                setSelectedFiles(Array.from(e.target.files ?? []).slice(0, 3))
+              }
+            />
+            <Button
+              onClick={handleExtract}
+              disabled={extract.isPending || selectedFiles.length === 0}
+            >
+              {extract.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileUp className="h-4 w-4" />
+              )}
+              {extract.isPending
+                ? "Analisi in corso… (può richiedere ~1 min)"
+                : "Analizza documento"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

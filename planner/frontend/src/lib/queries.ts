@@ -3,12 +3,13 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { apiDelete, apiGet, apiPatch, apiPost, apiPut, ApiError } from "@/lib/api";
+import { apiDelete, apiGet, apiPatch, apiPost, apiPut, apiUpload, ApiError } from "@/lib/api";
 import type {
   Brand,
   BrandCreate,
   BrandSummary,
   BrandUpdate,
+  ExtractedProfile,
   KlaviyoSnapshot,
   KlaviyoStatus,
   NotionSettings,
@@ -95,6 +96,32 @@ export function useUpdateBrand(brandId: number) {
     onSuccess: (brand) => {
       qc.setQueryData(keys.brand(brandId), brand);
       qc.invalidateQueries({ queryKey: keys.brands });
+    },
+  });
+}
+
+export function useExtractProfile(brandId: number) {
+  const qc = useQueryClient();
+  return useMutation<
+    ExtractedProfile,
+    ApiError,
+    { files: File[]; apply?: boolean }
+  >({
+    mutationFn: ({ files, apply }) => {
+      const fd = new FormData();
+      for (const f of files) fd.append("files", f);
+      return apiUpload<ExtractedProfile>(
+        `/brands/${brandId}/extract-profile`,
+        fd,
+        apply ? { apply: "true" } : undefined
+      );
+    },
+    onSuccess: (result) => {
+      if (result.applied) {
+        qc.invalidateQueries({ queryKey: keys.brand(brandId) });
+        qc.invalidateQueries({ queryKey: keys.brands });
+        qc.invalidateQueries({ queryKey: keys.products(brandId) });
+      }
     },
   });
 }

@@ -305,3 +305,22 @@ export interface PlanPublishResult {
   notion_url: string;
   pages: { email_id: number; notion_url: string }[];
 }
+
+export interface ExtractedProduct {
+  name: string;
+  category: string;
+  price: number | null;
+  is_best_seller: boolean;
+}
+
+export interface ExtractedProfile {
+  description: string;
+  tone_of_voice: string;
+  mission: string;
+  positioning: string;
+  avatar: BrandAvatar;
+  products: ExtractedProduct[];
+  extraction_notes: string;
+  applied: boolean;
+  products_created: number;
+}

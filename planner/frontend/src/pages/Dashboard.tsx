@@ -1,7 +1,19 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { CheckCircle2, Package, Plus, Store, Tag, XCircle } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  CheckCircle2,
+  Loader2,
+  Package,
+  Plus,
+  Store,
+  Tag,
+  XCircle,
+} from "lucide-react";
 import { toast } from "sonner";
+import { apiUpload } from "@/lib/api";
+import { keys } from "@/lib/queries";
+import type { ExtractedProfile } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -136,9 +148,12 @@ export function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const qc = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
   const [positioning, setPositioning] = useState("");
+  const [brandFiles, setBrandFiles] = useState<File[]>([]);
+  const [extracting, setExtracting] = useState(false);
 
   // Il BrandSwitcher può chiedere di aprire il dialog via location state.
   useEffect(() => {
@@ -147,6 +162,35 @@ export function Dashboard() {
       navigate(location.pathname, { replace: true, state: null });
     }
   }, [location.state, location.pathname, navigate]);
+
+  async function extractFromFiles(brandId: number): Promise<void> {
+    const fd = new FormData();
+    for (const f of brandFiles) fd.append("files", f);
+    setExtracting(true);
+    try {
+      const result = await apiUpload<ExtractedProfile>(
+        `/brands/${brandId}/extract-profile`,
+        fd,
+        { apply: "true" }
+      );
+      qc.invalidateQueries({ queryKey: keys.brand(brandId) });
+      qc.invalidateQueries({ queryKey: keys.brands });
+      qc.invalidateQueries({ queryKey: keys.products(brandId) });
+      const extra =
+        result.products_created > 0
+          ? ` (+${result.products_created} prodotti importati)`
+          : "";
+      toast.success(`Profilo compilato dal documento${extra}: rivedilo e salva`, {
+        duration: 6000,
+      });
+    } catch (err) {
+      toast.error(
+        `Brand creato, ma estrazione fallita: ${err instanceof Error ? err.message : err}`
+      );
+    } finally {
+      setExtracting(false);
+    }
+  }
 
   function handleCreate() {
     const trimmed = name.trim();
@@ -157,13 +201,20 @@ export function Dashboard() {
     createBrand.mutate(
       { name: trimmed, positioning: positioning.trim() || undefined },
       {
-        onSuccess: (brand) => {
+        onSuccess: async (brand) => {
           toast.success(`Brand "${brand.name}" creato`);
+          setLastBrandId(brand.id);
+          const hasFiles = brandFiles.length > 0;
+          if (hasFiles) {
+            await extractFromFiles(brand.id);
+          }
           setDialogOpen(false);
           setName("");
           setPositioning("");
-          setLastBrandId(brand.id);
-          navigate(`/brands/${brand.id}/plans`);
+          setBrandFiles([]);
+          navigate(
+            hasFiles ? `/brands/${brand.id}/profile` : `/brands/${brand.id}/plans`
+          );
         },
         onError: (err) => toast.error(`Errore: ${err.message}`),
       }
@@ -247,13 +298,44 @@ export function Dashboard() {
                 rows={3}
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="brand-files">
+                Brand book / questionario (opzionale)
+              </Label>
+              <Input
+                id="brand-files"
+                type="file"
+                accept=".pdf,.txt,.md,application/pdf,text/plain,text/markdown"
+                multiple
+                className="cursor-pointer"
+                onChange={(e) =>
+                  setBrandFiles(Array.from(e.target.files ?? []).slice(0, 3))
+                }
+              />
+              <p className="text-xs text-muted-foreground">
+                Carica il PDF del cliente e l'AI compila da sola profilo, tono
+                di voce e avatar (fino a 3 file, max 20 MB).
+              </p>
+            </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setDialogOpen(false)}
+              disabled={extracting}
+            >
               Annulla
             </Button>
-            <Button onClick={handleCreate} disabled={createBrand.isPending}>
-              {createBrand.isPending ? "Creazione…" : "Crea brand"}
+            <Button
+              onClick={handleCreate}
+              disabled={createBrand.isPending || extracting}
+            >
+              {extracting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {extracting
+                ? "Analisi documento… (~1 min)"
+                : createBrand.isPending
+                  ? "Creazione…"
+                  : "Crea brand"}
             </Button>
           </DialogFooter>
         </DialogContent>

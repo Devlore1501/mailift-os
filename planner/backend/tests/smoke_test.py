@@ -189,6 +189,35 @@ check(
 r = client.get(f"/api/plans/{plan_id}")
 check("plan published", r.json()["status"] == "published")
 
+# estrazione profilo da documento (mock)
+brand2 = client.post("/api/brands", json={"name": "Nuovo Cliente"}).json()
+doc = (
+    "Brand book Nuovo Cliente. Vendiamo candele artigianali profumate "
+    "per chi ama la casa accogliente. Tono caldo e informale."
+).encode()
+r = client.post(
+    f"/api/brands/{brand2['id']}/extract-profile",
+    files=[("files", ("brandbook.txt", doc, "text/plain"))],
+)
+check(
+    "extract-profile (mock)",
+    r.status_code == 200 and r.json()["description"],
+    str(r.status_code),
+)
+r = client.post(
+    f"/api/brands/{brand2['id']}/extract-profile?apply=true",
+    files=[("files", ("brandbook.txt", doc, "text/plain"))],
+)
+check("extract-profile apply", r.status_code == 200 and r.json()["applied"] is True)
+r = client.get(f"/api/brands/{brand2['id']}")
+check("profilo applicato", "candele" in r.json()["description"].lower(), r.json()["description"][:60])
+r = client.post(
+    f"/api/brands/{brand2['id']}/extract-profile",
+    files=[("files", ("virus.exe", b"x", "application/octet-stream"))],
+)
+check("formato non supportato → 415", r.status_code == 415)
+client.delete(f"/api/brands/{brand2['id']}")
+
 # delete plan + brand
 r = client.delete(f"/api/plans/{plan_id}")
 check("delete plan", r.status_code == 204)

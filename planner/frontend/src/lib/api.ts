@@ -90,3 +90,17 @@ export function apiPut<T>(path: string, body?: unknown): Promise<T> {
 export function apiDelete<T = null>(path: string): Promise<T> {
   return request<T>("DELETE", path);
 }
+
+/** POST multipart (upload file). Il Content-Type lo imposta il browser. */
+export async function apiUpload<T>(
+  path: string,
+  formData: FormData,
+  params?: Record<string, unknown>
+): Promise<T> {
+  const res = await fetch(buildUrl(path, params), {
+    method: "POST",
+    headers: { Accept: "application/json" },
+    body: formData,
+  });
+  return handle<T>(res);
+}
