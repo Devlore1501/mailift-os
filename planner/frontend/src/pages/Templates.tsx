@@ -2,14 +2,24 @@ import { useEffect, useState } from "react";
 import {
   ExternalLink,
   Loader2,
+  Plus,
   RefreshCw,
   Search,
   SwatchBook,
+  Trash2,
+  Wand2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -20,12 +30,170 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/domain/EmptyState";
 import {
+  useCanvaSet,
+  useSaveCanvaSet,
   useSyncTemplates,
   useTemplateCategories,
   useTemplates,
 } from "@/lib/queries";
 
 const ALL_CATEGORIES = "__all__";
+
+interface RangeDraft {
+  category: string;
+  start: string;
+  end: string;
+}
+
+function CanvaSetCard() {
+  const { data: canvaSet, isLoading } = useCanvaSet();
+  const saveSet = useSaveCanvaSet();
+
+  const [fileUrl, setFileUrl] = useState("");
+  const [ranges, setRanges] = useState<RangeDraft[]>([]);
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    if (canvaSet && !initialized) {
+      setFileUrl(canvaSet.canva_file_url);
+      setRanges(
+        canvaSet.ranges.length > 0
+          ? canvaSet.ranges.map((r) => ({
+              category: r.category,
+              start: String(r.start),
+              end: String(r.end),
+            }))
+          : [{ category: "", start: "", end: "" }]
+      );
+      setInitialized(true);
+    }
+  }, [canvaSet, initialized]);
+
+  function updateRange(index: number, patch: Partial<RangeDraft>) {
+    setRanges((rows) =>
+      rows.map((row, i) => (i === index ? { ...row, ...patch } : row))
+    );
+  }
+
+  function handleSave() {
+    const payload = {
+      canva_file_url: fileUrl.trim(),
+      ranges: ranges
+        .filter((r) => r.category.trim() || r.start || r.end)
+        .map((r) => ({
+          category: r.category.trim(),
+          start: parseInt(r.start, 10) || 0,
+          end: parseInt(r.end, 10) || 0,
+        })),
+    };
+    saveSet.mutate(payload, {
+      onSuccess: (set) => {
+        toast.success(
+          `Libreria generata: ${set.template_count} template in ${set.ranges.length} categorie`
+        );
+      },
+      onError: (err) => toast.error(err.message),
+    });
+  }
+
+  if (isLoading) {
+    return <Skeleton className="h-48 w-full" />;
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>File Canva unico</CardTitle>
+        <CardDescription>
+          Un solo file Canva con i template numerati (una pagina per template).
+          Assegna le categorie per intervalli di numeri — es. 1–5 promo, 7–21
+          educative — come nella pagina Notion dell'agenzia: in base al tipo di
+          email il piano suggerirà il numero di template giusto.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="canva-file-url">Link del file Canva</Label>
+          <Input
+            id="canva-file-url"
+            placeholder="https://www.canva.com/design/…/edit"
+            value={fileUrl}
+            onChange={(e) => setFileUrl(e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Intervalli per categoria</Label>
+          <div className="space-y-2">
+            {ranges.map((row, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <Input
+                  className="flex-1"
+                  placeholder="Categoria (es. promo, educativa)"
+                  value={row.category}
+                  onChange={(e) => updateRange(i, { category: e.target.value })}
+                />
+                <Input
+                  className="w-24"
+                  type="number"
+                  min={1}
+                  placeholder="Da n."
+                  value={row.start}
+                  onChange={(e) => updateRange(i, { start: e.target.value })}
+                />
+                <Input
+                  className="w-24"
+                  type="number"
+                  min={1}
+                  placeholder="A n."
+                  value={row.end}
+                  onChange={(e) => updateRange(i, { end: e.target.value })}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Rimuovi intervallo"
+                  disabled={ranges.length === 1}
+                  onClick={() =>
+                    setRanges((rows) => rows.filter((_, j) => j !== i))
+                  }
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setRanges((rows) => [...rows, { category: "", start: "", end: "" }])
+            }
+          >
+            <Plus className="h-4 w-4" />
+            Aggiungi intervallo
+          </Button>
+        </div>
+
+        <div className="flex items-center justify-between pt-1">
+          <p className="text-xs text-muted-foreground">
+            {canvaSet && canvaSet.template_count > 0
+              ? `Libreria attuale dal set: ${canvaSet.template_count} template`
+              : "Nessun set applicato"}
+          </p>
+          <Button onClick={handleSave} disabled={saveSet.isPending}>
+            {saveSet.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Wand2 className="h-4 w-4" />
+            )}
+            {saveSet.isPending ? "Salvataggio…" : "Salva e genera libreria"}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export function Templates() {
   const [category, setCategory] = useState<string>(ALL_CATEGORIES);
@@ -72,10 +240,15 @@ export function Templates() {
             Template Canva
           </h1>
           <p className="text-sm text-muted-foreground">
-            Libreria letta dal database Notion dell'agenzia.
+            Libreria dei template: dal file Canva unico numerato, oppure dal
+            database Notion.
           </p>
         </div>
-        <Button onClick={handleSync} disabled={syncTemplates.isPending}>
+        <Button
+          variant="outline"
+          onClick={handleSync}
+          disabled={syncTemplates.isPending}
+        >
           {syncTemplates.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
@@ -86,6 +259,8 @@ export function Templates() {
             : "Sincronizza da Notion"}
         </Button>
       </div>
+
+      <CanvaSetCard />
 
       {/* Filtri */}
       <div className="flex flex-wrap items-center gap-3">
@@ -127,15 +302,7 @@ export function Templates() {
           description={
             search || effectiveCategory
               ? "Nessun template corrisponde ai filtri. Prova a cambiare ricerca o categoria."
-              : 'La libreria è vuota: premi "Sincronizza da Notion" per importare i template.'
-          }
-          action={
-            !search && !effectiveCategory ? (
-              <Button onClick={handleSync} disabled={syncTemplates.isPending}>
-                <RefreshCw className="h-4 w-4" />
-                Sincronizza da Notion
-              </Button>
-            ) : undefined
+              : "La libreria è vuota: configura il file Canva qui sopra, oppure sincronizza dal database Notion."
           }
         />
       ) : (

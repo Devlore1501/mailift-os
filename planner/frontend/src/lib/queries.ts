@@ -9,6 +9,8 @@ import type {
   BrandCreate,
   BrandSummary,
   BrandUpdate,
+  CanvaSet,
+  CanvaSetRange,
   ExtractedProfile,
   KlaviyoSnapshot,
   KlaviyoStatus,
@@ -49,6 +51,7 @@ export const keys = {
   templates: (category?: string, q?: string) =>
     ["templates", category ?? "", q ?? ""] as const,
   templateCategories: ["template-categories"] as const,
+  canvaSet: ["canva-set"] as const,
   plans: (brandId: number) => ["plans", brandId] as const,
   plan: (planId: number) => ["plan", planId] as const,
 };
@@ -373,6 +376,30 @@ export function useSyncTemplates() {
       qc.invalidateQueries({ queryKey: ["templates"] });
       qc.invalidateQueries({ queryKey: keys.templateCategories });
       qc.invalidateQueries({ queryKey: keys.notionSettings });
+      qc.invalidateQueries({ queryKey: keys.canvaSet });
+    },
+  });
+}
+
+export function useCanvaSet() {
+  return useQuery<CanvaSet>({
+    queryKey: keys.canvaSet,
+    queryFn: () => apiGet<CanvaSet>("/templates/set"),
+  });
+}
+
+export function useSaveCanvaSet() {
+  const qc = useQueryClient();
+  return useMutation<
+    CanvaSet,
+    ApiError,
+    { canva_file_url: string; ranges: CanvaSetRange[] }
+  >({
+    mutationFn: (payload) => apiPut<CanvaSet>("/templates/set", payload),
+    onSuccess: (set) => {
+      qc.setQueryData(keys.canvaSet, set);
+      qc.invalidateQueries({ queryKey: ["templates"] });
+      qc.invalidateQueries({ queryKey: keys.templateCategories });
     },
   });
 }

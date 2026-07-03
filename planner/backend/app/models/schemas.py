@@ -176,6 +176,23 @@ class TemplateOut(BaseModel):
     tags: list
 
 
+class CanvaSetRange(BaseModel):
+    category: str
+    start: int
+    end: int
+
+
+class CanvaSetIn(BaseModel):
+    canva_file_url: str
+    ranges: list[CanvaSetRange]
+
+
+class CanvaSetOut(BaseModel):
+    canva_file_url: str = ""
+    ranges: list[CanvaSetRange] = []
+    template_count: int = 0
+
+
 class PlanGenerateIn(BaseModel):
     month_start: str  # primo giorno del mese, YYYY-MM-01
     num_emails: int | None = None

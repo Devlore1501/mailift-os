@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 
 from ..db import get_db
 from ..models.db_models import Template
-from ..models.schemas import TemplateOut
+from ..models.schemas import CanvaSetIn, CanvaSetOut, TemplateOut
+from ..services.canva_set import CanvaSetInvalid, apply_set, get_config
 from ..services.notion_api import NotionAPIError, NotionNotConfigured, sync_templates
 
 router = APIRouter(prefix="/api/templates", tags=["templates"])
@@ -21,7 +22,9 @@ def list_templates(
         query = query.filter(Template.category == category.lower())
     if q:
         query = query.filter(Template.name.ilike(f"%{q}%"))
-    return query.order_by(Template.category, Template.name).all()
+    # id segue l'ordine di inserimento: per il set Canva è l'ordine numerico
+    # dei template, per la sync Notion l'ordine del database.
+    return query.order_by(Template.category, Template.id).all()
 
 
 @router.get("/categories")
@@ -41,3 +44,18 @@ def sync(db: Session = Depends(get_db)):
         return sync_templates(db)
     except (NotionNotConfigured, NotionAPIError) as e:
         raise HTTPException(502, str(e))
+
+
+@router.get("/set", response_model=CanvaSetOut)
+def get_canva_set(db: Session = Depends(get_db)):
+    return get_config(db)
+
+
+@router.put("/set", response_model=CanvaSetOut)
+def save_canva_set(payload: CanvaSetIn, db: Session = Depends(get_db)):
+    try:
+        return apply_set(
+            db, payload.canva_file_url, [r.model_dump() for r in payload.ranges]
+        )
+    except CanvaSetInvalid as e:
+        raise HTTPException(422, str(e))

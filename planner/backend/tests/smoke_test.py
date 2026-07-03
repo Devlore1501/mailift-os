@@ -239,6 +239,64 @@ r = client.post(
 check("formato non supportato → 415", r.status_code == 415)
 client.delete(f"/api/brands/{brand2['id']}")
 
+# set di template Canva (file unico numerato)
+r = client.get("/api/templates/set")
+check("canva set vuoto", r.status_code == 200 and r.json()["canva_file_url"] == "")
+
+set_payload = {
+    "canva_file_url": "https://www.canva.com/design/TESTFILE/edit",
+    "ranges": [
+        {"category": "Promo", "start": 1, "end": 5},
+        {"category": "educativa", "start": 7, "end": 21},
+    ],
+}
+r = client.put("/api/templates/set", json=set_payload)
+check(
+    "canva set apply",
+    r.status_code == 200 and r.json()["template_count"] == 20,
+    str(r.json()),
+)
+
+r = client.get("/api/templates", params={"category": "educativa"})
+check(
+    "canva set espanso per categoria",
+    r.status_code == 200
+    and len(r.json()) == 15
+    and r.json()[0]["canva_url"] == set_payload["canva_file_url"],
+    str(len(r.json())),
+)
+
+r = client.get("/api/templates/set")
+check(
+    "canva set persistito",
+    r.json()["canva_file_url"] == set_payload["canva_file_url"]
+    and r.json()["template_count"] == 20,
+    str(r.json()),
+)
+
+r = client.put(
+    "/api/templates/set",
+    json={
+        "canva_file_url": "https://www.canva.com/design/TESTFILE/edit",
+        "ranges": [
+            {"category": "promo", "start": 1, "end": 5},
+            {"category": "educativa", "start": 5, "end": 10},
+        ],
+    },
+)
+check("canva set sovrapposto → 422", r.status_code == 422, str(r.status_code))
+
+r = client.put("/api/templates/set", json={"canva_file_url": "", "ranges": []})
+check("canva set senza url → 422", r.status_code == 422)
+
+# la sync mock rimpiazza la libreria (una sorgente attiva alla volta)
+r = client.post("/api/templates/sync")
+check(
+    "sync rimpiazza il set",
+    r.status_code == 200
+    and client.get("/api/templates/set").json()["template_count"] == 0,
+)
+
 # delete plan + brand
 r = client.delete(f"/api/plans/{plan_id}")
 check("delete plan", r.status_code == 204)

@@ -237,3 +237,22 @@ Categorie note (aperte, non enum rigido): `promo`, `newsletter`, `lancio prodott
   max 20MB) → profilo estratto {description, tone_of_voice, mission, positioning,
   avatar, products[], extraction_notes, applied, products_created}. Con apply=true
   compila i campi vuoti del brand e crea i prodotti trovati.
+
+## Aggiornamenti v1.2 (set di template Canva a file unico)
+
+Flusso reale dell'agenzia: UN solo file Canva editabile con i template numerati
+(una pagina per template) e categorie assegnate per intervalli di numeri
+(es. 1–5 promo, 7–21 educative, come nel documento Notion). Il backend espande
+gli intervalli in righe `Template` normali ("Template 3", categoria, link al
+file), così matching, card email e pubblicazione restano invariati.
+
+- `GET /api/templates/set` →
+  `{"canva_file_url": "https://www.canva.com/design/…/edit",
+    "ranges": [{"category": "promo", "start": 1, "end": 5}, …],
+    "template_count": 20}` (vuoto se mai configurato)
+- `PUT /api/templates/set` — body `{canva_file_url, ranges: [{category, start, end}]}`
+  → come GET. Valida (url presente, 1 ≤ da ≤ a, niente sovrapposizioni → 422) e
+  RIMPIAZZA l'intera libreria template (una sorgente attiva alla volta: anche
+  `POST /templates/sync` da Notion rimpiazza tutto, incluso il set).
+- I template generati hanno `notion_page_id = "canva-set-NNNN"`, `name = "Template N"`,
+  tag `n.N` e `canva_url` = link del file (unico per tutti).

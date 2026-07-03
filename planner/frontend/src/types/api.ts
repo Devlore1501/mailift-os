@@ -213,6 +213,18 @@ export interface TemplatesSyncResult {
   categories: number;
 }
 
+export interface CanvaSetRange {
+  category: string;
+  start: number;
+  end: number;
+}
+
+export interface CanvaSet {
+  canva_file_url: string;
+  ranges: CanvaSetRange[];
+  template_count: number;
+}
+
 // -------------------- Piani editoriali
 
 export type EmailObjective = "nurturing" | "promo" | "storytelling" | "vendita";

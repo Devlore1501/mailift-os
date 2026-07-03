@@ -42,7 +42,13 @@ pubblicazione del calendario approvato su Notion.
 8. **Card email**: giorno+orario, obiettivo (badge), tema/angolo, segmento+rationale,
    2-3 oggetti A/B, preview, corpo completo, prodotti/offerta, template Canva con link.
    Modifica inline + rigenerazione singola con istruzioni
-9. **Template Canva**: sync dal DB Notion (mapping tollerante delle proprietà), libreria con filtri
+9. **Template Canva**: due sorgenti (una attiva alla volta, ogni import rimpiazza la libreria):
+   a) **set a file unico** — il flusso reale di Lorenzo: UN file Canva editabile con template
+   numerati (una pagina per template) + intervalli per categoria (es. 1–5 promo, 7–21 educative,
+   dal documento Notion dell'agenzia). Card "File Canva unico" nella pagina Template →
+   `GET/PUT /api/templates/set`, espande gli intervalli in righe Template
+   (`notion_page_id="canva-set-NNNN"`, name="Template N"); b) sync dal DB Notion
+   (mapping tollerante delle proprietà). Libreria con filtri
 10. **Approvazione → pubblicazione Notion**: database calendario con pagina per email
 11. **Mock mode completo** senza ANTHROPIC_API_KEY (demo deterministica di tutto)
 12. **UI "studio editoriale"**: sidebar scura a inchiostro + canvas carta, Fraunces (titoli) +

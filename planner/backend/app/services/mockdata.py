@@ -127,8 +127,12 @@ def mock_plan(context: dict) -> dict:
         prod = best or (products[i % len(products)] if products else None)
         offer = offers[0] if (offers and objective in ("promo", "vendita")) else None
 
+        # match per categoria; se la libreria usa categorie diverse (es. set
+        # Canva con "educativa") ruota comunque sui template disponibili
         wanted_cat = _TEMPLATE_BY_OBJECTIVE[objective]
-        tpl = next((t for t in templates if t.get("category") == wanted_cat), None)
+        tpl = next((t for t in templates if t.get("category") == wanted_cat), None) or (
+            templates[i % len(templates)] if templates else None
+        )
 
         first_line = f"Ciao {{{{ first_name|default:'' }}}},"
         product_name = prod["name"] if prod else "il nostro prodotto di punta"
