@@ -52,87 +52,98 @@ def get_account(api_key: str) -> dict:
     }
 
 
-def _list_segments_paginated(api_key: str, extra_params: dict | None) -> list[dict]:
-    out: list[dict] = []
-    # alcuni account limitano page[size] a 10: si pagina seguendo links.next
-    params: dict | None = {"page[size]": 10, **(extra_params or {})}
-    url_path = "/segments/"
-    while True:
-        data = _get(api_key, url_path, params)
-        for seg in data.get("data", []):
-            attrs = seg.get("attributes", {})
-            out.append(
-                {
-                    "klaviyo_id": seg.get("id"),
-                    "name": attrs.get("name", ""),
-                    "profile_count": attrs.get("profile_count"),
-                }
-            )
-        next_url = (data.get("links") or {}).get("next")
-        if not next_url or len(out) >= 200:
-            break
-        # links.next è un URL assoluto: estraiamo il path+query
-        url_path = next_url.replace(BASE_URL, "")
-        params = None
-    return out
+def _paginate(
+    api_key: str,
+    path: str,
+    param_attempts: list[dict],
+    cap: int,
+) -> tuple[list[dict], dict]:
+    """Fetch tollerante: prova le combinazioni di parametri in ordine (dalla
+    più ricca alla minima) e usa la prima che l'API accetta — ogni account
+    Klaviyo espone limiti diversi su page[size], additional-fields, sort e
+    filtri. Poi segue links.next fino al cap.
+
+    Ritorna (risorse JSON:API grezze, parametri effettivamente usati).
+    """
+    last_err: KlaviyoError | None = None
+    for params in param_attempts:
+        try:
+            first = _get(api_key, path, params or None)
+        except KlaviyoError as e:
+            if "Klaviyo 400" in str(e):
+                last_err = e
+                continue  # input non valido per questo account: prova la variante dopo
+            raise
+        out = list(first.get("data", []))
+        next_url = (first.get("links") or {}).get("next")
+        while next_url and len(out) < cap:
+            data = _get(api_key, next_url.replace(BASE_URL, ""), None)
+            out.extend(data.get("data", []))
+            next_url = (data.get("links") or {}).get("next")
+        return out[:cap], params
+    raise last_err or KlaviyoError(f"Nessuna variante di richiesta accettata per {path}")
 
 
 def list_segments(api_key: str) -> list[dict]:
-    # profile_count sulla lista non è supportato da tutte le revision/account:
-    # prova, e in caso di 400 rileggi senza e recupera i conteggi per-segmento.
-    try:
-        return _list_segments_paginated(
-            api_key, {"additional-fields[segment]": "profile_count"}
-        )
-    except KlaviyoError as e:
-        if "400" not in str(e):
-            raise
-    segments = _list_segments_paginated(api_key, None)
-    for seg in segments[:30]:  # cap per non esaurire i rate limit
-        try:
-            data = _get(
-                api_key,
-                f"/segments/{seg['klaviyo_id']}/",
-                {"additional-fields[segment]": "profile_count"},
-            )
-            attrs = (data.get("data") or {}).get("attributes", {})
-            seg["profile_count"] = attrs.get("profile_count")
-        except KlaviyoError:
-            pass  # il conteggio resta None, il resto dello snapshot è valido
+    attempts = [
+        {"page[size]": 10, "additional-fields[segment]": "profile_count"},
+        {"additional-fields[segment]": "profile_count"},
+        {"page[size]": 10},
+        {},
+    ]
+    raw, used = _paginate(api_key, "/segments/", attempts, cap=200)
+    segments = [
+        {
+            "klaviyo_id": seg.get("id"),
+            "name": (seg.get("attributes") or {}).get("name", ""),
+            "profile_count": (seg.get("attributes") or {}).get("profile_count"),
+        }
+        for seg in raw
+    ]
+    # Se la lista non includeva i conteggi, recuperali per-segmento (best effort)
+    if "additional-fields[segment]" not in used:
+        for seg in segments[:30]:  # cap per non esaurire i rate limit
+            try:
+                data = _get(
+                    api_key,
+                    f"/segments/{seg['klaviyo_id']}/",
+                    {"additional-fields[segment]": "profile_count"},
+                )
+                attrs = (data.get("data") or {}).get("attributes", {})
+                seg["profile_count"] = attrs.get("profile_count")
+            except KlaviyoError:
+                pass  # il conteggio resta None, il resto dello snapshot è valido
     return segments
 
 
 def list_recent_campaigns(api_key: str, days_back: int = 60) -> list[dict]:
-    since = (datetime.now(timezone.utc) - timedelta(days=days_back)).strftime(
-        "%Y-%m-%dT%H:%M:%SZ"
-    )
-    params: dict | None = {
-        "filter": (
-            f"and(equals(messages.channel,'email'),"
-            f"greater-than(scheduled_at,{since}))"
-        ),
-        "sort": "-scheduled_at",
-        "page[size]": 10,
-    }
-    out: list[dict] = []
-    url_path = "/campaigns/"
-    while True:
-        data = _get(api_key, url_path, params)
-        for c in data.get("data", []):
-            attrs = c.get("attributes", {})
-            out.append(
-                {
-                    "klaviyo_id": c.get("id"),
-                    "name": attrs.get("name", ""),
-                    "sent_at": attrs.get("send_time") or attrs.get("scheduled_at"),
-                    "status": attrs.get("status", ""),
-                }
-            )
-        next_url = (data.get("links") or {}).get("next")
-        if not next_url or len(out) >= 25:
-            break
-        url_path = next_url.replace(BASE_URL, "")
-        params = None
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days_back)
+    since = cutoff.strftime("%Y-%m-%dT%H:%M:%SZ")
+    channel = "equals(messages.channel,'email')"
+    dated = f"and({channel},greater-than(scheduled_at,{since}))"
+    # il filtro sul canale è obbligatorio per l'endpoint campaigns
+    attempts = [
+        {"filter": dated, "sort": "-scheduled_at"},
+        {"filter": dated},
+        {"filter": channel, "sort": "-scheduled_at"},
+        {"filter": channel},
+    ]
+    raw, used = _paginate(api_key, "/campaigns/", attempts, cap=100)
+    out = []
+    for c in raw:
+        attrs = c.get("attributes", {})
+        out.append(
+            {
+                "klaviyo_id": c.get("id"),
+                "name": attrs.get("name", ""),
+                "sent_at": attrs.get("send_time") or attrs.get("scheduled_at"),
+                "status": attrs.get("status", ""),
+            }
+        )
+    # Se l'API non ha accettato il filtro per data, filtra e ordina lato client
+    if "greater-than" not in (used.get("filter") or ""):
+        out = [c for c in out if _within_days(c.get("sent_at"), days_back)] or out
+    out.sort(key=lambda c: c.get("sent_at") or "", reverse=True)
     return out[:25]
 
 
