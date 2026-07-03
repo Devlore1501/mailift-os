@@ -42,6 +42,12 @@ case "$mode" in
     backend) start_backend ;;
     frontend) start_frontend ;;
     all)
+        # chiudi eventuali istanze precedenti rimaste appese (porte occupate)
+        pkill -f "uvicorn app.main:app" 2>/dev/null || true
+        pkill -f "$FRONTEND_DIR/node_modules/.bin/vite" 2>/dev/null || true
+        pkill -f "vite" 2>/dev/null || true
+        sleep 1
+
         pids=()
         cleanup() {
             echo ""
@@ -63,7 +69,8 @@ case "$mode" in
         (cd "$FRONTEND_DIR" && npm run dev) \
             > >(sed 's/^/[frontend] /') 2> >(sed 's/^/[frontend] /' >&2) &
         pids+=("$!")
-        wait -n
+        # 'wait -n' non esiste nella bash 3.2 di macOS: attendi entrambi
+        wait
         cleanup
         ;;
     *)
