@@ -54,7 +54,8 @@ def get_account(api_key: str) -> dict:
 
 def _list_segments_paginated(api_key: str, extra_params: dict | None) -> list[dict]:
     out: list[dict] = []
-    params: dict | None = {"page[size]": 50, **(extra_params or {})}
+    # alcuni account limitano page[size] a 10: si pagina seguendo links.next
+    params: dict | None = {"page[size]": 10, **(extra_params or {})}
     url_path = "/segments/"
     while True:
         data = _get(api_key, url_path, params)
@@ -105,27 +106,34 @@ def list_recent_campaigns(api_key: str, days_back: int = 60) -> list[dict]:
     since = (datetime.now(timezone.utc) - timedelta(days=days_back)).strftime(
         "%Y-%m-%dT%H:%M:%SZ"
     )
-    params = {
+    params: dict | None = {
         "filter": (
             f"and(equals(messages.channel,'email'),"
             f"greater-than(scheduled_at,{since}))"
         ),
         "sort": "-scheduled_at",
-        "page[size]": 25,
+        "page[size]": 10,
     }
-    data = _get(api_key, "/campaigns/", params)
-    out = []
-    for c in data.get("data", []):
-        attrs = c.get("attributes", {})
-        out.append(
-            {
-                "klaviyo_id": c.get("id"),
-                "name": attrs.get("name", ""),
-                "sent_at": attrs.get("send_time") or attrs.get("scheduled_at"),
-                "status": attrs.get("status", ""),
-            }
-        )
-    return out
+    out: list[dict] = []
+    url_path = "/campaigns/"
+    while True:
+        data = _get(api_key, url_path, params)
+        for c in data.get("data", []):
+            attrs = c.get("attributes", {})
+            out.append(
+                {
+                    "klaviyo_id": c.get("id"),
+                    "name": attrs.get("name", ""),
+                    "sent_at": attrs.get("send_time") or attrs.get("scheduled_at"),
+                    "status": attrs.get("status", ""),
+                }
+            )
+        next_url = (data.get("links") or {}).get("next")
+        if not next_url or len(out) >= 25:
+            break
+        url_path = next_url.replace(BASE_URL, "")
+        params = None
+    return out[:25]
 
 
 def campaign_metrics(api_key: str, campaign_ids: list[str]) -> dict[str, dict]:
