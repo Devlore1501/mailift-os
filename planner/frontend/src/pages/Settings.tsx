@@ -99,7 +99,7 @@ export function Settings() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Impostazioni</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Impostazioni</h1>
         <p className="text-sm text-muted-foreground">
           Configurazione a livello agenzia (valida per tutti i brand).
         </p>

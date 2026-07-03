@@ -17,10 +17,10 @@ export function TopBar({ brandId }: TopBarProps) {
   const { data: system } = useSystemStatus();
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border/60 bg-background/80 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex min-w-0 flex-1 items-center gap-3">
-        <span className="hidden text-sm font-medium text-muted-foreground sm:block">
-          Agenzia
+        <span className="hidden text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:block">
+          Agenzia Mailift
         </span>
       </div>
 

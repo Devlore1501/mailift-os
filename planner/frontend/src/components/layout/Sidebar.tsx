@@ -10,7 +10,6 @@ import {
   UserRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
 import { useBrand } from "@/lib/queries";
 
 interface SidebarProps {
@@ -35,16 +34,41 @@ function NavItem({
       end={end}
       className={({ isActive }) =>
         cn(
-          "flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors",
-          "hover:bg-accent hover:text-accent-foreground",
+          "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+          isActive
+            ? "bg-sidebar-accent text-sidebar-foreground"
+            : "text-sidebar-muted hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
         )
       }
     >
-      <Icon className="h-4 w-4 shrink-0" />
-      <span className="truncate">{label}</span>
+      {({ isActive }) => (
+        <>
+          <span
+            aria-hidden
+            className={cn(
+              "absolute left-0 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-amber-400 transition-opacity duration-200",
+              isActive ? "opacity-100" : "opacity-0"
+            )}
+          />
+          <Icon
+            className={cn(
+              "h-4 w-4 shrink-0 transition-colors",
+              isActive ? "text-amber-400" : "text-sidebar-muted group-hover:text-sidebar-foreground"
+            )}
+          />
+          <span className="truncate">{label}</span>
+        </>
+      )}
     </NavLink>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="px-3 pb-1.5 pt-5 text-[10px] font-semibold uppercase tracking-[0.14em] text-sidebar-muted/80">
+      {children}
+    </div>
   );
 }
 
@@ -54,36 +78,34 @@ export function Sidebar({ brandId, className }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "flex h-screen w-[240px] flex-col border-r border-border bg-card/50",
+        "flex h-screen w-[248px] flex-col bg-sidebar text-sidebar-foreground",
         className
       )}
       aria-label="Navigazione principale"
     >
-      {/* Logo */}
-      <div className="flex h-14 items-center gap-2 px-3">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-          <Mail className="h-4 w-4" />
+      {/* Brand mark */}
+      <div className="flex h-16 items-center gap-2.5 px-4">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-amber-400 shadow-lg shadow-indigo-950/40">
+          <Mail className="h-4 w-4 text-white" />
         </div>
         <div className="flex min-w-0 flex-col leading-tight">
-          <span className="truncate text-sm font-semibold">
+          <span className="truncate font-display text-[15px] font-semibold tracking-tight">
             Mailift Planner
           </span>
-          <span className="truncate text-[10px] uppercase tracking-wide text-muted-foreground">
-            Email marketing
+          <span className="truncate text-[10px] uppercase tracking-[0.18em] text-sidebar-muted">
+            Email studio
           </span>
         </div>
       </div>
-      <Separator />
 
       {/* Nav */}
-      <nav className="flex-1 space-y-0.5 px-2 py-3">
+      <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-2">
+        <SectionLabel>Agenzia</SectionLabel>
         <NavItem to="/" label="Dashboard" icon={Home} end />
 
         {brandId != null && (
           <>
-            <div className="px-2 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              {brand?.name ?? "Brand"}
-            </div>
+            <SectionLabel>{brand?.name ?? "Brand"}</SectionLabel>
             <NavItem
               to={`/brands/${brandId}/plans`}
               label="Piani"
@@ -108,8 +130,7 @@ export function Sidebar({ brandId, className }: SidebarProps) {
         )}
       </nav>
 
-      <Separator />
-      <div className="space-y-0.5 px-2 py-3">
+      <div className="space-y-0.5 border-t border-sidebar-border px-3 py-3">
         <NavItem to="/templates" label="Template" icon={SwatchBook} />
         <NavItem to="/settings" label="Impostazioni" icon={Settings} />
       </div>

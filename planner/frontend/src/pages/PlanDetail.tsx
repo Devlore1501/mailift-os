@@ -67,12 +67,18 @@ function BalanceIndicator({ plan }: { plan: PlanDetailType }) {
   const contentPct = total > 0 ? Math.round((content / total) * 100) : 0;
 
   return (
-    <div className="w-full max-w-xs space-y-1.5">
-      <div className="flex items-center justify-between text-xs">
-        <span className="font-medium">
-          Bilanciamento 80/20 · {content} contenuto / {promo} promo
+    <div className="w-full max-w-sm space-y-1.5">
+      <div className="flex items-center justify-between gap-3 whitespace-nowrap text-xs">
+        <span className="font-semibold uppercase tracking-wide text-muted-foreground">
+          Bilanciamento 80/20
         </span>
-        <span className="text-muted-foreground">{contentPct}% contenuto</span>
+        <span className="tabular-nums">
+          <span className="font-semibold text-primary">
+            {content} contenuto
+          </span>
+          <span className="text-muted-foreground"> · </span>
+          <span className="font-semibold text-amber-600">{promo} promo</span>
+        </span>
       </div>
       <Progress value={contentPct} className="h-2" />
     </div>
@@ -207,7 +213,7 @@ export function PlanDetail() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-semibold tracking-tight">
+              <h1 className="font-display text-2xl font-semibold tracking-tight">
                 Settimana del {formatDate(plan.week_start)}
               </h1>
               <PlanStatusBadge status={plan.status} />

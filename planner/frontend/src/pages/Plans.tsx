@@ -90,7 +90,7 @@ export function Plans() {
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-2xl font-semibold tracking-tight">
             Piani editoriali
           </h1>
           <p className="text-sm text-muted-foreground">

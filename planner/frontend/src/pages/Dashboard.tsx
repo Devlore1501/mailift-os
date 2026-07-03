@@ -28,14 +28,31 @@ import { setLastBrandId } from "@/lib/brand";
 import { formatDate } from "@/lib/utils";
 import type { BrandSummary } from "@/types/api";
 
+/* Gradiente deterministico per l'avatar del brand */
+const AVATAR_GRADIENTS = [
+  "from-indigo-500 to-violet-600",
+  "from-amber-500 to-orange-600",
+  "from-emerald-500 to-teal-600",
+  "from-rose-500 to-pink-600",
+  "from-sky-500 to-blue-600",
+  "from-fuchsia-500 to-purple-600",
+];
+
+function brandInitials(name: string): string {
+  const words = name.trim().split(/\s+/);
+  return (words.length >= 2 ? words[0][0] + words[1][0] : name.slice(0, 2))
+    .toUpperCase();
+}
+
 function BrandCard({ brand }: { brand: BrandSummary }) {
   const navigate = useNavigate();
+  const gradient = AVATAR_GRADIENTS[brand.id % AVATAR_GRADIENTS.length];
 
   return (
     <Card
       role="button"
       tabIndex={0}
-      className="cursor-pointer transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="card-lift group cursor-pointer overflow-hidden border-border/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       onClick={() => {
         setLastBrandId(brand.id);
         navigate(`/brands/${brand.id}/plans`);
@@ -49,7 +66,22 @@ function BrandCard({ brand }: { brand: BrandSummary }) {
     >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-base">{brand.name}</CardTitle>
+          <div className="flex items-center gap-3">
+            <div
+              aria-hidden
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} font-display text-sm font-semibold text-white shadow-sm`}
+            >
+              {brandInitials(brand.name)}
+            </div>
+            <div>
+              <CardTitle className="font-display text-base tracking-tight transition-colors group-hover:text-primary">
+                {brand.name}
+              </CardTitle>
+              <p className="line-clamp-1 text-xs text-muted-foreground">
+                {brand.positioning || "Nessun positioning definito"}
+              </p>
+            </div>
+          </div>
           {brand.klaviyo_configured ? (
             <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
               <CheckCircle2 className="h-3 w-3" />
@@ -62,20 +94,27 @@ function BrandCard({ brand }: { brand: BrandSummary }) {
             </span>
           )}
         </div>
-        <p className="line-clamp-2 min-h-[2rem] text-xs text-muted-foreground">
-          {brand.positioning || "Nessun positioning definito"}
-        </p>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            <Package className="h-3.5 w-3.5" />
-            {brand.num_products} prodotti
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <Tag className="h-3.5 w-3.5" />
-            {brand.num_active_offers} offerte attive
-          </span>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-lg bg-muted/60 px-3 py-2">
+            <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+              <Package className="h-3 w-3" />
+              Prodotti
+            </div>
+            <div className="mt-0.5 text-sm font-semibold tabular-nums">
+              {brand.num_products}
+            </div>
+          </div>
+          <div className="rounded-lg bg-muted/60 px-3 py-2">
+            <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+              <Tag className="h-3 w-3" />
+              Offerte attive
+            </div>
+            <div className="mt-0.5 text-sm font-semibold tabular-nums">
+              {brand.num_active_offers}
+            </div>
+          </div>
         </div>
         <div className="flex items-center justify-between border-t border-border/60 pt-3">
           <span className="text-xs text-muted-foreground">
@@ -133,11 +172,17 @@ export function Dashboard() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">
-            Tutti i brand gestiti dall'agenzia
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+            I tuoi clienti
+          </p>
+          <h1 className="font-display mt-1 text-3xl font-semibold tracking-tight">
+            Il piano della settimana,{" "}
+            <em className="text-primary">per ogni brand</em>
+          </h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            Scegli un workspace o creane uno nuovo per iniziare a pianificare.
           </p>
         </div>
         <Button size="lg" onClick={() => setDialogOpen(true)}>

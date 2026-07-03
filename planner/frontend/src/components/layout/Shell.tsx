@@ -32,7 +32,7 @@ export function Shell() {
         <Sidebar brandId={brandId} />
         <div className="flex min-w-0 flex-1 flex-col">
           <TopBar brandId={brandId} />
-          <main className="flex-1 overflow-auto px-6 py-6">
+          <main className="flex-1 overflow-auto px-6 py-8 lg:px-10">
             <Outlet />
           </main>
         </div>
