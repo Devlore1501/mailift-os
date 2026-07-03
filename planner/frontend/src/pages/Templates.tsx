@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import {
   ExternalLink,
+  Image as ImageIcon,
   Loader2,
-  Plus,
   RefreshCw,
   Search,
   SwatchBook,
-  Trash2,
   Wand2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -20,6 +19,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -32,6 +32,7 @@ import { EmptyState } from "@/components/domain/EmptyState";
 import {
   useCanvaSet,
   useSaveCanvaSet,
+  useUploadPreviews,
   useSyncTemplates,
   useTemplateCategories,
   useTemplates,
@@ -39,57 +40,75 @@ import {
 
 const ALL_CATEGORIES = "__all__";
 
-interface RangeDraft {
-  category: string;
-  start: string;
-  end: string;
+const ENTRIES_PLACEHOLDER = `About x3
+Before & After x3
+Flash Sale x3
+FAQ x3
+How-to? x3
+…incolla qui l'elenco dalla pagina Notion (una riga per tipo)`;
+
+/** Parsa "Nome x3" per la preview locale (il backend riparsa comunque). */
+function parseEntriesPreview(text: string): { types: number; total: number } {
+  let types = 0;
+  let total = 0;
+  for (const raw of text.split("\n")) {
+    const line = raw.trim().replace(/^[-•*]\s*/, "");
+    if (!line || line.startsWith("#")) continue;
+    const m = line.match(/[xX×]\s*(\d*)\s*$/);
+    types += 1;
+    total += m && m[1] ? parseInt(m[1], 10) : 3;
+  }
+  return { types, total };
 }
 
 function CanvaSetCard() {
   const { data: canvaSet, isLoading } = useCanvaSet();
   const saveSet = useSaveCanvaSet();
+  const uploadPreviews = useUploadPreviews();
 
   const [fileUrl, setFileUrl] = useState("");
-  const [ranges, setRanges] = useState<RangeDraft[]>([]);
+  const [entriesText, setEntriesText] = useState("");
+  const [previewFiles, setPreviewFiles] = useState<File[]>([]);
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     if (canvaSet && !initialized) {
       setFileUrl(canvaSet.canva_file_url);
-      setRanges(
-        canvaSet.ranges.length > 0
-          ? canvaSet.ranges.map((r) => ({
-              category: r.category,
-              start: String(r.start),
-              end: String(r.end),
-            }))
-          : [{ category: "", start: "", end: "" }]
-      );
+      if (canvaSet.entries.length > 0) {
+        setEntriesText(
+          canvaSet.entries.map((e) => `${e.name} x${e.count}`).join("\n")
+        );
+      }
       setInitialized(true);
     }
   }, [canvaSet, initialized]);
 
-  function updateRange(index: number, patch: Partial<RangeDraft>) {
-    setRanges((rows) =>
-      rows.map((row, i) => (i === index ? { ...row, ...patch } : row))
+  const parsed = parseEntriesPreview(entriesText);
+
+  function handleSave() {
+    saveSet.mutate(
+      { canva_file_url: fileUrl.trim(), entries_text: entriesText },
+      {
+        onSuccess: (set) => {
+          toast.success(
+            `Libreria generata: ${set.template_count} template in ${set.categories.length} categorie (assegnate automaticamente)`
+          );
+        },
+        onError: (err) => toast.error(err.message),
+      }
     );
   }
 
-  function handleSave() {
-    const payload = {
-      canva_file_url: fileUrl.trim(),
-      ranges: ranges
-        .filter((r) => r.category.trim() || r.start || r.end)
-        .map((r) => ({
-          category: r.category.trim(),
-          start: parseInt(r.start, 10) || 0,
-          end: parseInt(r.end, 10) || 0,
-        })),
-    };
-    saveSet.mutate(payload, {
-      onSuccess: (set) => {
+  function handleUploadPreviews() {
+    if (previewFiles.length === 0) {
+      toast.error("Seleziona le immagini esportate da Canva (o uno zip)");
+      return;
+    }
+    uploadPreviews.mutate(previewFiles, {
+      onSuccess: (res) => {
+        setPreviewFiles([]);
         toast.success(
-          `Libreria generata: ${set.template_count} template in ${set.ranges.length} categorie`
+          `${res.saved} anteprime caricate, ${res.matched} template abbinati`
         );
       },
       onError: (err) => toast.error(err.message),
@@ -103,83 +122,48 @@ function CanvaSetCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>File Canva unico</CardTitle>
+        <CardTitle>Set template Canva</CardTitle>
         <CardDescription>
-          Un solo file Canva con i template numerati (una pagina per template).
-          Assegna le categorie per intervalli di numeri — es. 1–5 promo, 7–21
-          educative — come nella pagina Notion dell'agenzia: in base al tipo di
-          email il piano suggerirà il numero di template giusto.
+          Incolla l'elenco dei tipi dalla pagina Notion (es. "About x3"): la
+          libreria si genera da sola, con le categorie assegnate
+          automaticamente e il link che apre il file Canva direttamente sulla
+          pagina giusta.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="canva-file-url">Link del file Canva</Label>
+          <Label htmlFor="canva-file-url">Link del file Canva (opzionale)</Label>
           <Input
             id="canva-file-url"
             placeholder="https://www.canva.com/design/…/edit"
             value={fileUrl}
             onChange={(e) => setFileUrl(e.target.value)}
           />
+          <p className="text-xs text-muted-foreground">
+            Le pagine del file devono seguire l'ordine dell'elenco: il
+            template n. 12 aprirà …/edit#12.
+          </p>
         </div>
 
         <div className="space-y-2">
-          <Label>Intervalli per categoria</Label>
-          <div className="space-y-2">
-            {ranges.map((row, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <Input
-                  className="flex-1"
-                  placeholder="Categoria (es. promo, educativa)"
-                  value={row.category}
-                  onChange={(e) => updateRange(i, { category: e.target.value })}
-                />
-                <Input
-                  className="w-24"
-                  type="number"
-                  min={1}
-                  placeholder="Da n."
-                  value={row.start}
-                  onChange={(e) => updateRange(i, { start: e.target.value })}
-                />
-                <Input
-                  className="w-24"
-                  type="number"
-                  min={1}
-                  placeholder="A n."
-                  value={row.end}
-                  onChange={(e) => updateRange(i, { end: e.target.value })}
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Rimuovi intervallo"
-                  disabled={ranges.length === 1}
-                  onClick={() =>
-                    setRanges((rows) => rows.filter((_, j) => j !== i))
-                  }
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              setRanges((rows) => [...rows, { category: "", start: "", end: "" }])
-            }
-          >
-            <Plus className="h-4 w-4" />
-            Aggiungi intervallo
-          </Button>
+          <Label htmlFor="entries-text">Elenco tipi (uno per riga)</Label>
+          <Textarea
+            id="entries-text"
+            rows={8}
+            className="font-mono text-xs"
+            placeholder={ENTRIES_PLACEHOLDER}
+            value={entriesText}
+            onChange={(e) => setEntriesText(e.target.value)}
+          />
         </div>
 
         <div className="flex items-center justify-between pt-1">
           <p className="text-xs text-muted-foreground">
-            {canvaSet && canvaSet.template_count > 0
-              ? `Libreria attuale dal set: ${canvaSet.template_count} template`
-              : "Nessun set applicato"}
+            {entriesText.trim()
+              ? `Nell'elenco: ${parsed.types} tipi → ${parsed.total} template`
+              : canvaSet && canvaSet.template_count > 0
+                ? `Libreria attuale dal set: ${canvaSet.template_count} template`
+                : "Nessun set applicato"}
           </p>
           <Button onClick={handleSave} disabled={saveSet.isPending}>
             {saveSet.isPending ? (
@@ -189,6 +173,40 @@ function CanvaSetCard() {
             )}
             {saveSet.isPending ? "Salvataggio…" : "Salva e genera libreria"}
           </Button>
+        </div>
+
+        <div className="space-y-2 rounded-lg border border-dashed border-border p-3">
+          <Label htmlFor="preview-files" className="flex items-center gap-2">
+            <ImageIcon className="h-4 w-4 text-muted-foreground" />
+            Anteprime dei template
+          </Label>
+          <p className="text-xs text-muted-foreground">
+            Da Canva: Condividi → Scarica → PNG (tutte le pagine). Carica qui
+            le immagini numerate o lo zip: vengono abbinate per numero di
+            pagina e appaiono nella libreria e nelle card email.
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              id="preview-files"
+              type="file"
+              multiple
+              accept=".png,.jpg,.jpeg,.webp,.zip"
+              className="max-w-md cursor-pointer"
+              onChange={(e) => setPreviewFiles(Array.from(e.target.files ?? []))}
+            />
+            <Button
+              variant="outline"
+              onClick={handleUploadPreviews}
+              disabled={uploadPreviews.isPending || previewFiles.length === 0}
+            >
+              {uploadPreviews.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <ImageIcon className="h-4 w-4" />
+              )}
+              {uploadPreviews.isPending ? "Caricamento…" : "Carica anteprime"}
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -308,7 +326,17 @@ export function Templates() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(templates ?? []).map((template) => (
-            <Card key={template.id} className="flex flex-col">
+            <Card key={template.id} className="flex flex-col overflow-hidden">
+              {template.preview_url && (
+                <div className="aspect-[4/3] w-full overflow-hidden border-b border-border bg-muted">
+                  <img
+                    src={template.preview_url}
+                    alt={`Anteprima ${template.name}`}
+                    loading="lazy"
+                    className="h-full w-full object-cover object-top"
+                  />
+                </div>
+              )}
               <CardContent className="flex flex-1 flex-col gap-3 p-4">
                 <div className="flex items-start justify-between gap-2">
                   <span className="font-medium leading-snug">
@@ -330,18 +358,25 @@ export function Templates() {
                     ))}
                   </div>
                 )}
-                <div className="mt-auto pt-2">
-                  <Button variant="outline" size="sm" className="w-full" asChild>
-                    <a
-                      href={template.canva_url}
-                      target="_blank"
-                      rel="noreferrer"
+                {template.canva_url && (
+                  <div className="mt-auto pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      asChild
                     >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      Apri in Canva
-                    </a>
-                  </Button>
-                </div>
+                      <a
+                        href={template.canva_url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                        Apri in Canva
+                      </a>
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}

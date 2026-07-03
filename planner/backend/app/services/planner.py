@@ -82,6 +82,7 @@ def _resolve_template(db: Session, notion_page_id: str | None) -> dict | None:
         "name": t.name,
         "category": t.category,
         "canva_url": t.canva_url,
+        "preview_url": t.preview_url,
     }
 
 

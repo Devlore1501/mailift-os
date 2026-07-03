@@ -154,6 +154,7 @@ class Template(Base):
     canva_url: Mapped[str] = mapped_column(String(600), default="")
     notion_url: Mapped[str] = mapped_column(String(600), default="")
     tags: Mapped[list] = mapped_column(JSON, default=list)
+    preview_url: Mapped[str] = mapped_column(String(600), default="")
     last_synced_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
 

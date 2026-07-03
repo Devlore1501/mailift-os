@@ -282,23 +282,35 @@ export function EmailCard({ email, planId, readOnly = false }: EmailCardProps) {
 
         {/* Template Canva */}
         {email.canva_template && (
-          <div className="flex items-center justify-between rounded-md border border-border/60 px-3 py-2">
-            <div className="min-w-0 text-sm">
-              <span className="font-medium">{email.canva_template.name}</span>
-              <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
-                {email.canva_template.category}
-              </span>
+          <div className="flex items-center justify-between gap-3 rounded-md border border-border/60 px-3 py-2">
+            <div className="flex min-w-0 items-center gap-3">
+              {email.canva_template.preview_url && (
+                <img
+                  src={email.canva_template.preview_url}
+                  alt={`Anteprima ${email.canva_template.name}`}
+                  loading="lazy"
+                  className="h-14 w-11 shrink-0 rounded border border-border object-cover object-top"
+                />
+              )}
+              <div className="min-w-0 text-sm">
+                <span className="font-medium">{email.canva_template.name}</span>
+                <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+                  {email.canva_template.category}
+                </span>
+              </div>
             </div>
-            <Button variant="outline" size="sm" asChild>
-              <a
-                href={email.canva_template.canva_url}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-                Apri in Canva
-              </a>
-            </Button>
+            {email.canva_template.canva_url && (
+              <Button variant="outline" size="sm" asChild>
+                <a
+                  href={email.canva_template.canva_url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  Apri in Canva
+                </a>
+              </Button>
+            )}
           </div>
         )}
       </CardContent>

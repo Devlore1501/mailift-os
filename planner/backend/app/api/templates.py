@@ -1,13 +1,21 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ..db import get_db
 from ..models.db_models import Template
 from ..models.schemas import CanvaSetIn, CanvaSetOut, TemplateOut
-from ..services.canva_set import CanvaSetInvalid, apply_set, get_config
+from ..services.canva_set import (
+    CanvaSetInvalid,
+    apply_set,
+    find_preview_file,
+    get_config,
+    parse_entries_text,
+    save_previews,
+)
 from ..services.notion_api import NotionAPIError, NotionNotConfigured, sync_templates
 
 router = APIRouter(prefix="/api/templates", tags=["templates"])
@@ -53,9 +61,45 @@ def get_canva_set(db: Session = Depends(get_db)):
 
 @router.put("/set", response_model=CanvaSetOut)
 def save_canva_set(payload: CanvaSetIn, db: Session = Depends(get_db)):
+    entries = [e.model_dump() for e in payload.entries]
+    if not entries and payload.entries_text.strip():
+        entries = parse_entries_text(payload.entries_text)
     try:
-        return apply_set(
-            db, payload.canva_file_url, [r.model_dump() for r in payload.ranges]
-        )
+        return apply_set(db, payload.canva_file_url, entries)
     except CanvaSetInvalid as e:
         raise HTTPException(422, str(e))
+
+
+@router.post("/previews")
+async def upload_previews(
+    files: list[UploadFile] = File(...), db: Session = Depends(get_db)
+):
+    """Carica le anteprime dei template: export PNG/JPG del file Canva
+    (immagini singole numerate o uno zip). L'abbinamento è per numero di
+    pagina ricavato dal nome del file."""
+    if not files:
+        raise HTTPException(400, "Nessun file caricato")
+    payload: list[tuple[str, bytes]] = []
+    total = 0
+    for f in files:
+        data = await f.read()
+        total += len(data)
+        if total > 300 * 1024 * 1024:
+            raise HTTPException(413, "Upload troppo grande (max 300 MB)")
+        payload.append((f.filename or "", data))
+    result = save_previews(db, payload)
+    if result["saved"] == 0:
+        raise HTTPException(
+            422,
+            "Nessuna immagine valida trovata: servono PNG/JPG numerati "
+            "(es. 'Design - 12.png') o uno zip che li contiene.",
+        )
+    return result
+
+
+@router.get("/previews/{page}")
+def get_preview(page: int):
+    f = find_preview_file(page)
+    if f is None:
+        raise HTTPException(404, "Anteprima non trovata")
+    return FileResponse(f)

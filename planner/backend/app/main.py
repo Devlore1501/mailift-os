@@ -25,6 +25,11 @@ def _migrate() -> None:
             conn.execute(
                 text("ALTER TABLE brands ADD COLUMN country VARCHAR(5) DEFAULT 'IT'")
             )
+        tcols = {row[1] for row in conn.execute(text("PRAGMA table_info(templates)"))}
+        if tcols and "preview_url" not in tcols:
+            conn.execute(
+                text("ALTER TABLE templates ADD COLUMN preview_url VARCHAR(600) DEFAULT ''")
+            )
 
 
 _migrate()

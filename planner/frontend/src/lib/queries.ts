@@ -10,7 +10,8 @@ import type {
   BrandSummary,
   BrandUpdate,
   CanvaSet,
-  CanvaSetRange,
+  CanvaSetIn,
+  PreviewUploadResult,
   ExtractedProfile,
   KlaviyoSnapshot,
   KlaviyoStatus,
@@ -381,6 +382,21 @@ export function useSyncTemplates() {
   });
 }
 
+export function useUploadPreviews() {
+  const qc = useQueryClient();
+  return useMutation<PreviewUploadResult, ApiError, File[]>({
+    mutationFn: (files) => {
+      const fd = new FormData();
+      for (const f of files) fd.append("files", f);
+      return apiUpload<PreviewUploadResult>("/templates/previews", fd);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["templates"] });
+      qc.invalidateQueries({ queryKey: keys.canvaSet });
+    },
+  });
+}
+
 export function useCanvaSet() {
   return useQuery<CanvaSet>({
     queryKey: keys.canvaSet,
@@ -393,7 +409,7 @@ export function useSaveCanvaSet() {
   return useMutation<
     CanvaSet,
     ApiError,
-    { canva_file_url: string; ranges: CanvaSetRange[] }
+    CanvaSetIn
   >({
     mutationFn: (payload) => apiPut<CanvaSet>("/templates/set", payload),
     onSuccess: (set) => {

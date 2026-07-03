@@ -239,30 +239,47 @@ r = client.post(
 check("formato non supportato → 415", r.status_code == 415)
 client.delete(f"/api/brands/{brand2['id']}")
 
-# set di template Canva (file unico numerato)
+# set di template Canva (elenco tipi × varianti, formato Notion di Mailift)
 r = client.get("/api/templates/set")
 check("canva set vuoto", r.status_code == 200 and r.json()["canva_file_url"] == "")
 
+notion_text = """## Tutte le voci (New database)
+
+- About x3
+- Flash Sale x3
+- FAQ x3
+- How-to? x3
+- Product Features x3
+- Recommendations x
+- Special Day x3
+"""
 set_payload = {
     "canva_file_url": "https://www.canva.com/design/TESTFILE/edit",
-    "ranges": [
-        {"category": "Promo", "start": 1, "end": 5},
-        {"category": "educativa", "start": 7, "end": 21},
-    ],
+    "entries_text": notion_text,
 }
 r = client.put("/api/templates/set", json=set_payload)
+out = r.json()
 check(
-    "canva set apply",
-    r.status_code == 200 and r.json()["template_count"] == 20,
-    str(r.json()),
+    "canva set apply (7 tipi × 3 = 21)",
+    r.status_code == 200 and out["template_count"] == 21,
+    str(out),
+)
+by_name = {e["name"]: e["category"] for e in out.get("entries", [])}
+check(
+    "categorie auto-assegnate",
+    by_name.get("Flash Sale") == "promo"
+    and by_name.get("How-to?") == "educativo"
+    and by_name.get("About") == "storytelling"
+    and by_name.get("Special Day") == "stagionale",
+    str(by_name),
 )
 
-r = client.get("/api/templates", params={"category": "educativa"})
+r = client.get("/api/templates", params={"category": "educativo"})
 check(
     "canva set espanso per categoria",
     r.status_code == 200
-    and len(r.json()) == 15
-    and r.json()[0]["canva_url"] == set_payload["canva_file_url"],
+    and len(r.json()) == 6  # FAQ x3 + How-to? x3
+    and r.json()[0]["canva_url"].startswith(set_payload["canva_file_url"] + "#"),
     str(len(r.json())),
 )
 
@@ -270,24 +287,61 @@ r = client.get("/api/templates/set")
 check(
     "canva set persistito",
     r.json()["canva_file_url"] == set_payload["canva_file_url"]
-    and r.json()["template_count"] == 20,
-    str(r.json()),
+    and r.json()["template_count"] == 21,
+    str(r.json()["template_count"]),
 )
 
 r = client.put(
     "/api/templates/set",
     json={
-        "canva_file_url": "https://www.canva.com/design/TESTFILE/edit",
-        "ranges": [
-            {"category": "promo", "start": 1, "end": 5},
-            {"category": "educativa", "start": 5, "end": 10},
+        "canva_file_url": "",
+        "entries": [
+            {"name": "About", "count": 3},
+            {"name": "about", "count": 2},
         ],
     },
 )
-check("canva set sovrapposto → 422", r.status_code == 422, str(r.status_code))
+check("canva set duplicato → 422", r.status_code == 422, str(r.status_code))
 
-r = client.put("/api/templates/set", json={"canva_file_url": "", "ranges": []})
-check("canva set senza url → 422", r.status_code == 422)
+r = client.put("/api/templates/set", json={"canva_file_url": "", "entries": []})
+check("canva set vuoto → 422", r.status_code == 422)
+
+# deep-link alla pagina del file Canva
+r = client.put("/api/templates/set", json=set_payload)
+tpl = client.get("/api/templates").json()
+check(
+    "deep-link pagina Canva",
+    all(t["canva_url"].endswith(f"#{i+1}") for i, t in enumerate(
+        sorted(tpl, key=lambda t: int(t["canva_url"].rsplit("#", 1)[1]))
+    )),
+    tpl[0]["canva_url"] if tpl else "",
+)
+
+# anteprime: upload immagini numerate → match per pagina
+png = b"\x89PNG\r\n\x1a\n" + b"0" * 64
+r = client.post(
+    "/api/templates/previews",
+    files=[
+        ("files", ("Canva Templates - 1.png", png, "image/png")),
+        ("files", ("Canva Templates - 5.png", png, "image/png")),
+    ],
+)
+check(
+    "upload anteprime",
+    r.status_code == 200 and r.json()["saved"] == 2 and r.json()["matched"] == 2,
+    str(r.json()),
+)
+r = client.get("/api/templates/previews/5")
+check("serve anteprima", r.status_code == 200)
+r = client.get("/api/templates/previews/99")
+check("anteprima mancante → 404", r.status_code == 404)
+with_previews = [t for t in client.get("/api/templates").json() if t["preview_url"]]
+check(
+    "preview_url sui template",
+    len(with_previews) == 2
+    and with_previews[0]["preview_url"].startswith("/api/templates/previews/"),
+    str([t["name"] for t in with_previews]),
+)
 
 # la sync mock rimpiazza la libreria (una sorgente attiva alla volta)
 r = client.post("/api/templates/sync")

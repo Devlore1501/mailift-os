@@ -4,7 +4,7 @@
 > In una sessione nuova: "Leggi planner/HANDOFF.md e continua da lì".
 > Aggiornare questo file a fine sessione se cambia qualcosa di sostanziale.
 
-**Ultimo aggiornamento**: 2026-07-03 · **Branch**: `claude/saas-email-planning-ecommerce-mf9kls`
+**Ultimo aggiornamento**: 2026-07-03 (sera) · **Branch**: `claude/saas-email-planning-ecommerce-mf9kls`
 
 ## Cos'è
 
@@ -43,12 +43,16 @@ pubblicazione del calendario approvato su Notion.
    2-3 oggetti A/B, preview, corpo completo, prodotti/offerta, template Canva con link.
    Modifica inline + rigenerazione singola con istruzioni
 9. **Template Canva**: due sorgenti (una attiva alla volta, ogni import rimpiazza la libreria):
-   a) **set a file unico** — il flusso reale di Lorenzo: UN file Canva editabile con template
-   numerati (una pagina per template) + intervalli per categoria (es. 1–5 promo, 7–21 educative,
-   dal documento Notion dell'agenzia). Card "File Canva unico" nella pagina Template →
-   `GET/PUT /api/templates/set`, espande gli intervalli in righe Template
-   (`notion_page_id="canva-set-NNNN"`, name="Template N"); b) sync dal DB Notion
-   (mapping tollerante delle proprietà). Libreria con filtri
+   a) **set tipi × varianti** — il flusso reale di Lorenzo: elenco Notion "About x3, Flash
+   Sale x3, ..." (45 tipi × 3 = 135 template) incollato così com'è nella card della pagina
+   Template → `GET/PUT /api/templates/set` (`entries_text` grezzo o `entries` strutturati);
+   categorie AUTO-assegnate da mappa keyword in `services/canva_set.py::_CATEGORY_RULES`
+   (promo/educativo/prodotto/storytelling/social proof/engagement/...); ogni variante ha una
+   pagina globale nel file Canva → deep-link `...edit#N` che apre la pagina giusta;
+   b) sync dal DB Notion. **Anteprime**: export PNG del file Canva (immagini numerate o zip)
+   → `POST /api/templates/previews`, match per numero di pagina dal nome file, servite da
+   `GET /api/templates/previews/{page}` (salvate in data/previews/), mostrate nella griglia
+   e nelle card email (Template.preview_url, anche dentro canva_template delle email)
 10. **Approvazione → pubblicazione Notion**: database calendario con pagina per email
 11. **Mock mode completo** senza ANTHROPIC_API_KEY (demo deterministica di tutto)
 12. **UI "studio editoriale"**: sidebar scura a inchiostro + canvas carta, Fraunces (titoli) +

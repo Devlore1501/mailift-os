@@ -174,23 +174,27 @@ class TemplateOut(BaseModel):
     canva_url: str
     notion_url: str
     tags: list
+    preview_url: str = ""
 
 
-class CanvaSetRange(BaseModel):
-    category: str
-    start: int
-    end: int
+class CanvaSetEntry(BaseModel):
+    name: str
+    count: int = 3
+    category: str = ""  # vuota = assegnata automaticamente dal nome
 
 
 class CanvaSetIn(BaseModel):
-    canva_file_url: str
-    ranges: list[CanvaSetRange]
+    canva_file_url: str = ""
+    entries: list[CanvaSetEntry] = Field(default_factory=list)
+    # in alternativa a entries: testo grezzo incollato da Notion ("About x3\n...")
+    entries_text: str = ""
 
 
 class CanvaSetOut(BaseModel):
     canva_file_url: str = ""
-    ranges: list[CanvaSetRange] = []
+    entries: list[CanvaSetEntry] = Field(default_factory=list)
     template_count: int = 0
+    categories: list[str] = Field(default_factory=list)
 
 
 class PlanGenerateIn(BaseModel):

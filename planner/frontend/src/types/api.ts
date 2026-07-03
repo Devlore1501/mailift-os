@@ -200,6 +200,7 @@ export interface Template {
   category: string;
   canva_url: string;
   tags: string[];
+  preview_url: string;
   notion_url: string;
 }
 
@@ -213,16 +214,28 @@ export interface TemplatesSyncResult {
   categories: number;
 }
 
-export interface CanvaSetRange {
+export interface CanvaSetEntry {
+  name: string;
+  count: number;
   category: string;
-  start: number;
-  end: number;
 }
 
 export interface CanvaSet {
   canva_file_url: string;
-  ranges: CanvaSetRange[];
+  entries: CanvaSetEntry[];
   template_count: number;
+  categories: string[];
+}
+
+export interface CanvaSetIn {
+  canva_file_url: string;
+  entries?: CanvaSetEntry[];
+  entries_text?: string;
+}
+
+export interface PreviewUploadResult {
+  saved: number;
+  matched: number;
 }
 
 // -------------------- Piani editoriali
@@ -265,6 +278,7 @@ export interface EmailCanvaTemplate {
   name: string;
   category: string;
   canva_url: string;
+  preview_url?: string;
 }
 
 export interface PlanEmail {
