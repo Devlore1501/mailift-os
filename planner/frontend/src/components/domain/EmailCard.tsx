@@ -52,6 +52,29 @@ const BLOCK_FIELDS: { key: keyof EmailBlock; label: string }[] = [
   { key: "visual", label: "Visual" },
 ];
 
+const CAMPAIGN_ROLE_LABELS: Record<string, string> = {
+  teaser: "Teaser",
+  annuncio: "Annuncio",
+  follow_up: "Follow-up",
+  last_call: "Last call",
+  final_reminder: "Final reminder",
+  altro: "Sequenza",
+};
+
+/** Badge per le email che fanno parte di una sequenza lancio/promo. */
+function CampaignBadge({ campaign }: { campaign: PlanEmail["campaign"] }) {
+  if (!campaign?.name) return null;
+  return (
+    <Badge
+      variant="outline"
+      className="gap-1 border-violet-200 bg-violet-50 text-[11px] text-violet-700"
+      title={`Sequenza: ${campaign.name}`}
+    >
+      🚀 {campaign.name} · {CAMPAIGN_ROLE_LABELS[campaign.role] ?? campaign.role}
+    </Badge>
+  );
+}
+
 function FormatBadge({ format }: { format: PlanEmail["format"] }) {
   const isGraphic = format !== "testuale";
   return (
@@ -233,6 +256,7 @@ export function EmailCard({ email, planId, readOnly = false }: EmailCardProps) {
                 Modificata
               </Badge>
             )}
+            <CampaignBadge campaign={email.campaign} />
             <FormatBadge format={email.format} />
             <ObjectiveBadge objective={email.objective} />
             {!readOnly && (

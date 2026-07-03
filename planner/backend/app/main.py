@@ -37,6 +37,11 @@ def _migrate() -> None:
             )
         if ecols and "blocks" not in ecols:
             conn.execute(text("ALTER TABLE plan_emails ADD COLUMN blocks JSON DEFAULT '[]'"))
+        if ecols and "campaign" not in ecols:
+            conn.execute(text("ALTER TABLE plan_emails ADD COLUMN campaign JSON"))
+        pcols = {row[1] for row in conn.execute(text("PRAGMA table_info(plans)"))}
+        if pcols and "campaigns" not in pcols:
+            conn.execute(text("ALTER TABLE plans ADD COLUMN campaigns JSON"))
 
 
 _migrate()

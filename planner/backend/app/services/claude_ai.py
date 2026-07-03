@@ -99,6 +99,27 @@ _EMAIL_SCHEMA: dict[str, Any] = {
             "type": ["string", "null"],
             "description": "notion_page_id del template Canva più adatto, dal catalogo fornito",
         },
+        "campaign": {
+            "type": ["object", "null"],
+            "description": "Solo se l'email fa parte di una sequenza lancio/promo: nome della "
+            "sequenza e ruolo dell'email nella sequenza. null per le email normali.",
+            "properties": {
+                "name": {"type": "string"},
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "teaser",
+                        "annuncio",
+                        "follow_up",
+                        "last_call",
+                        "final_reminder",
+                        "altro",
+                    ],
+                },
+            },
+            "required": ["name", "role"],
+            "additionalProperties": False,
+        },
     },
     "required": [
         "position",
@@ -117,14 +138,41 @@ _EMAIL_SCHEMA: dict[str, Any] = {
         "products",
         "offer",
         "template_notion_page_id",
+        "campaign",
     ],
     "additionalProperties": False,
 }
 
 _PLAN_SCHEMA: dict[str, Any] = {
     "type": "object",
-    "properties": {"emails": {"type": "array", "items": _EMAIL_SCHEMA}},
-    "required": ["emails"],
+    "properties": {
+        "emails": {"type": "array", "items": _EMAIL_SCHEMA},
+        "campaigns": {
+            "type": "array",
+            "description": "Una voce per OGNI lancio/promo pianificato nel mese: spiegazione "
+            "della strategia della sequenza e proposte extra. Vuoto se non ci sono lanci/promo.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "kind": {"type": "string", "enum": ["lancio", "promo"]},
+                    "strategy": {
+                        "type": "string",
+                        "description": "Spiegazione della strategia scelta per la sequenza: "
+                        "quante email, quando, con quali leve e segmenti, e perché.",
+                    },
+                    "proposals": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "2-4 proposte extra concrete per potenziare la sequenza",
+                    },
+                },
+                "required": ["name", "kind", "strategy", "proposals"],
+                "additionalProperties": False,
+            },
+        },
+    },
+    "required": ["emails", "campaigns"],
     "additionalProperties": False,
 }
 
@@ -168,7 +216,41 @@ email testuali template_notion_page_id = null.
 - Distribuisci gli invii lungo TUTTO il mese in modo regolare (mai due email nello stesso \
 giorno, evita buchi di oltre una settimana), orari mattina 8:30-10:00 nei feriali; il weekend \
 va bene 9:30-11:00. Se le performance passate suggeriscono altro, adeguati.
-- Usa solo prodotti e offerte realmente forniti; non inventare sconti o codici."""
+- Usa solo prodotti e offerte realmente forniti; non inventare sconti o codici.
+
+LANCI E PROMO (sezione "Lanci e promo del mese" nel contesto):
+- Un lancio o una promo NON è mai una singola email: è una SEQUENZA COORDINATA integrata nel \
+calendario del mese. Etichetta OGNI email della sequenza col campo campaign {name, role} \
+(name = nome del lancio/promo); tutte le altre email hanno campaign = null. Le email della \
+sequenza contano nella quota 10% promo (per le promo) e 20% prodotto (per i lanci): riduci le \
+altre promo/vendita del mese di conseguenza — la parte educativa resta ~70%.
+- SEQUENZA PROMO — procedura dell'agenzia, testata su 30+ brand (per sale di 5-7 giorni):
+  1. "teaser" 1-3 giorni prima dell'inizio: email hype "non comprare oggi" — consiglia di \
+NON acquistare ora perché sta arrivando una sale (costruisce fiducia), invita a RISPONDERE \
+alla mail per saperlo in anteprima (le risposte migliorano la deliverability), countdown \
+all'inizio. NON rivelare lo sconto.
+  2. "annuncio" il giorno di inizio: email grafica semplicissima leggibile a colpo d'occhio \
+— header sale, sconto in grande, CTA, una riga di info. Verifica link e codice.
+  3. "follow_up" a giorni alterni se la sale dura più di 3 giorni (sale di 5 giorni: giorno \
+3; sale di 7: giorni 3 e 5): non limitarti a ripetere la promo, aggiungi contenuto — best \
+seller, recensioni/social proof. Il formato TESTUALE 1:1 stile "customer support" è quello \
+che converte meglio come follow-up.
+  4. "last_call" la MATTINA dell'ultimo giorno: urgenza e scarsità, countdown alla fine, \
+best seller, risparmio evidenziato.
+  5. "final_reminder" la SERA dell'ultimo giorno (<5 ore alla fine), sempre TESTUALE: \
+target = chi ha cliccato le email della sequenza SENZA acquistare (escludi acquirenti degli \
+ultimi 20 giorni) — descrivi questo segmento e la sua logica nel rationale.
+  Durate brevi: 3 giorni = annuncio + last_call + final_reminder (niente follow_up); \
+flash 48h = annuncio, last_call, final_reminder; flash 24h = solo annuncio + last_call.
+- SEQUENZA LANCIO prodotto: "teaser" di anticipazione ~5-7 giorni prima (mistero, dietro le \
+quinte, waitlist), eventuale secondo teaser più vicino, "annuncio" il giorno del lancio \
+(hero del prodotto, perché esiste, per chi è), "follow_up" con social proof/casi d'uso, \
+"last_call" solo se c'è un'offerta lancio a scadenza.
+- Nel campo "campaigns" del piano compila una voce per OGNI lancio/promo: in "strategy" \
+spiega la logica della sequenza scelta (quante email, in quali date e perché, formati, \
+segmenti e leve psicologiche), in "proposals" 2-4 proposte extra concrete e attuabili (es. \
+countdown timer nelle grafiche, estensione riservata ai VIP, segmento winback dedicato, SMS \
+di supporto). Se non ci sono lanci/promo nel mese: campaigns = [] e campaign = null ovunque."""
 
 _OCCASIONS_SCHEMA: dict[str, Any] = {
     "type": "object",
@@ -230,6 +312,9 @@ def _fmt_context(context: dict) -> str:
         "## Occasioni/temi del periodo",
         json.dumps(context.get("occasions", []), ensure_ascii=False, indent=1) or "[]",
         "",
+        "## Lanci e promo del mese (ognuno = una sequenza email dedicata)",
+        json.dumps(context.get("launches", []), ensure_ascii=False, indent=1) or "[]",
+        "",
         "## Dati Klaviyo (segmenti reali, performance campagne, salute lista)",
         json.dumps(context.get("klaviyo") or {"nota": "nessun dato sincronizzato"},
                    ensure_ascii=False, indent=1),
@@ -287,7 +372,7 @@ def generate_plan(context: dict) -> dict:
     # normalizza le position
     for i, e in enumerate(emails, start=1):
         e["position"] = i
-    return {"emails": emails}
+    return {"emails": emails, "campaigns": plan.get("campaigns") or []}
 
 
 def regenerate_email(context: dict, current_email: dict, instructions: str) -> dict:

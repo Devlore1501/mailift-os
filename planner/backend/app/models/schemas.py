@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class AvatarSchema(BaseModel):
@@ -137,6 +137,34 @@ class OccasionOut(BaseModel):
     notes: str
 
 
+class LaunchBase(BaseModel):
+    name: str | None = None
+    kind: Literal["lancio", "promo"] | None = None
+    start_date: str | None = None
+    end_date: str | None = None
+    subject: str | None = None
+    notes: str | None = None
+    active: bool | None = None
+
+
+class LaunchCreate(LaunchBase):
+    name: str
+
+
+class LaunchOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    brand_id: int
+    name: str
+    kind: str
+    start_date: str
+    end_date: str
+    subject: str
+    notes: str
+    active: bool
+
+
 class KlaviyoKeyIn(BaseModel):
     api_key: str
 
@@ -227,6 +255,7 @@ class PlanEmailOut(BaseModel):
     preview_text: str
     body: str
     blocks: list = Field(default_factory=list)
+    campaign: dict | None = None
     products: list
     offer: dict | None
     canva_template: dict | None
@@ -248,6 +277,7 @@ class PlanEmailPatch(BaseModel):
     preview_text: str | None = None
     body: str | None = None
     blocks: list | None = None
+    campaign: dict | None = None
     products: list | None = None
     offer: dict | None = None
     canva_template: dict | None = None
@@ -275,7 +305,13 @@ class PlanSummary(BaseModel):
 
 class PlanDetail(PlanSummary):
     emails: list[PlanEmailOut] = Field(default_factory=list)
+    campaigns: list = Field(default_factory=list)
     context_snapshot: dict[str, Any] | None = None
+
+    @field_validator("campaigns", mode="before")
+    @classmethod
+    def _campaigns_none_to_list(cls, v):
+        return v or []
 
 
 class PlanPatch(BaseModel):

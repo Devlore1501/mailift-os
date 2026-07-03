@@ -4,8 +4,10 @@ import {
   ArrowLeft,
   CheckCircle2,
   ExternalLink,
+  Lightbulb,
   Loader2,
   RefreshCw,
+  Rocket,
   Send,
   Undo2,
 } from "lucide-react";
@@ -101,6 +103,71 @@ function BalanceIndicator({ plan }: { plan: PlanDetailType }) {
           {plan.emails.filter((e) => e.format === "testuale").length} testuali
         </span>
       </div>
+    </div>
+  );
+}
+
+const CAMPAIGN_KIND_STYLES: Record<string, string> = {
+  lancio: "border-indigo-200 bg-indigo-50 text-indigo-700",
+  promo: "border-amber-200 bg-amber-50 text-amber-700",
+};
+
+function CampaignsSection({ plan }: { plan: PlanDetailType }) {
+  const campaigns = plan.campaigns ?? [];
+  if (campaigns.length === 0) return null;
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+        <Rocket className="h-4 w-4 text-primary" />
+        Lanci &amp; Promo del mese
+      </div>
+      {campaigns.map((c) => {
+        const emailsCount = plan.emails.filter(
+          (e) => e.campaign?.name === c.name
+        ).length;
+        return (
+          <div
+            key={c.name}
+            className="rounded-xl border border-primary/25 bg-gradient-to-br from-primary/[0.04] to-transparent p-4"
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-display font-semibold">{c.name}</span>
+              <span
+                className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${
+                  CAMPAIGN_KIND_STYLES[c.kind] ??
+                  "border-border bg-muted text-muted-foreground"
+                }`}
+              >
+                {c.kind}
+              </span>
+              {emailsCount > 0 && (
+                <span className="text-xs text-muted-foreground">
+                  sequenza di {emailsCount} email
+                </span>
+              )}
+            </div>
+            {c.strategy && (
+              <p className="mt-2 text-sm text-muted-foreground">{c.strategy}</p>
+            )}
+            {c.proposals?.length > 0 && (
+              <div className="mt-3 space-y-1.5">
+                <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+                  Proposte extra
+                </div>
+                <ul className="space-y-1 text-sm text-muted-foreground">
+                  {c.proposals.map((p, i) => (
+                    <li key={i} className="flex gap-2">
+                      <span className="text-primary">•</span>
+                      <span>{p}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -325,6 +392,11 @@ export function PlanDetail() {
             </Button>
           </AlertDescription>
         </Alert>
+      )}
+
+      {/* Strategia lanci & promo */}
+      {plan.status !== "generating" && plan.status !== "error" && (
+        <CampaignsSection plan={plan} />
       )}
 
       {/* Email */}

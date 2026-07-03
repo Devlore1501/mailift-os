@@ -229,6 +229,80 @@ check(
 r = client.get(f"/api/plans/{plan_id}")
 check("plan published", r.json()["status"] == "published")
 
+# ---- lanci & promo: sequenza dedicata nel piano
+r = client.post(
+    f"/api/brands/{brand_id}/launches",
+    json={
+        "name": "Summer Sale",
+        "kind": "promo",
+        "start_date": "2026-09-14",
+        "end_date": "2026-09-18",
+        "subject": "-20% su tutto",
+    },
+)
+check("create launch", r.status_code == 201, str(r.status_code))
+launch_id = r.json()["id"]
+
+r = client.get(f"/api/brands/{brand_id}/launches")
+check("list launches", r.status_code == 200 and len(r.json()) == 1)
+
+r = client.patch(f"/api/launches/{launch_id}", json={"notes": "non rivelare lo sconto prima"})
+check("patch launch", r.status_code == 200 and "rivelare" in r.json()["notes"])
+
+r = client.post(
+    f"/api/brands/{brand_id}/plans/generate",
+    json={"month_start": "2026-09-01", "num_emails": 12},
+)
+check("generate plan con lancio (202)", r.status_code == 202, str(r.status_code))
+plan2_id = r.json()["id"]
+plan2 = None
+for _ in range(30):
+    plan2 = client.get(f"/api/plans/{plan2_id}").json()
+    if plan2["status"] != "generating":
+        break
+    time.sleep(0.3)
+check("plan con lancio generato", plan2 is not None and plan2["status"] == "draft",
+      (plan2 or {}).get("error") or "")
+
+seq = [e for e in plan2["emails"] if e.get("campaign")]
+normal = [e for e in plan2["emails"] if not e.get("campaign")]
+roles = [e["campaign"]["role"] for e in seq]
+check("sequenza promo presente", len(seq) >= 4, f"{len(seq)} email in sequenza, ruoli {roles}")
+check(
+    "sequenza etichettata col nome della promo",
+    all(e["campaign"]["name"] == "Summer Sale" for e in seq),
+)
+check(
+    "funnel completo (5 giorni): teaser, annuncio, follow_up, last_call, final_reminder",
+    {"teaser", "annuncio", "follow_up", "last_call", "final_reminder"} <= set(roles),
+    str(roles),
+)
+check("email normali senza campaign", len(normal) > 0 and all(e["campaign"] is None for e in normal))
+annuncio = next(e for e in seq if e["campaign"]["role"] == "annuncio")
+final_rem = next(e for e in seq if e["campaign"]["role"] == "final_reminder")
+check("annuncio grafica il giorno di inizio",
+      annuncio["format"] == "grafica" and annuncio["send_date"] == "2026-09-14",
+      f"{annuncio['format']} {annuncio['send_date']}")
+check("final reminder testuale l'ultimo giorno, sera",
+      final_rem["format"] == "testuale" and final_rem["send_date"] == "2026-09-18"
+      and final_rem["send_time"] >= "18:00",
+      f"{final_rem['format']} {final_rem['send_date']} {final_rem['send_time']}")
+check("final reminder → segmento cliccato-non-acquirenti",
+      "cliccato" in final_rem["segment"]["name"].lower(), final_rem["segment"]["name"])
+campaigns = plan2.get("campaigns") or []
+check(
+    "strategia spiegata + proposte",
+    len(campaigns) == 1
+    and campaigns[0]["name"] == "Summer Sale"
+    and len(campaigns[0]["strategy"]) > 40
+    and len(campaigns[0]["proposals"]) >= 2,
+    str(campaigns)[:120],
+)
+
+client.delete(f"/api/plans/{plan2_id}")
+r = client.delete(f"/api/launches/{launch_id}")
+check("delete launch", r.status_code == 204)
+
 # estrazione profilo da documento (mock)
 brand2 = client.post("/api/brands", json={"name": "Nuovo Cliente"}).json()
 doc = (

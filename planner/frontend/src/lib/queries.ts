@@ -15,6 +15,8 @@ import type {
   ExtractedProfile,
   KlaviyoSnapshot,
   KlaviyoStatus,
+  Launch,
+  LaunchInput,
   NotionSettings,
   NotionSettingsUpdate,
   Occasion,
@@ -46,6 +48,7 @@ export const keys = {
   products: (brandId: number) => ["products", brandId] as const,
   offers: (brandId: number) => ["offers", brandId] as const,
   occasions: (brandId: number) => ["occasions", brandId] as const,
+  launches: (brandId: number) => ["launches", brandId] as const,
   klaviyoStatus: (brandId: number) => ["klaviyo-status", brandId] as const,
   klaviyoInsights: (brandId: number) => ["klaviyo-insights", brandId] as const,
   notionSettings: ["notion-settings"] as const,
@@ -269,6 +272,46 @@ export function useDeleteOccasion(brandId: number) {
     mutationFn: (id) => apiDelete(`/occasions/${id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: keys.occasions(brandId) });
+    },
+  });
+}
+
+// -------------------- Lanci & Promo
+
+export function useLaunches(brandId: number) {
+  return useQuery<Launch[]>({
+    queryKey: keys.launches(brandId),
+    queryFn: () => apiGet<Launch[]>(`/brands/${brandId}/launches`),
+    enabled: !!brandId,
+  });
+}
+
+export function useCreateLaunch(brandId: number) {
+  const qc = useQueryClient();
+  return useMutation<Launch, ApiError, LaunchInput>({
+    mutationFn: (data) => apiPost<Launch>(`/brands/${brandId}/launches`, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.launches(brandId) });
+    },
+  });
+}
+
+export function useUpdateLaunch(brandId: number) {
+  const qc = useQueryClient();
+  return useMutation<Launch, ApiError, { id: number; data: Partial<LaunchInput> }>({
+    mutationFn: ({ id, data }) => apiPatch<Launch>(`/launches/${id}`, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.launches(brandId) });
+    },
+  });
+}
+
+export function useDeleteLaunch(brandId: number) {
+  const qc = useQueryClient();
+  return useMutation<null, ApiError, number>({
+    mutationFn: (id) => apiDelete(`/launches/${id}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.launches(brandId) });
     },
   });
 }

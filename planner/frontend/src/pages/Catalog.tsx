@@ -6,6 +6,7 @@ import {
   Package,
   Pencil,
   Plus,
+  Rocket,
   Sparkles,
   Star,
   Tag,
@@ -38,22 +39,26 @@ import {
 import { EmptyState } from "@/components/domain/EmptyState";
 import {
   useBrand,
+  useCreateLaunch,
   useCreateOccasion,
   useCreateOffer,
   useCreateProduct,
+  useDeleteLaunch,
   useDeleteOccasion,
   useDeleteOffer,
   useDeleteProduct,
+  useLaunches,
   useOccasions,
   useOffers,
   useProducts,
   useSuggestOccasions,
+  useUpdateLaunch,
   useUpdateOccasion,
   useUpdateOffer,
   useUpdateProduct,
 } from "@/lib/queries";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import type { Occasion, Offer, Product } from "@/types/api";
+import type { Launch, LaunchKind, Occasion, Offer, Product } from "@/types/api";
 
 // -------------------- Prodotti
 
@@ -954,6 +959,331 @@ function OccasionsTab({ brandId }: { brandId: number }) {
   );
 }
 
+// -------------------- Lanci & Promo
+
+interface LaunchForm {
+  name: string;
+  kind: LaunchKind;
+  start_date: string;
+  end_date: string;
+  subject: string;
+  notes: string;
+  active: boolean;
+}
+
+const EMPTY_LAUNCH: LaunchForm = {
+  name: "",
+  kind: "promo",
+  start_date: "",
+  end_date: "",
+  subject: "",
+  notes: "",
+  active: true,
+};
+
+const LAUNCH_KIND_STYLES: Record<string, string> = {
+  lancio: "border-indigo-200 bg-indigo-50 text-indigo-700",
+  promo: "border-amber-200 bg-amber-50 text-amber-700",
+};
+
+function launchDuration(l: Launch): string {
+  if (!l.start_date || !l.end_date) return "—";
+  const days =
+    Math.round(
+      (new Date(l.end_date).getTime() - new Date(l.start_date).getTime()) /
+        86_400_000
+    ) + 1;
+  if (days <= 0) return "—";
+  if (days === 1) return "24h flash";
+  if (days === 2) return "48h flash";
+  return `${days} giorni`;
+}
+
+function LaunchesTab({ brandId }: { brandId: number }) {
+  const { data: launches, isLoading } = useLaunches(brandId);
+  const createLaunch = useCreateLaunch(brandId);
+  const updateLaunch = useUpdateLaunch(brandId);
+  const deleteLaunch = useDeleteLaunch(brandId);
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<Launch | null>(null);
+  const [form, setForm] = useState<LaunchForm>(EMPTY_LAUNCH);
+
+  function openCreate() {
+    setEditing(null);
+    setForm(EMPTY_LAUNCH);
+    setDialogOpen(true);
+  }
+
+  function openEdit(launch: Launch) {
+    setEditing(launch);
+    setForm({
+      name: launch.name,
+      kind: launch.kind,
+      start_date: launch.start_date ?? "",
+      end_date: launch.end_date ?? "",
+      subject: launch.subject ?? "",
+      notes: launch.notes ?? "",
+      active: launch.active,
+    });
+    setDialogOpen(true);
+  }
+
+  function handleSubmit() {
+    if (!form.name.trim()) {
+      toast.error("Il nome del lancio/promo è obbligatorio");
+      return;
+    }
+    const payload = {
+      name: form.name.trim(),
+      kind: form.kind,
+      start_date: form.start_date,
+      end_date: form.end_date,
+      subject: form.subject,
+      notes: form.notes,
+      active: form.active,
+    };
+    const opts = {
+      onSuccess: () => {
+        toast.success(editing ? "Aggiornato" : "Aggiunto: entrerà nel prossimo piano come sequenza dedicata");
+        setDialogOpen(false);
+      },
+      onError: (err: Error) => toast.error(`Errore: ${err.message}`),
+    };
+    if (editing) {
+      updateLaunch.mutate({ id: editing.id, data: payload }, opts);
+    } else {
+      createLaunch.mutate(payload, opts);
+    }
+  }
+
+  if (isLoading) return <Skeleton className="h-64 w-full" />;
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-xl border border-primary/25 bg-gradient-to-br from-primary/[0.04] to-transparent p-4 text-sm">
+        <div className="flex items-center gap-2 font-medium">
+          <Rocket className="h-4 w-4 text-primary" />
+          Come funziona
+        </div>
+        <p className="mt-1 text-muted-foreground">
+          Ogni lancio o promo inserito qui diventa una <strong>sequenza email
+          coordinata</strong> nel piano del mese: hype/teaser, annuncio, follow-up,
+          last call e final reminder secondo la durata (5-7 giorni = funnel completo,
+          3 giorni = senza follow-up, flash 24/48h = solo le email essenziali).
+          Nel piano trovi la strategia spiegata e le proposte extra.
+        </p>
+      </div>
+
+      <div className="flex justify-end">
+        <Button onClick={openCreate}>
+          <Plus className="h-4 w-4" />
+          Aggiungi lancio / promo
+        </Button>
+      </div>
+
+      {(launches ?? []).length === 0 ? (
+        <EmptyState
+          icon={Rocket}
+          title="Nessun lancio o promo"
+          description="Aggiungi un lancio prodotto o una promo con le date: il prossimo piano preparerà la sequenza email dedicata."
+          action={
+            <Button onClick={openCreate}>
+              <Plus className="h-4 w-4" />
+              Aggiungi lancio / promo
+            </Button>
+          }
+        />
+      ) : (
+        <div className="rounded-lg border border-border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Durata</TableHead>
+                <TableHead>Protagonista</TableHead>
+                <TableHead>Attivo</TableHead>
+                <TableHead className="w-[90px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(launches ?? []).map((launch) => (
+                <TableRow key={launch.id}>
+                  <TableCell className="font-medium">{launch.name}</TableCell>
+                  <TableCell>
+                    <span
+                      className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${
+                        LAUNCH_KIND_STYLES[launch.kind] ??
+                        "border-border bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {launch.kind}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {launch.start_date || launch.end_date
+                      ? `${formatDate(launch.start_date)} → ${formatDate(launch.end_date)}`
+                      : "—"}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {launchDuration(launch)}
+                  </TableCell>
+                  <TableCell className="max-w-[180px] truncate text-sm text-muted-foreground">
+                    {launch.subject || "—"}
+                  </TableCell>
+                  <TableCell>
+                    <Switch
+                      checked={launch.active}
+                      aria-label="Lancio attivo"
+                      onCheckedChange={(checked) =>
+                        updateLaunch.mutate(
+                          { id: launch.id, data: { active: checked } },
+                          {
+                            onSuccess: () =>
+                              toast.success(checked ? "Attivato" : "Disattivato"),
+                            onError: (err) =>
+                              toast.error(`Errore: ${err.message}`),
+                          }
+                        )
+                      }
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Modifica lancio"
+                        onClick={() => openEdit(launch)}
+                      >
+                        <Pencil className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Elimina lancio"
+                        onClick={() => {
+                          if (window.confirm(`Eliminare "${launch.name}"?`)) {
+                            deleteLaunch.mutate(launch.id, {
+                              onSuccess: () => toast.success("Eliminato"),
+                              onError: (err) =>
+                                toast.error(`Errore: ${err.message}`),
+                            });
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              {editing ? "Modifica lancio / promo" : "Nuovo lancio / promo"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>Nome *</Label>
+              <Input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="es. Summer Sale, Lancio Crema Viso"
+                autoFocus
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Tipo</Label>
+              <div className="flex gap-2">
+                {(["promo", "lancio"] as LaunchKind[]).map((k) => (
+                  <Button
+                    key={k}
+                    type="button"
+                    variant={form.kind === k ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setForm({ ...form, kind: k })}
+                  >
+                    {k === "promo" ? "Promo / sale" : "Lancio prodotto"}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>{form.kind === "promo" ? "Inizio sale" : "Giorno del lancio"}</Label>
+                <Input
+                  type="date"
+                  value={form.start_date}
+                  onChange={(e) =>
+                    setForm({ ...form, start_date: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>{form.kind === "promo" ? "Fine sale" : "Fine offerta lancio (opzionale)"}</Label>
+                <Input
+                  type="date"
+                  value={form.end_date}
+                  onChange={(e) =>
+                    setForm({ ...form, end_date: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Prodotto / offerta protagonista</Label>
+              <Input
+                value={form.subject}
+                onChange={(e) => setForm({ ...form, subject: e.target.value })}
+                placeholder="es. Kit Estate, -20% su tutto"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Note per la strategia</Label>
+              <Textarea
+                rows={2}
+                value={form.notes}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                placeholder="es. non rivelare lo sconto prima del via, target VIP…"
+              />
+            </div>
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <Switch
+                checked={form.active}
+                onCheckedChange={(checked) =>
+                  setForm({ ...form, active: checked })
+                }
+              />
+              Attivo (incluso nei prossimi piani)
+            </label>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              Annulla
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={createLaunch.isPending || updateLaunch.isPending}
+            >
+              {editing ? "Salva modifiche" : "Aggiungi"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 // -------------------- Pagina
 
 export function Catalog() {
@@ -965,7 +1295,7 @@ export function Catalog() {
       <div>
         <h1 className="font-display text-2xl font-semibold tracking-tight">Catalogo</h1>
         <p className="text-sm text-muted-foreground">
-          Prodotti, offerte e occasioni usati nella generazione dei piani.
+          Prodotti, offerte, occasioni e lanci/promo usati nella generazione dei piani.
         </p>
       </div>
 
@@ -974,6 +1304,7 @@ export function Catalog() {
           <TabsTrigger value="products">Prodotti</TabsTrigger>
           <TabsTrigger value="offers">Offerte</TabsTrigger>
           <TabsTrigger value="occasions">Occasioni</TabsTrigger>
+          <TabsTrigger value="launches">Lanci &amp; Promo</TabsTrigger>
         </TabsList>
         <TabsContent value="products" className="pt-4">
           <ProductsTab brandId={brandId} />
@@ -983,6 +1314,9 @@ export function Catalog() {
         </TabsContent>
         <TabsContent value="occasions" className="pt-4">
           <OccasionsTab brandId={brandId} />
+        </TabsContent>
+        <TabsContent value="launches" className="pt-4">
+          <LaunchesTab brandId={brandId} />
         </TabsContent>
       </Tabs>
     </div>

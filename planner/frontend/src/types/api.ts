@@ -128,6 +128,30 @@ export interface OccasionInput {
   notes?: string;
 }
 
+export type LaunchKind = "lancio" | "promo";
+
+export interface Launch {
+  id: number;
+  brand_id: number;
+  name: string;
+  kind: LaunchKind;
+  start_date: string;
+  end_date: string;
+  subject: string;
+  notes: string;
+  active: boolean;
+}
+
+export interface LaunchInput {
+  name: string;
+  kind?: LaunchKind;
+  start_date?: string;
+  end_date?: string;
+  subject?: string;
+  notes?: string;
+  active?: boolean;
+}
+
 // -------------------- Klaviyo
 
 export interface KlaviyoStatus {
@@ -284,6 +308,28 @@ export interface EmailOfferRef {
   discount: string;
 }
 
+export type CampaignRole =
+  | "teaser"
+  | "annuncio"
+  | "follow_up"
+  | "last_call"
+  | "final_reminder"
+  | "altro";
+
+/** Appartenenza dell'email a una sequenza lancio/promo. */
+export interface EmailCampaignRef {
+  name: string;
+  role: CampaignRole | string;
+}
+
+/** Strategia di una sequenza lancio/promo a livello di piano. */
+export interface PlanCampaign {
+  name: string;
+  kind: LaunchKind | string;
+  strategy: string;
+  proposals: string[];
+}
+
 export interface EmailCanvaTemplate {
   template_id: number | null;
   name: string;
@@ -308,6 +354,7 @@ export interface PlanEmail {
   preview_text: string;
   body: string;
   blocks: EmailBlock[];
+  campaign: EmailCampaignRef | null;
   products: EmailProductRef[];
   offer: EmailOfferRef | null;
   canva_template: EmailCanvaTemplate | null;
@@ -317,6 +364,7 @@ export interface PlanEmail {
 
 export interface PlanDetail extends PlanSummary {
   emails: PlanEmail[];
+  campaigns: PlanCampaign[];
   context_snapshot: Record<string, unknown>;
 }
 

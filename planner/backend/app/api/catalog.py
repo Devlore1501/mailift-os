@@ -6,8 +6,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from ..db import get_db
-from ..models.db_models import Occasion, Offer, Product
+from ..models.db_models import Launch, Occasion, Offer, Product
 from ..models.schemas import (
+    LaunchBase,
+    LaunchCreate,
+    LaunchOut,
     OccasionBase,
     OccasionCreate,
     OccasionOut,
@@ -175,4 +178,49 @@ def delete_occasion(occasion_id: int, db: Session = Depends(get_db)):
     if occasion is None:
         raise HTTPException(404, "Occasione non trovata")
     db.delete(occasion)
+    db.commit()
+
+
+# ---- Lanci & Promo
+
+
+@router.get("/brands/{brand_id}/launches", response_model=list[LaunchOut])
+def list_launches(brand_id: int, db: Session = Depends(get_db)):
+    get_brand_or_404(db, brand_id)
+    return (
+        db.query(Launch)
+        .filter(Launch.brand_id == brand_id)
+        .order_by(Launch.start_date.desc(), Launch.id.desc())
+        .all()
+    )
+
+
+@router.post("/brands/{brand_id}/launches", response_model=LaunchOut, status_code=201)
+def create_launch(brand_id: int, payload: LaunchCreate, db: Session = Depends(get_db)):
+    get_brand_or_404(db, brand_id)
+    launch = Launch(brand_id=brand_id)
+    _apply(launch, payload)
+    db.add(launch)
+    db.commit()
+    db.refresh(launch)
+    return launch
+
+
+@router.patch("/launches/{launch_id}", response_model=LaunchOut)
+def update_launch(launch_id: int, payload: LaunchBase, db: Session = Depends(get_db)):
+    launch = db.get(Launch, launch_id)
+    if launch is None:
+        raise HTTPException(404, "Lancio non trovato")
+    _apply(launch, payload)
+    db.commit()
+    db.refresh(launch)
+    return launch
+
+
+@router.delete("/launches/{launch_id}", status_code=204)
+def delete_launch(launch_id: int, db: Session = Depends(get_db)):
+    launch = db.get(Launch, launch_id)
+    if launch is None:
+        raise HTTPException(404, "Lancio non trovato")
+    db.delete(launch)
     db.commit()

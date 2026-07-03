@@ -256,3 +256,21 @@ file), così matching, card email e pubblicazione restano invariati.
   `POST /templates/sync` da Notion rimpiazza tutto, incluso il set).
 - I template generati hanno `notion_page_id = "canva-set-NNNN"`, `name = "Template N"`,
   tag `n.N` e `canva_url` = link del file (unico per tutti).
+
+## Aggiornamenti v1.5 (lanci & promo → sequenze email)
+
+Ogni lancio prodotto o promo del brand diventa una SEQUENZA email coordinata nel
+piano mensile, secondo la procedura in `planner/design/PROCEDURA_PROMO.md`
+(teaser → annuncio → follow_up → last_call → final_reminder, adattata alla durata).
+
+- CRUD: `GET/POST /api/brands/{id}/launches`, `PATCH/DELETE /api/launches/{id}`.
+  Launch: {id, brand_id, name, kind: "lancio"|"promo", start_date, end_date,
+  subject (prodotto/offerta protagonista), notes, active}.
+- I lanci attivi e rilevanti per il mese entrano nel contesto di generazione
+  (`context.launches`); il piano etichetta le email della sequenza con
+  `PlanEmail.campaign = {name, role}` (role: teaser|annuncio|follow_up|last_call|
+  final_reminder|altro; null per le email normali) e salva a livello piano
+  `PlanDetail.campaigns = [{name, kind, strategy, proposals[]}]` (spiegazione
+  della strategia + proposte extra).
+- Pubblicazione Notion: nuova colonna "Sequenza" (es. "Summer Sale · last_call").
+- Le email della sequenza contano nelle quote 70/20/10 (promo→10%, lancio→20%).

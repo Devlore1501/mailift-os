@@ -47,6 +47,9 @@ class Brand(Base):
     plans: Mapped[list["Plan"]] = relationship(
         back_populates="brand", cascade="all, delete-orphan"
     )
+    launches: Mapped[list["Launch"]] = relationship(
+        back_populates="brand", cascade="all, delete-orphan"
+    )
 
 
 class Product(Base):
@@ -93,6 +96,24 @@ class Occasion(Base):
     brand: Mapped[Brand] = relationship(back_populates="occasions")
 
 
+class Launch(Base):
+    """Lancio prodotto o promo pianificata: genera una sequenza email dedicata."""
+
+    __tablename__ = "launches"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    brand_id: Mapped[int] = mapped_column(ForeignKey("brands.id"), index=True)
+    name: Mapped[str] = mapped_column(String(300), nullable=False)
+    kind: Mapped[str] = mapped_column(String(20), default="lancio")  # lancio | promo
+    start_date: Mapped[str] = mapped_column(String(20), default="")  # ISO
+    end_date: Mapped[str] = mapped_column(String(20), default="")
+    subject: Mapped[str] = mapped_column(Text, default="")  # prodotto/offerta protagonista
+    notes: Mapped[str] = mapped_column(Text, default="")
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    brand: Mapped[Brand] = relationship(back_populates="launches")
+
+
 class Plan(Base):
     __tablename__ = "plans"
 
@@ -105,6 +126,8 @@ class Plan(Base):
     notes: Mapped[str] = mapped_column(Text, default="")
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     context_snapshot: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # strategia delle sequenze lancio/promo del mese: [{name, kind, strategy, proposals}]
+    campaigns: Mapped[list | None] = mapped_column(JSON, nullable=True)
     notion_database_id: Mapped[str] = mapped_column(String(100), default="")
     notion_url: Mapped[str] = mapped_column(String(500), default="")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
@@ -135,6 +158,8 @@ class PlanEmail(Base):
     body: Mapped[str] = mapped_column(Text, default="")
     # scaletta per il designer (email grafiche): lista di blocchi copy
     blocks: Mapped[list] = mapped_column(JSON, default=list)
+    # appartenenza a una sequenza lancio/promo: {name, role} oppure null
+    campaign: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     products: Mapped[list] = mapped_column(JSON, default=list)
     offer: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     canva_template: Mapped[dict | None] = mapped_column(JSON, nullable=True)

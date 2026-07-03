@@ -66,6 +66,24 @@ def build_context(db: Session, brand: Brand, month_start: str, num_emails: int, 
         "occasions": [
             {"name": oc.name, "date": oc.date, "notes": oc.notes} for oc in brand.occasions
         ],
+        "launches": [
+            {
+                "name": l.name,
+                "kind": l.kind,
+                "start_date": l.start_date,
+                "end_date": l.end_date,
+                "subject": l.subject,
+                "notes": l.notes,
+            }
+            for l in brand.launches
+            if l.active
+            and (
+                # rilevante per il mese: senza date, o con inizio/fine nel mese
+                not (l.start_date or l.end_date)
+                or (l.start_date or l.end_date or "").startswith(month_start[:7])
+                or (l.end_date or l.start_date or "").startswith(month_start[:7])
+            )
+        ],
         "klaviyo": brand.klaviyo_snapshot,
         "templates": templates,
     }
@@ -100,6 +118,7 @@ def apply_email_payload(db: Session, email: PlanEmail, payload: dict) -> None:
     email.preview_text = payload.get("preview_text", email.preview_text)
     email.body = payload.get("body", email.body)
     email.blocks = payload.get("blocks") if payload.get("blocks") is not None else (email.blocks or [])
+    email.campaign = payload.get("campaign") if "campaign" in payload else email.campaign
     email.products = payload.get("products") or []
     email.offer = payload.get("offer")
     email.canva_template = _resolve_template(db, payload.get("template_notion_page_id")) or (
@@ -127,6 +146,7 @@ def _run_generation(plan_id: int) -> None:
             email = PlanEmail(plan_id=plan.id, position=payload.get("position", 1))
             db.add(email)
             apply_email_payload(db, email, payload)
+        plan.campaigns = result.get("campaigns") or []
         plan.status = "draft"
         plan.error = None
         db.commit()

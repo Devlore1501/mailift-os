@@ -61,9 +61,25 @@ pubblicazione del calendario approvato su Notion.
    `GET /api/templates/previews/{page}` (salvate in data/previews/), mostrate nella griglia
    e nelle card email (Template.preview_url, anche dentro canva_template delle email)
 10. **Approvazione → pubblicazione Notion**: database calendario con pagina per email
+    (colonna "Sequenza" per le email di lanci/promo)
 11. **Mock mode completo** senza ANTHROPIC_API_KEY (demo deterministica di tutto)
 12. **UI "studio editoriale"**: sidebar scura a inchiostro + canvas carta, Fraunces (titoli) +
     Plus Jakarta Sans self-hosted via Fontsource, indigo+ambra, dark mode pronta
+13. **Lanci & Promo → sequenze email**: tab "Lanci & Promo" nel Catalogo (nome, tipo
+    lancio|promo, date, protagonista, note, attivo). Ogni voce attiva e rilevante per il
+    mese diventa una SEQUENZA coordinata nel piano secondo la procedura testata
+    dell'agenzia (`planner/design/PROCEDURA_PROMO.md`, incollata da Lorenzo):
+    promo = teaser "non comprare oggi" (no sconto svelato, chiedi reply) → annuncio
+    grafico essenziale → follow-up testuale con social proof (g.3, e g.5 se 7gg) →
+    last call (mattina, urgenza+countdown) → final reminder (sera, <5h, testuale,
+    segmento "cliccato senza acquistare" esclusi acquirenti 20gg). 3gg = senza
+    follow-up; 48h = annuncio+last call+final reminder; 24h = annuncio+last call.
+    Lancio = teaser ~5gg prima → annuncio → follow-up social proof (+last call se
+    offerta a scadenza). Email etichettate `campaign {name, role}` (badge viola 🚀
+    nelle card); piano con sezione "Lanci & Promo del mese" = strategia spiegata +
+    proposte extra (`plan.campaigns`). Le sequenze contano nelle quote 70/20/10.
+    API: CRUD `/brands/{id}/launches` + `PATCH /launches/{id}`; prompt/schema in
+    `claude_ai.py`, mock in `mockdata.py::_mock_sequence`
 
 ## Configurazione (stato di Lorenzo)
 

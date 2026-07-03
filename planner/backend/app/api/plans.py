@@ -174,6 +174,7 @@ def regenerate_email(
         "preview_text": email.preview_text,
         "body": email.body,
         "blocks": email.blocks,
+        "campaign": email.campaign,
         "products": email.products,
         "offer": email.offer,
     }
@@ -211,6 +212,7 @@ def publish(plan_id: int, db: Session = Depends(get_db)):
             "preview_text": e.preview_text,
             "body": e.body,
             "blocks": e.blocks,
+            "campaign": e.campaign,
             "products": e.products,
             "offer": e.offer,
             "canva_template": e.canva_template,

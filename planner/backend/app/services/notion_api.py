@@ -152,6 +152,19 @@ def _email_page_properties(email: dict, subject: str) -> dict:
         "Orario": {"rich_text": [{"text": {"content": email.get("send_time", "")}}]},
         "Obiettivo": {"select": {"name": email.get("objective", "nurturing")}},
         "Formato": {"select": {"name": email.get("format", "grafica")}},
+        "Sequenza": {
+            "rich_text": [
+                {
+                    "text": {
+                        "content": (
+                            f"{email['campaign'].get('name', '')} · {email['campaign'].get('role', '')}"
+                            if email.get("campaign")
+                            else ""
+                        )[:200]
+                    }
+                }
+            ]
+        },
         "Segmento": {
             "rich_text": [{"text": {"content": (email.get("segment") or {}).get("name", "")[:200]}}]
         },
@@ -280,6 +293,7 @@ def publish_plan(db: Session, brand_name: str, month_start: str, emails: list[di
                         ]
                     }
                 },
+                "Sequenza": {"rich_text": {}},
                 "Segmento": {"rich_text": {}},
                 "Preview": {"rich_text": {}},
                 "Template Canva": {"url": {}},
