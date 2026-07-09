@@ -11,26 +11,28 @@
 Scarpe artigianali made-to-order, alta qualità. Fatturato YTD ~€185k. Mercato EU (nessun paese dominante; Germania: AOV alto ma return rate ~20%). Lista Klaviyo ~27k totale, ~25k attivi. CTR newsletter attuale ~0.77% (sotto benchmark). Popup conversion ~1% (benchmark ~10%). Deliverability ~90% (buona) ma finisce in tab Promozioni Gmail. Email attribution 25-35% (click-only, era ~50% con view-through). Configuratore scarpe personalizzato in sviluppo (in attesa di grant).
 
 ## Ultime decisioni
-_Ultima call: [2026-04-13](calls/2026-04-13_discovery-call-kali-shoes.md)_
+_Ultima call: [2026-06-25](calls/2026-06-25_proposta-rinnovo-kali-shoes---decisione-rimandata.md)_
 
-- Accesso Klaviyo concesso a lorenzo.baretta997@gmail.com
-- Proposta pricing: range 1.500-3.000 EUR/mese
-- Follow-up giovedì per audit readout e proposta formale
+- Rimandare la scelta tra gestione mensile e pacchetto grafiche a metà/fine luglio, con partenza indicativa a settembre.
+- Sul multilingua: NON gestire tutte le 5 lingue separatamente, ma separare solo Italia vs Inglese (Europa/internazionale) con calendari editoriali bilingue condivisi su Notion.
+- Mantenere OptiMonk (il popup inglese al 9.2% ripaga già da solo l'abbonamento ~100€/mese).
+- Fixare il bug del doppio trigger abbandono carrello tra Shopify e Klaviyo.
+- Lorenzo prepara comunque il contratto per il pacchetto grafiche da 20, con possibilità di caparra €100 per bloccare lo slot di settembre.
 
 
 ## Prossimi step
 ### Lorenzo / Mailift
-- [ ] Accedere a Klaviyo e analizzare setup popup (target: ottimizzazione conversion dal 1% al 10%+)
-- [ ] Mappare flussi email attuali e identificare gap nelle automazioni
-- [ ] Analizzare segmentazione: preparare raccomandazioni per localizzazione popup e contenuti
-- [ ] Valutare email deliverability: indagare posizionamento in tab Promozioni Gmail e strategie di miglioramento
-- [ ] Preparare audit readout + deck proposta per giovedì
-- [ ] Stimare effort retention workflows (WISMO, post-acquisto, re-engagement)
+- [ ] Sistemare il bug del doppio trigger abbandono carrello Shopify/Klaviyo (fix veloce)
+- [ ] Preparare il contratto per il pacchetto grafiche da 20 layout
+- [ ] Predisporre opzione caparra €100 per bloccare lo slot di settembre
+- [ ] Impostare struttura calendari editoriali bilingue (IT / EN) su Notion condivisi
+- [ ] Ricontattare Kali a metà/fine luglio per la decisione finale (gestione vs grafiche)
 
-### Cliente (Dante Scalvenzi)
-- [ ] Fornire accesso editor Klaviyo a lorenzo.baretta997@gmail.com (confermato)
-- [ ] Chiarire constraint tecnici/organizzativi (bandwidth limitata, processi interni)
-- [ ] Disponibilità a discussione strategica su retention giovedì
+### Cliente
+- [ ] Prendere la decisione finale (gestione mensile vs pacchetto grafiche) entro metà/fine luglio
+- [ ] Valutare il versamento della caparra €100 per bloccare lo slot di settembre
+- [ ] Presentare a Lorenzo i contatti/referral menzionati (celiachia brand, "Fare Nella")
+- [ ] Condividere il contatto sviluppatore di fiducia per il cliente Mailift con sito custom-coded
 
 
 ## Note operative

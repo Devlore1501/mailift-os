@@ -12,26 +12,30 @@
 Calzature (linea "Sposa" + linea "old day"). AOV ~€140, costo ~€40, margine lordo ~€100 (60-70%). ROAS attuale ~6.2 (ultimi 30gg, €2k spesa → €13.8k revenue). Budget attuale ~€20-25/gg sulla linea Sposa. No Black Friday — usano Outlet. Stagionalità Sposa: picco feb-ott. Cambio numero (GLS) ~€22, attualmente gratuito per il cliente.
 
 ## Ultime decisioni
-_Ultima call: [2025-11-06](calls/2025-11-06_pre-proposta-treemme-calzature.md)_
+_Ultima call: [2026-06-30](calls/2026-06-30_testimonianza-6-mesi-treemme---risultati-e-pianifi.md)_
 
-- Implementazione lead capture pop-up customizzato (target: 240 email/mese vs attuali 30)
-- Adozione email marketing strategy completa (welcome series, abandoned cart, post-purchase)
-- Accesso a 300 template email + 600 content ideas + content planning tool interno
-- Presentazione di 2 package: Setup (€1.500) e Completo con WhatsApp automation (€2.005)
-- Garanzia performance 30 giorni con adjustments gratuiti
+- Produrre un case study/testimonianza basato sui risultati dei primi 6 mesi (fatturato +134%)
+- Mantenere in H2 un tono comunicativo non aggressivo/poco promozionale (newsletter "conoscitive")
+- Alleggerire la cadenza email a luglio (mese debole per ferie/saldi), con focus su articoli regalo/evergreen
+- Impostare la strategia H2 evitando sconti eccessivi e puntando sulle categorie giuste per stagione (sneaker in tarda estate, meno sandali)
+- Continuare lo storytelling con storie di clienti reali (non fittizie)
 
+_Call precedente (2026-03-24, pianificazione content/calendario): volume 12 email/mese (8 grafiche + 4 testuali), mix 80% valore/20% promo, calendario diviso in sposa/cerimonia, quotidiano, outlet; struttura lancio a 3 fasi (anticipazione → gamification → lancio); orario ottimale ~7:00; deadline ricorrente calendario mese successivo entro il 10 del mese corrente._
 
 ## Prossimi step
 ### Lorenzo / Mailift
-- [ ] Inviare proposal dettagliato con specifiche pop-up e email flows
-- [ ] Preparare case study con risultati (8-10% conversion rate) da clienti simili
-- [ ] Attendere feedback Alessio entro 1 settimana
-- [ ] Schedulare follow-up call per validazione proposal
+- [ ] Verificare e filtrare il traffico bot USA con Fabio (tecnico) via Firebase/Google Analytics per ottenere il tasso di conversione reale
+- [ ] Impostare cadenza email alleggerita per luglio (focus regalo/evergreen)
+- [ ] Pianificare calendario H2: settembre e Black Friday, evitando sconti eccessivi
+- [ ] Continuare produzione content storytelling con storie clienti reali
+- [ ] Valutare/organizzare la produzione di un video testimonial (oltre alla trascrizione)
+- [ ] Affinare/strutturare il tema colore coordinato al brand (rosa antico)
 
-### Cliente (Treemme/Alessio)
-- [ ] Revisionare i 2 package e decidere configurazione
-- [ ] Confermare go-ahead per implementazione
-- [ ] Definire preferenze contenuto email (tone, frequency, segmentazione)
+### Cliente
+- [ ] Fornire/coordinarsi con Fabio (tecnico) per la verifica traffico bot su Firebase/GA
+- [ ] Rendersi disponibile per l'eventuale registrazione del video testimonial
+- [ ] Condividere storie clienti reali utilizzabili per lo storytelling
+- [ ] Consultare la libreria Notion "600+ idee di contenuto" come riferimento (accesso già dato a Roberta e Alessio)
 
 
 ## Note operative

@@ -83,6 +83,19 @@ Poi: `git add clients/ && git commit -m "Call <cliente> YYYY-MM-DD" && git push`
 
 **Core principle:** Local files are just for processing. Anything I need to see or use lives in cloud services. Everything in `.tmp/` is disposable.
 
+## Knowledge graph (graphify)
+
+Il repo ha un knowledge graph costruito con `/graphify .` in `graphify-out/`
+(graph.json, GRAPH_REPORT.md, graph.html). Copre codice, README/call clienti,
+knowledge base e asset — **consultalo prima di rispondere a memoria** su:
+- storico/pattern di un cliente o prospect specifico
+- relazioni cross-cliente (obiezioni ricorrenti, pricing simile, ecc.)
+- architettura o relazioni tra file di codice
+
+Uso: `graphify query "<domanda>"` se il grafo esiste già (non ricostruirlo
+per una domanda — è già pronto). Dopo nuove call/documenti, aggiornalo con
+`/graphify . --update` (non automatico, va fatto quando conviene).
+
 ## Bottom Line
 
 You sit between what I want (workflows) and what actually gets done (tools). Your job is to read instructions, make smart decisions, call the right tools, recover from errors, and keep improving the system as you go.

@@ -1,5 +1,10 @@
 # Discovery Call Processing
 
+> Questo workflow copre il **dopo** la call. Per la ricerca **prima** della
+> call (nome/telefono/email/sito → mini-dossier su piattaforma, ESP, fit
+> ICP preliminare), vedi
+> [workflows/lead_research.md](lead_research.md).
+
 ## Obiettivo
 Trasformare una **trascrizione Fathom** di discovery call in:
 1. Una **classificazione lead** strutturata (HOT / WARM / COLD)
@@ -33,6 +38,13 @@ da ~15 minuti a ~2 minuti di review.
 ### Tool Python richiesti
 - [tools/ghl_client.py](../tools/ghl_client.py) — find/create contact, add note,
   add tags. Usa Personal Integration Token GHL scoped a Mailift location.
+
+### Knowledge graph richiesto (opzionale ma consigliato)
+- `graphify-out/graph.json` alla root del progetto — costruito con `/graphify .`
+  (skill `graphify`, vedi [.claude/skills/graphify](../.claude/skills/graphify)).
+  Se manca o è vecchio (nuovi clienti/call non ancora integrati), salta lo
+  step 3 "Arricchimento dal knowledge graph" e segnalalo, **non bloccare**
+  il resto del workflow. Per aggiornarlo dopo nuove call: `/graphify . --update`.
 
 ### Variabili `.env`
 - `GHL_API_KEY` (Personal Integration Token, prefisso `pit-`) — ✅ configurato
@@ -82,7 +94,33 @@ Motivazione: [2-3 righe specifiche sul perché — citare elementi della call]
 Red flag: [se ce ne sono, anche per HOT]
 ```
 
-### 3. Briefing strutturato (Gamma)
+### 3. Arricchimento dal knowledge graph (graphify)
+
+Prima di scrivere il briefing, interroga il grafo di conoscenza per portare
+contesto che la singola call non contiene:
+
+```
+graphify query "storia, pain point e pattern simili a <azienda/settore/ESP attuale>"
+```
+
+Cosa cercare:
+- **Clienti/prospect simili**: stesso settore, stesso ESP attuale, pain
+  point analoghi già visti in altre call (es. "3 prospect con lo stesso
+  blocco ERP hanno risolto con opzione X").
+- **Obiezioni ricorrenti** e come sono state gestite altrove (o perché
+  hanno fatto perdere il deal).
+- **Pattern di pricing** che hanno funzionato su profili comparabili
+  (vedi anche `knowledge/mailift-listino-pricing.md` nel grafo).
+- Se il lead è **già presente nel grafo** (ex-prospect riaperto, o
+  menzionato in altre call/team review): riporta lo storico invece di
+  ripartire da zero.
+
+Se il grafo non è aggiornato o non trova nulla di rilevante, procedi senza
+bloccare — annota semplicemente "Nessun pattern storico rilevante trovato"
+e vai avanti. Questo step arricchisce lo step 4 (briefing) e lo step 5
+(nota GHL), non li sostituisce.
+
+### 4. Briefing strutturato (Gamma)
 
 Usa `mcp__claude_ai_Gamma__generate` per creare un briefing visuale.
 Struttura suggerita:
@@ -92,15 +130,18 @@ Struttura suggerita:
 3. **Slide 3 — Pain points** (bullet list, citazioni quasi-letterali)
 4. **Slide 4 — Obiettivi del lead** (cosa vuole ottenere)
 5. **Slide 5 — Fit con Mailift**: dove possiamo aiutare specificamente
-6. **Slide 6 — Obiezioni emerse + come rispondere**
-7. **Slide 7 — Next steps proposti + slot follow-up**
+6. **Slide 6 — Obiezioni emerse + come rispondere** (integra i pattern
+   trovati nello step 3, se rilevanti)
+7. **Slide 7 — Pattern simili e precedenti** (solo se lo step 3 ha trovato
+   qualcosa di utile — clienti comparabili, esiti, lezioni)
+8. **Slide 8 — Next steps proposti + slot follow-up**
 
 **Default tema Gamma**: lascia il default (la Segretaria non sceglie temi
 salvo richiesta esplicita di Lorenzo). Lingua: **italiano**.
 
 Salva il file ID del Gamma generato per riferimento futuro.
 
-### 4. Sync su GHL (find/create contact + nota + tag)
+### 5. Sync su GHL (find/create contact + nota + tag)
 
 Sequenza Python via [tools/ghl_client.py](../tools/ghl_client.py):
 
@@ -135,6 +176,9 @@ note_body = f"""## Discovery Call — {data_iso}
 ### Pain points
 {bullet_list(pain_points)}
 
+### Contesto storico (knowledge graph)
+{pattern_simili_o_"Nessun pattern storico rilevante trovato"}
+
 ### Next steps
 {next_steps_text}
 
@@ -163,7 +207,7 @@ add_tags(contact_id=contact_id, tags=[
 - Se `add_note` fallisce: non bloccare il workflow, mostra il blocco markdown
   in chat come fallback per copia-incolla manuale
 
-### 5. Slot follow-up (solo se HOT)
+### 6. Slot follow-up (solo se HOT)
 
 Se la classificazione è HOT:
 1. `mcp__claude_ai_Google_Calendar__gcal_find_my_free_time` per i prossimi
@@ -202,6 +246,9 @@ follow-up automatico.
 - …
 - …
 
+### Contesto storico (knowledge graph)
+[pattern simili trovati / "nessuno rilevante"]
+
 ### Briefing Gamma
 [link / file ID generato]
 
@@ -233,6 +280,9 @@ follow-up automatico.
   briefing + note GHL.
 - **Trascrizione Fathom con timestamp/speaker labels**: estraili pure ma non
   inquinare il briefing finale con timestamps.
+- **`graphify-out/graph.json` assente o non aggiornato**: salta lo step 3
+  (arricchimento), segnalalo a Lorenzo in una riga, e prosegui col resto del
+  workflow normalmente. Non è mai bloccante.
 
 ## Apprendimenti
 
@@ -282,8 +332,10 @@ Regole emerse dall'audit:
 2. Estrai schema strutturato (sezione 1) — chiedi conferma se mancano dati
    critici.
 3. Classifica HOT/WARM/COLD con motivazione.
-4. Genera briefing Gamma → verifica che il file sia accessibile a Lorenzo.
-5. Produci blocco "Note GHL" markdown da copia-incollare manualmente.
-6. Se HOT: proponi 3 slot, **non creare l'evento finché Lorenzo non sceglie**.
-7. Lorenzo dà feedback su classificazione e briefing → aggiorna gli
-   "Apprendimenti" qui se c'è una lezione.
+4. Interroga il knowledge graph (sezione 3) per pattern simili / storico —
+   se non disponibile, procedi senza bloccare.
+5. Genera briefing Gamma → verifica che il file sia accessibile a Lorenzo.
+6. Produci blocco "Note GHL" markdown da copia-incollare manualmente.
+7. Se HOT: proponi 3 slot, **non creare l'evento finché Lorenzo non sceglie**.
+8. Lorenzo dà feedback su classificazione, arricchimento e briefing →
+   aggiorna gli "Apprendimenti" qui se c'è una lezione.
