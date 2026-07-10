@@ -15,6 +15,10 @@ Usage:
     python tools/creative_fatigue_detector.py            # ultimi 28gg, solo ACTIVE
     python tools/creative_fatigue_detector.py --days 35
     python tools/creative_fatigue_detector.py --all       # include anche PAUSED
+    python tools/creative_fatigue_detector.py --no-html   # solo report da terminale
+
+Di default scrive anche un report HTML navigabile in `.tmp/creative_fatigue_report.html`
+(passa `--html PATH` per un percorso diverso, `--no-html` per saltarlo).
 """
 
 from __future__ import annotations
@@ -227,10 +231,185 @@ def print_report(results: list[dict], days: int) -> None:
     print(f"Riepilogo: {urgent} urgenti | {watch} da monitorare | {ok} OK")
 
 
+_SEVERITY_CSS = {"URGENTE": "critical", "WATCH": "warning", "OK": "good"}
+_SEVERITY_LABEL = {"URGENTE": "Urgente", "WATCH": "Watch", "OK": "OK"}
+_SEVERITY_ICON = {"URGENTE": "🔴", "WATCH": "🟡", "OK": "🟢"}
+
+_HTML_TEMPLATE = """<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Creative Fatigue — Mailift Meta Ads</title>
+<style>
+  :root {{
+    --surface-1: #fcfcfb; --page-plane: #f9f9f7; --text-primary: #0b0b0b;
+    --text-secondary: #52514e; --text-muted: #898781; --gridline: #e1e0d9;
+    --border: rgba(11,11,11,0.10); --good: #0ca30c; --warning: #fab219;
+    --critical: #d03b3b; --good-bg: #e7f6e7; --warning-bg: #fff6e0;
+    --critical-bg: #fbe9e9; --accent: #2a78d6;
+  }}
+  @media (prefers-color-scheme: dark) {{
+    :root {{
+      --surface-1: #232322; --page-plane: #0d0d0d; --text-primary: #ffffff;
+      --text-secondary: #c3c2b7; --gridline: #2c2c2a; --border: rgba(255,255,255,0.10);
+      --good-bg: #10240f; --warning-bg: #2b2210; --critical-bg: #2c1414; --accent: #3987e5;
+    }}
+  }}
+  * {{ box-sizing: border-box; }}
+  body {{ margin: 0; background: var(--page-plane); color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif; padding: 32px 20px 64px; }}
+  .wrap {{ max-width: 980px; margin: 0 auto; }}
+  .eyebrow {{ font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 6px; }}
+  h1 {{ font-size: 22px; font-weight: 700; margin: 0 0 6px; }}
+  .sub {{ color: var(--text-secondary); font-size: 14px; margin: 0 0 20px; }}
+  .stat-row {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }}
+  @media (max-width: 640px) {{ .stat-row {{ grid-template-columns: repeat(2, 1fr); }} }}
+  .stat-tile {{ background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }}
+  .stat-label {{ font-size: 12px; color: var(--text-secondary); margin: 0 0 8px; display:flex; align-items:center; gap:6px; }}
+  .stat-value {{ font-size: 28px; font-weight: 700; margin: 0; font-variant-numeric: tabular-nums; }}
+  .dot {{ width: 9px; height: 9px; border-radius: 50%; display:inline-block; flex: none; }}
+  .dot.critical {{ background: var(--critical); }} .dot.warning {{ background: var(--warning); }}
+  .dot.good {{ background: var(--good); }} .dot.neutral {{ background: var(--text-muted); }}
+  .panel {{ background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 20px; }}
+  .panel-head {{ padding: 14px 18px; border-bottom: 1px solid var(--gridline); display: flex;
+    align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }}
+  .panel-head h2 {{ font-size: 15px; margin: 0; font-weight: 650; }}
+  .panel-head .hint {{ font-size: 12px; color: var(--text-muted); }}
+  table {{ width: 100%; border-collapse: collapse; font-size: 13px; }}
+  thead th {{ text-align: left; font-weight: 600; color: var(--text-muted); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.03em; padding: 10px 18px; border-bottom: 1px solid var(--gridline); }}
+  tbody td {{ padding: 12px 18px; border-bottom: 1px solid var(--gridline); vertical-align: top; }}
+  tbody tr:last-child td {{ border-bottom: none; }}
+  .ad-name {{ font-weight: 600; }} .ad-meta {{ color: var(--text-muted); font-size: 12px; margin-top: 2px; }}
+  .badge {{ display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600;
+    padding: 3px 9px; border-radius: 999px; white-space: nowrap; }}
+  .badge.critical {{ background: var(--critical-bg); color: var(--critical); }}
+  .badge.warning {{ background: var(--warning-bg); color: #9a6b0e; }}
+  .badge.good {{ background: var(--good-bg); color: var(--good); }}
+  @media (prefers-color-scheme: dark) {{ .badge.warning {{ color: var(--warning); }} }}
+  .metric {{ font-variant-numeric: tabular-nums; }}
+  .delta {{ font-size: 11px; margin-left: 4px; }}
+  .delta.down {{ color: var(--critical); }} .delta.up {{ color: var(--good); }} .delta.flat {{ color: var(--text-muted); }}
+  .action {{ color: var(--text-secondary); max-width: 260px; }}
+  .legend {{ display: flex; gap: 18px; flex-wrap: wrap; padding: 12px 18px; font-size: 12px;
+    color: var(--text-secondary); border-top: 1px solid var(--gridline); }}
+  .legend span {{ display:inline-flex; align-items:center; gap:6px; }}
+  footer {{ font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 12px; }}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Mailift — Meta Ads</p>
+  <h1>Creative Fatigue Dashboard</h1>
+  <p class="sub">Generato {generated_at} · finestra {days}gg · soglia minima {min_impr} impr.</p>
+
+  <div class="stat-row">
+    <div class="stat-tile"><p class="stat-label"><span class="dot critical"></span>Urgenti</p>
+      <p class="stat-value" style="color:var(--critical)">{urgent}</p></div>
+    <div class="stat-tile"><p class="stat-label"><span class="dot warning"></span>Da monitorare</p>
+      <p class="stat-value" style="color:#9a6b0e">{watch}</p></div>
+    <div class="stat-tile"><p class="stat-label"><span class="dot good"></span>OK</p>
+      <p class="stat-value" style="color:var(--good)">{ok}</p></div>
+    <div class="stat-tile"><p class="stat-label"><span class="dot neutral"></span>Annunci analizzati</p>
+      <p class="stat-value">{total}</p></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Annunci — ordinati per severità</h2>
+      <span class="hint">Ordinati per severità, poi per impressioni nel periodo</span>
+    </div>
+    <table>
+      <thead><tr><th>Annuncio</th><th>Età</th><th>CTR</th><th>Frequency</th><th>Stato</th><th>Azione</th></tr></thead>
+      <tbody>{rows}</tbody>
+    </table>
+    <div class="legend">
+      <span><span class="badge critical">🔴 Urgente</span> età ≥{age_urgent}gg o CTR ≤ -{ctr_urgent:.0f}% sett/sett</span>
+      <span><span class="badge warning">🟡 Watch</span> età ≥{age_watch}gg, CTR ≤ -{ctr_watch:.0f}%, o frequency ≥ +{freq_watch:.0f}%</span>
+      <span><span class="badge good">🟢 OK</span> nessun segnale di fatica</span>
+    </div>
+  </div>
+  <footer>Generato da tools/creative_fatigue_detector.py — vedi workflows/creative_fatigue_monitoring.md</footer>
+</div>
+</body>
+</html>
+"""
+
+
+def _delta_html(v: float | None, invert: bool) -> str:
+    if v is None:
+        return '<span class="delta flat">—</span>'
+    good = (v <= 0) if invert else (v >= 0)
+    cls = "flat" if abs(v) < 0.02 else ("up" if good else "down")
+    sign = "+" if v > 0 else ""
+    return f'<span class="delta {cls}">{sign}{round(v * 100)}%</span>'
+
+
+def render_html(results: list[dict], days: int) -> str:
+    urgent = sum(1 for r in results if r["severity"] == "URGENTE")
+    watch = sum(1 for r in results if r["severity"] == "WATCH")
+    ok = len(results) - urgent - watch
+
+    row_tpl = """<tr>
+        <td><div class="ad-name">{name}</div><div class="ad-meta">{campaign} / {adset}</div></td>
+        <td class="metric">{age}</td>
+        <td class="metric">{ctr:.2f}% {ctr_delta}</td>
+        <td class="metric">{freq:.2f} {freq_delta}</td>
+        <td><span class="badge {css}">{icon} {label}</span></td>
+        <td class="action">{action}</td>
+    </tr>"""
+
+    rows_html = "\n".join(
+        row_tpl.format(
+            name=r["name"],
+            campaign=r["campaign"],
+            adset=r["adset"],
+            age=f"{r['age_days']}gg" if r["age_days"] is not None else "n/d",
+            ctr=r["ctr_last"],
+            ctr_delta=_delta_html(r["ctr_change"], invert=True),
+            freq=r["frequency_last"],
+            freq_delta=_delta_html(r["freq_change"], invert=False),
+            css=_SEVERITY_CSS[r["severity"]],
+            icon=_SEVERITY_ICON[r["severity"]],
+            label=_SEVERITY_LABEL[r["severity"]],
+            action=r["action"],
+        )
+        for r in results
+    )
+    if not rows_html:
+        rows_html = '<tr><td colspan="6" class="action">Nessun annuncio con dati sufficienti nel periodo.</td></tr>'
+
+    return _HTML_TEMPLATE.format(
+        generated_at=datetime.now(timezone.utc).strftime("%d/%m/%Y %H:%M UTC"),
+        days=days,
+        min_impr=MIN_IMPRESSIONS,
+        urgent=urgent,
+        watch=watch,
+        ok=ok,
+        total=len(results),
+        rows=rows_html,
+        age_urgent=AGE_URGENT_DAYS,
+        age_watch=AGE_WATCH_DAYS,
+        ctr_urgent=CTR_DECLINE_URGENT * 100,
+        ctr_watch=CTR_DECLINE_WATCH * 100,
+        freq_watch=FREQ_RISE_WATCH * 100,
+    )
+
+
+def write_html_report(results: list[dict], days: int, out_path: Path) -> None:
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(render_html(results, days), encoding="utf-8")
+    print(f"\n📊 Report HTML: {out_path}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Rileva creative fatigue sugli annunci Meta")
     parser.add_argument("--days", type=int, default=28, help="Finestra di analisi in giorni (default 28)")
     parser.add_argument("--all", action="store_true", help="Includi anche annunci PAUSED")
+    parser.add_argument("--html", type=str, default=str(PROJECT_ROOT / ".tmp" / "creative_fatigue_report.html"),
+                        help="Percorso del report HTML (default .tmp/creative_fatigue_report.html)")
+    parser.add_argument("--no-html", action="store_true", help="Salta la scrittura del report HTML")
     args = parser.parse_args()
 
     if not TOKEN or not ACCOUNT_ID:
@@ -246,6 +425,9 @@ def main() -> None:
 
     results = analyze(ads, weekly)
     print_report(results, args.days)
+
+    if not args.no_html:
+        write_html_report(results, args.days, Path(args.html))
 
 
 if __name__ == "__main__":
