@@ -191,6 +191,99 @@ def synthesize_proposals(db: Session) -> dict:
     return {"proposals_created": created, "items_processed": len(items)}
 
 
+EVERGREEN_TOOL = {
+    "name": "submit_evergreen_ideas",
+    "description": "Registra spunti di contenuto evergreen (non legati a notizie).",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "ideas": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "title": {"type": "string"},
+                        "angle": {"type": "string"},
+                        "pillar": {"type": "string", "enum": list(PILLARS)},
+                        "format": {"type": "string", "enum": list(FORMATS)},
+                        "hook_draft": {"type": "string"},
+                        "relevance": {"type": "integer", "minimum": 1, "maximum": 10},
+                    },
+                    "required": ["title", "angle", "pillar", "relevance"],
+                },
+            }
+        },
+        "required": ["ideas"],
+    },
+}
+
+EVERGREEN_PROMPT = """Genera {n} spunti di contenuto EVERGREEN per Mailift: argomenti interessanti da trattare
+che non dipendono da notizie del giorno. Temi da cui pescare (non limitarti a questi):
+- soldi che un eCommerce perde senza saperlo (carrelli, winback, post-purchase, segmentazione)
+- errori tipici degli owner con Klaviyo/Shopify e come evitarli
+- miti da sfatare su email marketing, sconti, pop-up, open rate
+- confronti controintuitivi (email vs ads, sconto vs valore, lista grande vs lista pulita)
+- casi e numeri concreti che parlano a store da 25k-300k€/mese
+- dietro le quinte di come lavora un'agenzia email
+
+Vincoli:
+- Bilancia i pillar rispettando all'incirca il mix: revenue_leak 30%, proof 25%, educational 25%, contrarian 10%, backstage 10%.
+- NON ripetere idee già in lavorazione. Titoli già usati:
+{existing}
+- Titoli e hook in italiano, concreti, rivolti a owner di eCommerce (mai a freelance o agenzie)."""
+
+
+def generate_evergreen(db: Session, n: int = 6) -> dict:
+    """Spunti evergreen proposti dall'AI, in coda review come le proposte da fonti."""
+    if not ANTHROPIC_API_KEY:
+        return {
+            "proposals_created": 0,
+            "error": "ANTHROPIC_API_KEY mancante nel .env: la generazione di spunti è disattivata.",
+        }
+
+    import anthropic
+
+    recent_titles = [
+        title for (title,) in
+        db.query(Idea.title).order_by(Idea.created_at.desc()).limit(40).all()
+    ]
+    existing = "\n".join(f"- {t}" for t in recent_titles) or "- (nessuna)"
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+    response = client.messages.create(
+        model=ANTHROPIC_MODEL,
+        max_tokens=4096,
+        system=SYSTEM_PROMPT,
+        tools=[EVERGREEN_TOOL],
+        tool_choice={"type": "tool", "name": "submit_evergreen_ideas"},
+        messages=[{"role": "user", "content": EVERGREEN_PROMPT.format(n=n, existing=existing)}],
+    )
+    ideas = []
+    for block in response.content:
+        if block.type == "tool_use" and block.name == "submit_evergreen_ideas":
+            ideas = block.input.get("ideas", [])
+
+    seen = {t.strip().lower() for t in recent_titles}
+    created = 0
+    for p in ideas[: n * 2]:
+        title = (p.get("title") or "").strip()
+        if not title or title.lower() in seen:
+            continue
+        seen.add(title.lower())
+        db.add(Idea(
+            title=title[:300],
+            angle=p.get("angle"),
+            pillar=p.get("pillar") if p.get("pillar") in PILLARS else None,
+            status="proposed",
+            origin="ai",
+            relevance_score=max(1, min(10, int(p.get("relevance", 5)))),
+            hook_draft=p.get("hook_draft"),
+            suggested_format=p.get("format") if p.get("format") in FORMATS else None,
+        ))
+        created += 1
+    db.commit()
+    return {"proposals_created": created}
+
+
 def run_job(db: Session) -> dict:
     """Job completo (FR-M3-02): fetch + sintesi. Usato dallo scheduler e dal trigger manuale."""
     fetch_result = fetch_sources(db)

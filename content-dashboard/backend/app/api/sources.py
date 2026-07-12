@@ -1,15 +1,48 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session as OrmSession
 
+from pydantic import BaseModel
+
 from ..auth import admin_only, any_user, editor_or_admin
 from ..db import get_db
 from ..enums import SOURCE_TYPES
 from ..models import Source, SourceItem, User
 from ..schemas import SourceCreate, SourceOut, SourceUpdate
 from ..services.activity import log_activity
-from ..services.idea_engine import fetch_sources, run_job, synthesize_proposals
+from ..services.idea_engine import fetch_sources, generate_evergreen, run_job, synthesize_proposals
+from ..source_catalog import CATALOG
 
 router = APIRouter(prefix="/api", tags=["idea-engine"])
+
+
+@router.get("/sources/catalog")
+def sources_catalog(user: User = Depends(any_user), db: OrmSession = Depends(get_db)):
+    """Fonti consigliate (Reddit, Google News/Trends, blog) con stato di installazione."""
+    installed = {url for (url,) in db.query(Source.url).all()}
+    return [{**entry, "installed": entry["url"] in installed} for entry in CATALOG]
+
+
+class CatalogAddIn(BaseModel):
+    urls: list[str] | None = None  # None = tutte le mancanti
+
+
+@router.post("/sources/catalog/add")
+def add_from_catalog(body: CatalogAddIn, user: User = Depends(admin_only),
+                     db: OrmSession = Depends(get_db)):
+    installed = {url for (url,) in db.query(Source.url).all()}
+    wanted = set(body.urls) if body.urls else None
+    added = []
+    for entry in CATALOG:
+        if entry["url"] in installed:
+            continue
+        if wanted is not None and entry["url"] not in wanted:
+            continue
+        db.add(Source(type=entry["type"], url=entry["url"], label=entry["label"], active=True))
+        added.append(entry["label"])
+    if added:
+        log_activity(db, user, "source", None, f"aggiunte {len(added)} fonti dal catalogo")
+    db.commit()
+    return {"added": added}
 
 
 @router.get("/sources", response_model=list[SourceOut])
@@ -91,3 +124,15 @@ def run_fetch_only(user: User = Depends(editor_or_admin), db: OrmSession = Depen
 @router.post("/idea-engine/synthesize")
 def run_synthesis_only(user: User = Depends(editor_or_admin), db: OrmSession = Depends(get_db)):
     return synthesize_proposals(db)
+
+
+@router.post("/idea-engine/brainstorm")
+def run_brainstorm(n: int = 6, user: User = Depends(editor_or_admin),
+                   db: OrmSession = Depends(get_db)):
+    """Spunti evergreen (argomenti interessanti non legati a notizie) in coda review."""
+    result = generate_evergreen(db, n=max(1, min(12, n)))
+    if result.get("proposals_created"):
+        log_activity(db, user, "idea", None,
+                     f"brainstorm evergreen: {result['proposals_created']} spunti proposti")
+        db.commit()
+    return result

@@ -185,6 +185,10 @@ with TestClient(app) as client:
                     json={"type": "rss", "url": "x", "label": "X"})
     check("editor NON può creare fonti", r.status_code == 403)
 
+    # disattiva le fonti di catalogo seminate all'avvio: il test usa solo feed locali
+    for s in client.get("/api/sources", headers=auth(admin_token)).json():
+        client.patch(f"/api/sources/{s['id']}", headers=auth(admin_token), json={"active": False})
+
     rss_file = Path(tempfile.gettempdir()) / "test_feed.xml"
     rss_file.write_text("""<?xml version="1.0"?><rss version="2.0"><channel>
       <title>Test Feed</title><link>http://example.com</link><description>t</description>
@@ -208,6 +212,25 @@ with TestClient(app) as client:
 
     r = client.post("/api/idea-engine/fetch", headers=auth(editor_token))
     check("secondo fetch: dedup, 0 nuovi item", r.json()["total_added"] == 0)
+
+    # catalogo fonti consigliate (Reddit / Google News / Trends / blog)
+    r = client.get("/api/sources/catalog", headers=auth(editor_token))
+    catalog = r.json()
+    check("catalogo fonti consigliate disponibile", r.status_code == 200 and len(catalog) >= 10)
+    # il seed ha già installato tutto il catalogo → nessuna voce mancante
+    check("catalogo: fonti del seed marcate installed", all(c["installed"] for c in catalog))
+    r = client.post("/api/sources/catalog/add", headers=auth(editor_token), json={})
+    check("editor NON può aggiungere dal catalogo", r.status_code == 403)
+    r = client.post("/api/sources/catalog/add", headers=auth(admin_token), json={})
+    check("catalogo: add idempotente (0 duplicati)", r.status_code == 200 and r.json()["added"] == [])
+
+    r = client.post("/api/idea-engine/brainstorm", headers=auth(editor_token))
+    brainstorm = r.json()
+    if brainstorm.get("error"):
+        check("brainstorm evergreen senza chiave: errore gestito",
+              "ANTHROPIC_API_KEY" in brainstorm["error"])
+    else:
+        check("brainstorm evergreen: spunti proposti", brainstorm["proposals_created"] >= 1)
 
     r = client.post("/api/idea-engine/synthesize", headers=auth(editor_token))
     synth = r.json()

@@ -11,7 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from app.db import Base, SessionLocal, engine
-from app.models import Content, Idea, Metric, Source
+from app.models import Content, Idea, Metric
 from app.seed import run_seed
 
 random.seed(42)
@@ -112,12 +112,7 @@ def main():
                     relevance_score=relevance, angle="Proposta demo dell'Idea Engine",
                     hook_draft=f"Bozza hook: {title}"))
 
-    for label, url in [
-        ("Shopify Blog", "https://www.shopify.com/it/blog/feed"),
-        ("r/ecommerce", "https://www.reddit.com/r/ecommerce/.rss"),
-    ]:
-        db.add(Source(type="rss", url=url, label=label, active=True))
-
+    # le fonti arrivano già dal catalogo consigliato via run_seed()
     db.commit()
     print(f"Seed demo: {db.query(Idea).count()} idee, {db.query(Content).count()} contenuti, "
           f"{db.query(Metric).count()} snapshot metriche.")

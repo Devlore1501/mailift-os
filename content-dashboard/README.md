@@ -49,13 +49,13 @@ cd content-dashboard/backend && ../../.venv/bin/python seed_demo.py
 
 **M2 Performance & KPI** — inserimento metriche manuale per contenuto (snapshot multipli = andamento), import CSV con mapping colonne (aggancio per URL/ID/titolo), dashboard KPI con primari in alto e vanity in secondaria, trend settimanale, breakdown per format/pillar/surface con winner detection e kill flag, composizione buyer (`icp_ratio`) e funnel DM→FHS per contenuto e per format.
 
-**M3 Idea Engine** — CRUD fonti (rss/reddit/trend/competitor), job schedulato giornaliero + trigger manuale che fetch-a item deduplicati (una fonte down non blocca le altre), sintesi AI Anthropic → proposte `{angolo, pillar, format, hook, rilevanza 1-10}` in coda review; approvata → idea madre in M1. Senza `ANTHROPIC_API_KEY` il fetch funziona e la sintesi resta in attesa (item preservati).
+**M3 Idea Engine** — CRUD fonti (rss/reddit/news/trend/blog/twitter/competitor) con **catalogo di 15 fonti consigliate** installate al primo avvio (subreddit eCom/email, query Google News IT, Google Trends Italia, blog di settore — vedi [`backend/app/source_catalog.py`](backend/app/source_catalog.py)); job schedulato giornaliero + trigger manuale che fetch-a item deduplicati (una fonte down non blocca le altre); sintesi AI Anthropic → proposte `{angolo, pillar, format, hook, rilevanza 1-10}` in coda review; in più **brainstorm evergreen** ("Spunti evergreen" nella pagina Idee): argomenti interessanti da trattare non legati alle notizie, bilanciati sul mix pillar e deduplicati contro le idee recenti. Proposta approvata → idea madre in M1. Senza `ANTHROPIC_API_KEY` il fetch funziona e la sintesi/brainstorm restano in attesa (item preservati). X/Twitter non espone RSS pubblici: si aggiunge via bridge Nitter/RSSHub con tipo `twitter`.
 
 **Trasversali** — auth con ruoli (Contributor: script/hook/note e stati fino a Critico; Editor: tutto il piano e le metriche; Admin: + fonti, soglie, target, utenti), Impostazioni per tutte le soglie, activity log basilare.
 
 ## REST API
 
-Swagger su [http://localhost:8010/docs](http://localhost:8010/docs). Prefisso `/api`: `auth/*`, `users`, `ideas` (+`/children`), `contents` (+`/status` con gate, `/metrics`), `metrics/import` (CSV), `kpi/overview|pillar-mix|breakdown`, `sources`, `source-items`, `idea-engine/run|fetch|synthesize`, `config` (+`/settings`, `/pillar-targets`), `activity`, `health`.
+Swagger su [http://localhost:8010/docs](http://localhost:8010/docs). Prefisso `/api`: `auth/*`, `users`, `ideas` (+`/children`), `contents` (+`/status` con gate, `/metrics`), `metrics/import` (CSV), `kpi/overview|pillar-mix|breakdown`, `sources` (+`/catalog`, `/catalog/add`), `source-items`, `idea-engine/run|fetch|synthesize|brainstorm`, `config` (+`/settings`, `/pillar-targets`), `activity`, `health`.
 
 ## Test
 

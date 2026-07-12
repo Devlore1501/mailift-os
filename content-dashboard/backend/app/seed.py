@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 
 from .auth import hash_password
 from .enums import DEFAULT_PILLAR_TARGETS, DEFAULT_SETTINGS
-from .models import PillarTarget, Setting, User
+from .models import PillarTarget, Setting, Source, User
+from .source_catalog import CATALOG
 
 log = logging.getLogger("seed")
 
@@ -33,4 +34,9 @@ def run_seed(db: Session):
     for key, value in DEFAULT_SETTINGS.items():
         if not db.get(Setting, key):
             db.add(Setting(key=key, value=value))
+    # primo avvio: fonti consigliate pronte, così l'Idea Engine parte subito
+    if not db.query(Source).first():
+        for entry in CATALOG:
+            db.add(Source(type=entry["type"], url=entry["url"], label=entry["label"], active=True))
+        log.info("Seed: aggiunte %d fonti consigliate dal catalogo", len(CATALOG))
     db.commit()

@@ -8,6 +8,14 @@ import { fmtDateTime } from "@/lib/format";
 import { useApp } from "@/state/AppContext";
 import type { Source, User } from "@/types";
 
+interface CatalogEntry {
+  type: string;
+  label: string;
+  url: string;
+  note: string;
+  installed: boolean;
+}
+
 const THRESHOLD_FIELDS: { key: string; label: string }[] = [
   { key: "critic_gate_min", label: "Gate Critico minimo (0-50)" },
   { key: "winner_retention_pct", label: "Winner: retention > %" },
@@ -27,6 +35,7 @@ export default function Settings() {
   const [targets, setTargets] = useState<Record<string, string>>({});
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [sources, setSources] = useState<Source[] | null>(null);
+  const [catalog, setCatalog] = useState<CatalogEntry[]>([]);
   const [users, setUsers] = useState<User[] | null>(null);
   const [activity, setActivity] = useState<{ id: number; user: string | null; entity: string; action: string; at: string }[] | null>(null);
   const [newSource, setNewSource] = useState<{ type: string; url: string; label: string } | null>(null);
@@ -41,6 +50,7 @@ export default function Settings() {
   const loadLists = useCallback(async () => {
     const jobs: Promise<void>[] = [
       api.get<Source[]>("/api/sources").then(setSources),
+      api.get<CatalogEntry[]>("/api/sources/catalog").then(setCatalog),
     ];
     if (isAdmin) jobs.push(api.get<User[]>("/api/users").then(setUsers));
     if (isEditor) jobs.push(api.get<typeof activity>("/api/activity?limit=50").then((a) => setActivity(a)));
@@ -143,7 +153,7 @@ export default function Settings() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="font-bold">Fonti Idea Engine</h2>
-            <p className="text-xs text-ink-500">RSS, Reddit (.rss), trend, competitor. Job giornaliero automatico.</p>
+            <p className="text-xs text-ink-500">Reddit, Google News/Trends, blog di settore, RSS, X via bridge. Job giornaliero automatico.</p>
           </div>
           {isAdmin && (
             <button className="btn-gold" onClick={() => setNewSource({ type: "rss", url: "", label: "" })}>
@@ -213,6 +223,57 @@ export default function Settings() {
             ANTHROPIC_API_KEY non configurata: il fetch funziona, la sintesi AI delle proposte è disattivata.
           </p>
         )}
+
+        {/* catalogo fonti consigliate */}
+        {catalog.some((c) => !c.installed) && (
+          <div className="mt-5 pt-4 border-t border-navy-700">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold">Fonti consigliate</h3>
+              {isAdmin && (
+                <button className="btn-ghost !py-1.5" onClick={async () => {
+                  try {
+                    const res = await api.post<{ added: string[] }>("/api/sources/catalog/add", {});
+                    flash(`${res.added.length} fonti aggiunte`);
+                    await loadLists();
+                  } catch (e) {
+                    setError((e as Error).message);
+                  }
+                }}>
+                  Aggiungi tutte
+                </button>
+              )}
+            </div>
+            <div className="grid gap-2 md:grid-cols-2">
+              {catalog.filter((c) => !c.installed).map((entry) => (
+                <div key={entry.url} className="flex items-center gap-3 rounded-lg border border-navy-700 bg-navy-900 px-3 py-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-semibold truncate">
+                      {entry.label}
+                      <span className="font-mono text-[10px] text-ink-500 ml-2 uppercase">{entry.type}</span>
+                    </div>
+                    <div className="text-xs text-ink-500 truncate" title={entry.note}>{entry.note}</div>
+                  </div>
+                  {isAdmin && (
+                    <button className="btn-ghost !py-1 !px-2.5 text-xs shrink-0" onClick={async () => {
+                      try {
+                        await api.post("/api/sources/catalog/add", { urls: [entry.url] });
+                        await loadLists();
+                      } catch (e) {
+                        setError((e as Error).message);
+                      }
+                    }}>
+                      <Plus className="w-3.5 h-3.5" aria-hidden /> Aggiungi
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <p className="text-xs text-ink-500 mt-3">
+          X/Twitter non espone feed RSS pubblici: per seguire account o ricerche X aggiungi come fonte
+          l'URL di un bridge (Nitter o RSSHub) con tipo «twitter».
+        </p>
       </section>
 
       {/* utenti */}

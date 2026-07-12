@@ -1,5 +1,5 @@
 // M3 coda review proposte AI + M1 idee madri con repurposing view (FR-M1-03).
-import { Check, ExternalLink, Plus, Sparkles, X } from "lucide-react";
+import { Check, ExternalLink, Lightbulb, Plus, Sparkles, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 import ContentModal from "@/components/ContentModal";
@@ -22,6 +22,7 @@ export default function Ideas() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [running, setRunning] = useState(false);
+  const [brainstorming, setBrainstorming] = useState(false);
   const [newIdeaOpen, setNewIdeaOpen] = useState(false);
   const [childrenFor, setChildrenFor] = useState<Idea | null>(null);
   const [openContent, setOpenContent] = useState<number | null>(null);
@@ -56,6 +57,22 @@ export default function Ideas() {
       setError((e as Error).message);
     } finally {
       setRunning(false);
+    }
+  };
+
+  const brainstorm = async () => {
+    setBrainstorming(true);
+    setError("");
+    setNotice("");
+    try {
+      const res = await api.post<{ proposals_created: number; error?: string }>("/api/idea-engine/brainstorm?n=6");
+      if (res.error) setError(res.error);
+      else setNotice(`${res.proposals_created} spunti evergreen proposti — in coda review`);
+      await load();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBrainstorming(false);
     }
   };
 
@@ -99,10 +116,18 @@ export default function Ideas() {
         </div>
         <div className="flex gap-2">
           {isEditor && (
-            <button className="btn-ghost" onClick={runEngine} disabled={running}>
-              <Sparkles className="w-4 h-4 text-gold-500" aria-hidden />
-              {running ? "In corso…" : "Esegui Idea Engine"}
-            </button>
+            <>
+              <button className="btn-ghost" onClick={runEngine} disabled={running}
+                title="Fetch dalle fonti (Reddit, news, blog) + sintesi AI">
+                <Sparkles className="w-4 h-4 text-gold-500" aria-hidden />
+                {running ? "In corso…" : "Dalle fonti"}
+              </button>
+              <button className="btn-ghost" onClick={brainstorm} disabled={brainstorming}
+                title="Argomenti interessanti da trattare, non legati alle notizie">
+                <Lightbulb className="w-4 h-4 text-gold-500" aria-hidden />
+                {brainstorming ? "In corso…" : "Spunti evergreen"}
+              </button>
+            </>
           )}
           <button className="btn-gold" onClick={() => setNewIdeaOpen(true)}>
             <Plus className="w-4 h-4" aria-hidden /> Idea madre

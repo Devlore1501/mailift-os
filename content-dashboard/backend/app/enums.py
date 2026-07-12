@@ -71,7 +71,8 @@ PLATFORMS = {"instagram": "Instagram", "tiktok": "TikTok"}
 IDEA_STATUSES = ["proposed", "approved", "discarded"]
 IDEA_ORIGINS = ["ai", "manual"]
 
-SOURCE_TYPES = ["rss", "reddit", "trend", "competitor"]
+# twitter = via bridge RSS (Nitter/RSSHub), X non espone feed pubblici
+SOURCE_TYPES = ["rss", "reddit", "news", "trend", "blog", "twitter", "competitor"]
 
 ROLES = ["admin", "editor", "contributor"]
 
