@@ -14,6 +14,8 @@ Usage:
     python tools/reengagement_radar.py --days 60    # finestra personalizzata
     python tools/reengagement_radar.py --ghl        # crea task nelle schede contatto GHL
     python tools/reengagement_radar.py --all --ghl  # tutti i prospect → task GHL
+    python tools/reengagement_radar.py --ghl --voice  # + tag `da-richiamare` per la coda
+                                                      # dell'agente vocale (solo voice-optin)
 """
 
 from __future__ import annotations
@@ -195,8 +197,12 @@ def _due_date_iso(d: date) -> str:
     return dt.isoformat()
 
 
-def sync_to_ghl(results: list[dict]) -> None:
-    """Crea un task nella scheda contatto GHL per ogni prospect del radar."""
+def sync_to_ghl(results: list[dict], voice: bool = False) -> None:
+    """Crea un task nella scheda contatto GHL per ogni prospect del radar.
+
+    voice=True: aggiunge anche il tag `da-richiamare` (coda dell'agente vocale,
+    vedi workflows/voice_agent.md) — SOLO se il contatto ha già `voice-optin`.
+    """
     print(f"\n{'='*60}")
     print("  SYNC → GHL")
     print(f"{'='*60}\n")
@@ -271,6 +277,14 @@ def sync_to_ghl(results: list[dict]) -> None:
             print(f"     ✓ Task + nota creati | Scadenza: {data_reminder}")
             print(f"       Messaggio: \"{messaggio[:70]}...\"")
 
+            if voice:
+                contact_tags = set(contact.get("tags") or [])
+                if "voice-optin" in contact_tags:
+                    ghl.add_tags(contact_id, ["da-richiamare"])
+                    print("     📞 Tag `da-richiamare` aggiunto (coda agente vocale)")
+                else:
+                    print("     ⚠️  Niente `voice-optin` — NON aggiunto alla coda vocale")
+
         except ghl.GHLError as exc:
             print(f"     ❌ GHL error: {exc}")
 
@@ -281,6 +295,7 @@ def main() -> None:
     args = sys.argv[1:]
     show_all = "--all" in args
     sync_ghl = "--ghl" in args
+    voice = "--voice" in args
 
     window_days = 30
     for i, a in enumerate(args):
@@ -294,7 +309,7 @@ def main() -> None:
     print_report(results, window_days)
 
     if sync_ghl:
-        sync_to_ghl(results)
+        sync_to_ghl(results, voice=voice)
 
 
 if __name__ == "__main__":

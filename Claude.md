@@ -147,6 +147,7 @@ Il tuo ruolo è **eseguire task operativi** in autonomia, senza aspettare confer
 | Documenti | Notion, Google Drive | ✅ Notion via API completa ([tools/notion_tasks.py](tools/notion_tasks.py)): list/create/update/batch close. Drive non ancora wired. |
 | Analisi call | Fathom → AI → GHL → Gamma | ⚠️ Fathom: ingestion manuale (paste trascrizione). Gamma: ✅ MCP. GHL: TODO. |
 | Fatturazione | Fatture in Cloud | ✅ Tool dedicato (`tools/fic_client.py`) |
+| Voice agent | Vapi + Twilio (numero IT) | ✅ [tools/vapi_client.py](tools/vapi_client.py) + [tools/voice_campaign.py](tools/voice_campaign.py). Richiede `VAPI_*` in `.env` + setup esterno (vedi workflow) |
 
 ## Aree di Competenza
 
@@ -188,6 +189,9 @@ Il tuo ruolo è **eseguire task operativi** in autonomia, senza aspettare confer
 - Preparare briefing pre-call con contesto del lead
 - Aggiornare note + tag GHL dopo le call (HOT/WARM/COLD via tag, briefing in nota)
 - Workflow: [workflows/discovery_call_processing.md](workflows/discovery_call_processing.md)
+- Agente vocale (inbound + campagne outbound su contatti `voice-optin`):
+  [workflows/voice_agent.md](workflows/voice_agent.md). Campagne SOLO a richiesta
+  con conferma di Lorenzo (chiamate reali a pagamento), mai da cron.
 
 ### 6. Amministrazione
 - Workflow autofatture TD17/18/19: [workflows/emit_autofatture.md](workflows/emit_autofatture.md)

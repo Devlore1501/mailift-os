@@ -6,12 +6,14 @@ pullano dati dai client esistenti (Notion, GCal, Gmail, Klaviyo), formattano un
 messaggio, lo mandano via bot.send_message. Niente LLM nei job — affidabilita'
 prima di tutto.
 
-Job attivi (5) — cadenze low-noise:
+Job attivi (7) — cadenze low-noise:
 1. Briefing mattutino       → 08:00 lun-ven (include scadenze prossime)
 2. Replan calendario        → 08:30 lun-ven (via agent_runner + replan_calendar.md)
 3. Check email VIP          → 09:00 / 13:00 / 17:00 lun-ven (3 check fissi)
 4. Report Klaviyo           → 09:00 lunedi'
 5. Recap fine giornata      → 19:00 lun-ven
+6. Autofatture mensili      → 09:00 il 10 del mese
+7. Report voice agent       → 09:30 lun-ven (report-only, mai lancia chiamate)
 
 Nota: job_poll_deadlines esiste ancora nel file ma NON e' piu' nel registro JOBS
 (le scadenze passano nel briefing mattutino). Resta disponibile per ripristino
@@ -587,6 +589,52 @@ async def job_replan_calendar() -> None:
         logger.error("job_replan_calendar failed: %s", exc)
 
 
+# ─── Job 8: Report chiamate agente vocale ────────────────────────────────────
+
+
+async def job_voice_calls_report() -> None:
+    """09:30 lun-ven. Riepilogo chiamate Vapi delle ultime 24h (report-only,
+    non lancia MAI chiamate — vedi workflows/voice_agent.md)."""
+    import asyncio
+
+    logger.info("running: voice_calls_report")
+    try:
+        from tools import vapi_client as vapi
+
+        if not vapi.API_KEY:
+            logger.info("voice_calls_report: VAPI_API_KEY assente, skip")
+            return
+
+        since = (datetime.now(timezone.utc) - timedelta(hours=24)).strftime(
+            "%Y-%m-%dT%H:%M:%SZ"
+        )
+        loop = asyncio.get_event_loop()
+        calls = await loop.run_in_executor(
+            None, lambda: vapi.list_calls(limit=50, created_at_gt=since)
+        )
+
+        if not calls:
+            return  # niente chiamate → niente rumore
+
+        esiti: dict[str, int] = {}
+        inbound = outbound = 0
+        for c in calls:
+            outcome = vapi.extract_outcome(c)
+            esiti[outcome["esito"]] = esiti.get(outcome["esito"], 0) + 1
+            if c.get("type") == "inboundPhoneCall":
+                inbound += 1
+            else:
+                outbound += 1
+
+        lines = [f"📞 *Voice agent — ultime 24h*: {len(calls)} chiamate\n"]
+        lines.append(f"↘️ Inbound: {inbound} | ↗️ Outbound: {outbound}")
+        lines.append("*Esiti:* " + ", ".join(f"{k}: {v}" for k, v in sorted(esiti.items())))
+        lines.append("\n_Dettagli: `python tools/vapi_client.py list`_")
+        await _send("\n".join(lines), force=True)
+    except Exception as exc:  # noqa: BLE001
+        logger.error("job_voice_calls_report failed: %s", exc)
+
+
 # ─── Job registry per /run e /status ────────────────────────────────────────
 
 JOBS: dict[str, dict[str, Any]] = {
@@ -621,6 +669,11 @@ JOBS: dict[str, dict[str, Any]] = {
         "func": job_monthly_autofatture,
         "trigger": CronTrigger(day=10, hour=9, minute=0, timezone=TZ),
         "label": "Autofatture mensili (09:00 il 10 di ogni mese)",
+    },
+    "voice_calls_report": {
+        "func": job_voice_calls_report,
+        "trigger": CronTrigger(day_of_week="mon-fri", hour=9, minute=30, timezone=TZ),
+        "label": "Report chiamate voice agent (09:30 lun-ven)",
     },
 }
 

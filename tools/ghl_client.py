@@ -9,6 +9,7 @@ Variabili .env richieste:
 
 Funzioni esposte:
 - search_contacts_by_email(email)              → list[dict]
+- search_contacts_by_tags(tags)                → list[dict] (AND sui tag)
 - find_or_create_contact(email, first, last,
     company, source, phone, tags)              → dict (contact)
 - get_contact(contact_id)                      → dict
@@ -157,6 +158,23 @@ def search_contacts_by_name(query: str, limit: int = 5) -> list[dict]:
         "/contacts/",
         params={"locationId": LOCATION_ID, "query": query, "limit": limit},
     )
+    return data.get("contacts", [])
+
+
+def search_contacts_by_tags(tags: list[str], limit: int = 50) -> list[dict]:
+    """Cerca contatti che hanno TUTTI i tag indicati (AND). Read-only.
+
+    Usa POST /contacts/search (Search API v2) con un filtro per tag.
+    Usato da voice_campaign.py per la coda outbound: ["voice-optin", "da-richiamare"].
+    """
+    payload = {
+        "locationId": LOCATION_ID,
+        "pageLimit": limit,
+        "filters": [
+            {"field": "tags", "operator": "eq", "value": tag} for tag in tags
+        ],
+    }
+    data = _request("POST", "/contacts/search", json=payload)
     return data.get("contacts", [])
 
 
