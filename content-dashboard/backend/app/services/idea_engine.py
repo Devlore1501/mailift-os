@@ -299,11 +299,23 @@ SCRIPT_TOOL = {
 }
 
 SURFACE_SCRIPT_GUIDE = {
-    "reel": "Reel 30-45 secondi (~110-150 parole parlate). Struttura: HOOK (3s) → problema concreto in euro → 2-3 punti/passaggi → CTA finale con keyword da commentare in DM. Indica tra [parentesi] le indicazioni visive essenziali.",
-    "carousel": "Carosello 6-8 slide. Formato: SLIDE 1: gancio forte · SLIDE 2: il problema quantificato · SLIDE 3-6: un punto per slide, testo breve · ULTIMA SLIDE: CTA con keyword DM. Max 25 parole per slide.",
-    "story": "Sequenza di 3-5 story. Formato: STORY 1: gancio + sondaggio/domanda · STORY 2-3: sviluppo rapido · ULTIMA: CTA con link/keyword. Tono diretto, da parlato.",
-    "other": "Formato libero ma breve: hook, corpo in 2-3 punti, CTA con keyword DM.",
+    "reel": "Reel 30-45 secondi (~110-160 parole parlate). Applica la struttura open loop con le sei sezioni etichettate (HOOK / LEAD / BODY 1 — open loop / BODY 2 — open loop 2 / BODY 3 — payoff / CTA). Indica tra [parentesi] le indicazioni visive essenziali.",
+    "carousel": "Carosello 6-8 slide che segue la struttura open loop: SLIDE 1 = HOOK · SLIDE 2 = LEAD · SLIDE 3-4 = BODY 1 e 2 (ognuna chiude aprendo il loop successivo, lo swipe È il loop) · SLIDE 5-6 = BODY 3 payoff · ULTIMA = CTA. Max 25 parole per slide, etichetta ogni slide.",
+    "story": "Sequenza di 4-6 story che segue la struttura open loop: STORY 1 = HOOK (+ sondaggio/domanda) · STORY 2 = LEAD · STORY centrali = BODY 1 e 2 con i loop aperti tra una story e l'altra · penultima = BODY 3 payoff · ULTIMA = CTA. Etichetta ogni story.",
+    "other": "Applica comunque la struttura open loop a sei sezioni etichettate, in forma compatta.",
 }
+
+_STYLE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "prompts", "script_style.md")
+
+
+def _load_script_style() -> str:
+    """Guida di stile editabile senza toccare il codice (prompts/script_style.md)."""
+    try:
+        with open(_STYLE_PATH, encoding="utf-8") as fh:
+            return fh.read()
+    except OSError:
+        log.warning("script_style.md non trovato: genero senza guida di stile")
+        return ""
 
 
 def generate_script(content, idea=None) -> dict:
@@ -326,9 +338,11 @@ def generate_script(content, idea=None) -> dict:
         "note_di_regia": content.notes,
     }
     guide = SURFACE_SCRIPT_GUIDE.get(content.surface, SURFACE_SCRIPT_GUIDE["other"])
+    style = _load_script_style()
     prompt = (
         "Scrivi la bozza di script per questo contenuto organico di Mailift.\n\n"
-        f"Brief:\n{json.dumps({k: v for k, v in brief.items() if v}, ensure_ascii=False, indent=1)}\n\n"
+        + (f"GUIDA DI STILE (da seguire alla lettera):\n\n{style}\n\n---\n\n" if style else "")
+        + f"Brief:\n{json.dumps({k: v for k, v in brief.items() if v}, ensure_ascii=False, indent=1)}\n\n"
         f"Formato richiesto: {guide}\n\n"
         "Regole:\n"
         "- Parla a owner di eCommerce DTC italiani (mai a freelance/agenzie); usa numeri ed euro concreti.\n"
