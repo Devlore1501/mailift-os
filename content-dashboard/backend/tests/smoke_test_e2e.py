@@ -102,6 +102,14 @@ with TestClient(app) as client:
     r = client.post(f"/api/contents/{first}/status", headers=auth(contrib_token), json={"status": "scheduled"})
     check("contributor NON può programmare", r.status_code == 403)
 
+    # 5b. generazione bozza script (anche per contributor)
+    r = client.post(f"/api/contents/{first}/generate-script", headers=auth(contrib_token))
+    if r.status_code == 503:
+        check("genera script senza chiave: 503 con messaggio chiaro",
+              "ANTHROPIC_API_KEY" in r.json()["detail"])
+    else:
+        check("genera script: bozza restituita", r.status_code == 200 and len(r.json()["script"]) > 50)
+
     # 6. Gate Critico (FR-M1-05): score 35 blocca, 41 passa
     r = client.post(f"/api/contents/{first}/status", headers=auth(editor_token), json={"status": "scheduled"})
     check("gate: senza score niente Programmato", r.status_code == 422, r.json().get("detail", "")[:60])

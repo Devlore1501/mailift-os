@@ -284,6 +284,77 @@ def generate_evergreen(db: Session, n: int = 6) -> dict:
     return {"proposals_created": created}
 
 
+SCRIPT_TOOL = {
+    "name": "submit_script",
+    "description": "Registra la bozza di script generata per il contenuto.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "script": {"type": "string", "description": "Bozza completa dello script in italiano"},
+            "hook": {"type": "string", "description": "Hook (prime 3 secondi), solo se non già fornito"},
+            "cta_keyword": {"type": "string", "description": "Keyword DM suggerita (una parola), solo se non già fornita"},
+        },
+        "required": ["script"],
+    },
+}
+
+SURFACE_SCRIPT_GUIDE = {
+    "reel": "Reel 30-45 secondi (~110-150 parole parlate). Struttura: HOOK (3s) → problema concreto in euro → 2-3 punti/passaggi → CTA finale con keyword da commentare in DM. Indica tra [parentesi] le indicazioni visive essenziali.",
+    "carousel": "Carosello 6-8 slide. Formato: SLIDE 1: gancio forte · SLIDE 2: il problema quantificato · SLIDE 3-6: un punto per slide, testo breve · ULTIMA SLIDE: CTA con keyword DM. Max 25 parole per slide.",
+    "story": "Sequenza di 3-5 story. Formato: STORY 1: gancio + sondaggio/domanda · STORY 2-3: sviluppo rapido · ULTIMA: CTA con link/keyword. Tono diretto, da parlato.",
+    "other": "Formato libero ma breve: hook, corpo in 2-3 punti, CTA con keyword DM.",
+}
+
+
+def generate_script(content, idea=None) -> dict:
+    """Bozza script AI per un contenuto (hook/pillar/format come brief). Human-in-the-loop:
+    la bozza va nel campo script della UI, l'umano la rifinisce e salva."""
+    if not ANTHROPIC_API_KEY:
+        return {"error": "ANTHROPIC_API_KEY mancante nel .env: la generazione script è disattivata."}
+
+    import anthropic
+
+    brief = {
+        "titolo": content.title or (idea.title if idea else None),
+        "idea_madre": idea.title if idea else None,
+        "angolo": idea.angle if idea else None,
+        "pillar": PILLARS.get(content.pillar, content.pillar),
+        "surface": content.surface,
+        "format": FORMATS.get(content.format, content.format),
+        "hook_esistente": content.hook,
+        "cta_keyword_esistente": content.cta_keyword,
+        "note_di_regia": content.notes,
+    }
+    guide = SURFACE_SCRIPT_GUIDE.get(content.surface, SURFACE_SCRIPT_GUIDE["other"])
+    prompt = (
+        "Scrivi la bozza di script per questo contenuto organico di Mailift.\n\n"
+        f"Brief:\n{json.dumps({k: v for k, v in brief.items() if v}, ensure_ascii=False, indent=1)}\n\n"
+        f"Formato richiesto: {guide}\n\n"
+        "Regole:\n"
+        "- Parla a owner di eCommerce DTC italiani (mai a freelance/agenzie); usa numeri ed euro concreti.\n"
+        "- Se c'è un hook esistente, aprilo con quello (puoi limarlo); altrimenti proponine uno.\n"
+        "- CTA coerente col funnel Mailift: commenta/scrivi la keyword in DM per ricevere il Flow Health Score.\n"
+        "- Niente gergo da marketer, niente promesse gonfiate. Tono diretto, primo persona singolare."
+    )
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+    response = client.messages.create(
+        model=ANTHROPIC_MODEL,
+        max_tokens=2048,
+        system=SYSTEM_PROMPT,
+        tools=[SCRIPT_TOOL],
+        tool_choice={"type": "tool", "name": "submit_script"},
+        messages=[{"role": "user", "content": prompt}],
+    )
+    for block in response.content:
+        if block.type == "tool_use" and block.name == "submit_script":
+            return {
+                "script": block.input.get("script", ""),
+                "hook": block.input.get("hook"),
+                "cta_keyword": block.input.get("cta_keyword"),
+            }
+    return {"error": "L'AI non ha restituito uno script: riprova."}
+
+
 def run_job(db: Session) -> dict:
     """Job completo (FR-M3-02): fetch + sintesi. Usato dallo scheduler e dal trigger manuale."""
     fetch_result = fetch_sources(db)

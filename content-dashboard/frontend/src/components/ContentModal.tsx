@@ -1,5 +1,5 @@
 // Dettaglio contenuto: brief/script, programmazione, score Critico, metriche.
-import { ExternalLink, Plus, Trash2 } from "lucide-react";
+import { ExternalLink, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 import { api } from "@/lib/api";
@@ -41,6 +41,7 @@ export default function ContentModal({
   const [tab, setTab] = useState<"brief" | "metrics">("brief");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [metricDraft, setMetricDraft] = useState<MetricDraft>({});
 
@@ -101,6 +102,27 @@ export default function ContentModal({
       setError((e as Error).message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const generateScript = async () => {
+    if (!content) return;
+    setGenerating(true);
+    setError("");
+    try {
+      const res = await api.post<{ script: string; hook: string | null; cta_keyword: string | null }>(
+        `/api/contents/${content.id}/generate-script`,
+      );
+      setDraft((d) => ({
+        ...d,
+        script: res.script,
+        hook: d.hook || res.hook || d.hook,
+        cta_keyword: d.cta_keyword || res.cta_keyword || d.cta_keyword,
+      }));
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -260,7 +282,19 @@ export default function ContentModal({
               onChange={(e) => setDraft({ ...draft, hook: e.target.value })} />
           </div>
           <div className="md:col-span-2">
-            <label className="label" htmlFor="cm-script">Script</label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="label !mb-0" htmlFor="cm-script">Script</label>
+              <button
+                type="button"
+                className="btn-ghost !py-1 !px-2.5 text-xs"
+                onClick={generateScript}
+                disabled={generating}
+                title="Bozza AI dal brief (idea madre, angolo, hook, pillar, format) — poi rifinisci e salva"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-gold-500" aria-hidden />
+                {generating ? "Generazione…" : "Genera bozza script"}
+              </button>
+            </div>
             <textarea id="cm-script" className="input min-h-[140px]" value={draft.script ?? ""}
               onChange={(e) => setDraft({ ...draft, script: e.target.value })} />
           </div>

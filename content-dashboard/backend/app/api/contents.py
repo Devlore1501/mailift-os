@@ -11,6 +11,7 @@ from ..models import Content, Idea, User, utcnow
 from ..util import naive_utc
 from ..schemas import ContentCreate, ContentOut, ContentUpdate, MetricOut, StatusChangeIn
 from ..services.activity import log_activity
+from ..services.idea_engine import generate_script
 from ..services.kpi import compute_winner_ids, get_settings_map, latest_metric
 
 router = APIRouter(prefix="/api/contents", tags=["contents"])
@@ -197,6 +198,25 @@ def change_status(content_id: int, body: StatusChangeIn, user: User = Depends(an
     db.commit()
     db.refresh(content)
     return serialize(content)
+
+
+@router.post("/{content_id}/generate-script")
+def generate_script_draft(content_id: int, user: User = Depends(any_user),
+                          db: OrmSession = Depends(get_db)):
+    """Bozza script AI dal brief (idea madre, angolo, hook, pillar, format).
+
+    Ritorna solo la bozza: non salva nulla — l'umano rifinisce nella UI e preme Salva.
+    Aperto anche ai Contributor: scrivere script è il loro lavoro.
+    """
+    content = db.get(Content, content_id)
+    if not content:
+        raise HTTPException(status_code=404, detail="Contenuto non trovato")
+    result = generate_script(content, content.idea)
+    if result.get("error"):
+        raise HTTPException(status_code=503, detail=result["error"])
+    log_activity(db, user, "content", content_id, "generata bozza script AI")
+    db.commit()
+    return result
 
 
 @router.delete("/{content_id}", status_code=204)
