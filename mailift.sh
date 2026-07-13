@@ -44,6 +44,7 @@ echo "  Mailift OS"
 echo "  Hub:               http://localhost:4000"
 if [ "$mode" = "all" ]; then
 echo "  Content Dashboard: http://localhost:5174"
+echo "  Email Planner:     http://localhost:5175"
 echo "  Autofatture:       http://localhost:5173"
 fi
 echo "  Ctrl+C ferma tutto"
@@ -59,6 +60,14 @@ if [ "$mode" = "all" ]; then
         (cd "$ROOT/content-dashboard/frontend" && npm install)
     fi
     run "content-web" "$ROOT/content-dashboard/frontend" npm run dev
+
+    # Email Planner
+    run "planner-api" "$ROOT/email-planner/backend" "$VENV/bin/uvicorn" app.main:app --port 8020 --reload
+    if [ ! -d "$ROOT/email-planner/frontend/node_modules" ]; then
+        echo "[planner-web] 📦 npm install (prima volta)..."
+        (cd "$ROOT/email-planner/frontend" && npm install)
+    fi
+    run "planner-web" "$ROOT/email-planner/frontend" npm run dev
 
     # Autofatture (se le sue dipendenze non sono installate, fallisce solo lei)
     run "fatture-api" "$ROOT/webapp/backend" "$VENV/bin/uvicorn" app.main:app --port 8000 --reload

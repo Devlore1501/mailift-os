@@ -25,6 +25,15 @@ APPS = [
         "accent": "#E0A93B",
     },
     {
+        "key": "email_planner",
+        "name": "Email Planner",
+        "description": "Piano invii dei clienti retainer: calendario, pipeline copy → review → invio, risultati.",
+        "url": "http://localhost:5175",
+        "health": "http://localhost:8020/api/health",
+        "docs": "http://localhost:8020/docs",
+        "accent": "#3DCB8F",
+    },
+    {
         "key": "autofatture",
         "name": "Autofatture",
         "description": "Reverse charge TD17/18/19 su Fatture in Cloud da estratti Revolut, verifica fornitori via Gmail.",
