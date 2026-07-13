@@ -71,8 +71,19 @@ manuale nel dashboard Vapi dopo ogni modifica.
 5. Riporta il summary (lanciate/esiti) in chat.
 
 ## Setup esterno (one-time, riferimento)
-1. Twilio: bundle regolatorio IT (P.IVA/visura) → numero geografico +39.
-2. Vapi: import numero Twilio → 3 assistant (prompt da `knowledge/voice/`)
+1. Numero italiano +39 — opzioni in ordine di convenienza:
+   - **Telnyx** (consigliato): numero geografico a pochi €/mese + KYC IT,
+     collegato a Vapi via BYO SIP trunk (FQDN `sip.vapi.ai`). Testare subito
+     una chiamata reale (segnalati intoppi occasionali Telnyx+Vapi in community).
+   - Provider VoIP italiano (VoipVoice, Messagenet, DIDWW...) via BYO SIP trunk;
+     se Lorenzo ha già un numero VoIP con credenziali SIP, si collega quello.
+   - Twilio: per l'Italia vende solo mobile/toll-free (~90 €/mese) — sconsigliato,
+     usare solo se serve l'import nativo. Numeri SIM mobili (TIM ecc.) non sono
+     collegabili: eventualmente portabilità verso Telnyx.
+   ⚠️ MAI numero US con caller ID italiano "sovrapposto": bloccato dal filtro
+   anti-spoofing AGCOM (fissi dal 08/2025, mobili dal 11/2025), oltre che illecito
+   se il numero non è tuo.
+2. Vapi: collega il numero (import Twilio o BYO SIP trunk) → 3 assistant (prompt da `knowledge/voice/`)
    → analysisPlan con lo schema in `knowledge/voice/README.md` → tool GHL
    nativi (OAuth + `calendarId`).
 3. GHL: app Vapi dal marketplace + 3 workflow (`Voice — Inbound post-call`,
