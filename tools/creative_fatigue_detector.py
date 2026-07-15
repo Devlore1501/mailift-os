@@ -24,6 +24,7 @@ Di default scrive anche un report HTML navigabile in `.tmp/creative_fatigue_repo
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import os
 import sys
@@ -121,7 +122,44 @@ def _pct_change(old: float, new: float) -> float | None:
     return (new - old) / old
 
 
-def analyze(ads: dict[str, dict], weekly: dict[str, list[dict]]) -> list[dict]:
+def _classify(age_days: int | None, ctr_change: float | None, freq_change: float | None) -> tuple[str, list[str], str]:
+    """Applica le soglie di fatica e ritorna (severity, signals, action)."""
+    signals: list[str] = []
+    severity = "OK"
+
+    def _bump(level: str) -> None:
+        nonlocal severity
+        if level == "URGENTE" or severity == "OK":
+            severity = level
+
+    if age_days is not None and age_days >= AGE_URGENT_DAYS:
+        signals.append(f"età {age_days}gg ≥ {AGE_URGENT_DAYS}gg")
+        _bump("URGENTE")
+    elif age_days is not None and age_days >= AGE_WATCH_DAYS:
+        signals.append(f"età {age_days}gg ≥ {AGE_WATCH_DAYS}gg")
+        _bump("WATCH")
+
+    if ctr_change is not None and ctr_change <= -CTR_DECLINE_URGENT:
+        signals.append(f"CTR {ctr_change:+.0%} vs periodo precedente")
+        _bump("URGENTE")
+    elif ctr_change is not None and ctr_change <= -CTR_DECLINE_WATCH:
+        signals.append(f"CTR {ctr_change:+.0%} vs periodo precedente")
+        _bump("WATCH")
+
+    if freq_change is not None and freq_change >= FREQ_RISE_WATCH:
+        signals.append(f"frequency {freq_change:+.0%} vs periodo precedente")
+        _bump("WATCH")
+
+    if severity == "URGENTE":
+        action = "Refresh o pausa: sostituisci il concept, non solo la variante"
+    elif severity == "WATCH":
+        action = "Prepara una variante di ricambio, monitora la prossima settimana"
+    else:
+        action = "Nessuna azione"
+    return severity, signals, action
+
+
+def analyze(ads: dict[str, dict], weekly: dict[str, list[dict]], min_impressions: int = MIN_IMPRESSIONS) -> list[dict]:
     today = datetime.now(timezone.utc).date()
     results = []
     for ad_id, meta in ads.items():
@@ -129,7 +167,7 @@ def analyze(ads: dict[str, dict], weekly: dict[str, list[dict]]) -> list[dict]:
         if not buckets:
             continue
         total_impr = sum(b["impressions"] for b in buckets)
-        if total_impr < MIN_IMPRESSIONS:
+        if total_impr < min_impressions:
             continue
 
         age_days = None
@@ -146,38 +184,7 @@ def analyze(ads: dict[str, dict], weekly: dict[str, list[dict]]) -> list[dict]:
         ctr_change = _pct_change(prev["ctr"], last["ctr"]) if prev else None
         freq_change = _pct_change(prev["frequency"], last["frequency"]) if prev else None
 
-        signals: list[str] = []
-        severity = "OK"
-
-        def _bump(level: str) -> None:
-            nonlocal severity
-            if level == "URGENTE" or severity == "OK":
-                severity = level
-
-        if age_days is not None and age_days >= AGE_URGENT_DAYS:
-            signals.append(f"età {age_days}gg ≥ {AGE_URGENT_DAYS}gg")
-            _bump("URGENTE")
-        elif age_days is not None and age_days >= AGE_WATCH_DAYS:
-            signals.append(f"età {age_days}gg ≥ {AGE_WATCH_DAYS}gg")
-            _bump("WATCH")
-
-        if ctr_change is not None and ctr_change <= -CTR_DECLINE_URGENT:
-            signals.append(f"CTR {ctr_change:+.0%} sett/sett")
-            _bump("URGENTE")
-        elif ctr_change is not None and ctr_change <= -CTR_DECLINE_WATCH:
-            signals.append(f"CTR {ctr_change:+.0%} sett/sett")
-            _bump("WATCH")
-
-        if freq_change is not None and freq_change >= FREQ_RISE_WATCH:
-            signals.append(f"frequency {freq_change:+.0%} sett/sett")
-            _bump("WATCH")
-
-        if severity == "URGENTE":
-            action = "Refresh o pausa: sostituisci il concept, non solo la variante"
-        elif severity == "WATCH":
-            action = "Prepara una variante di ricambio, monitora la prossima settimana"
-        else:
-            action = "Nessuna azione"
+        severity, signals, action = _classify(age_days, ctr_change, freq_change)
 
         results.append({
             "ad_id": ad_id,
@@ -201,11 +208,104 @@ def analyze(ads: dict[str, dict], weekly: dict[str, list[dict]]) -> list[dict]:
     return results
 
 
-def print_report(results: list[dict], days: int) -> None:
-    print(f"\n[creative-fatigue] Analisi {days}gg — {len(results)} annunci con dati sufficienti\n")
+# ── Modalità CSV (export manuale da Meta Ads Manager, nessun token richiesto) ──
+
+def _csv_float(v: str | None) -> float:
+    try:
+        return float(v) if v else 0.0
+    except ValueError:
+        return 0.0
+
+
+def parse_meta_csv(path: Path) -> dict[str, list[dict]]:
+    """Legge un export CSV di Ads Manager (breakdown giornaliero per annuncio).
+
+    Colonne attese (export standard "per giorno" a livello annuncio):
+    Reporting starts, Ad name, Ad delivery, Reach, Frequency,
+    Amount spent (EUR), Impressions, CTR (all).
+    """
+    by_ad: dict[str, list[dict]] = {}
+    with path.open(newline="", encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            name = (row.get("Ad name") or "").strip()
+            if not name:
+                continue
+            by_ad.setdefault(name, []).append({
+                "date": row.get("Reporting starts", ""),
+                "delivery": (row.get("Ad delivery") or "").strip().lower(),
+                "impressions": int(_csv_float(row.get("Impressions"))),
+                "reach": int(_csv_float(row.get("Reach"))),
+                "frequency": _csv_float(row.get("Frequency")),
+                "ctr": _csv_float(row.get("CTR (all)")),
+                "spend": _csv_float(row.get("Amount spent (EUR)")),
+            })
+    for rows in by_ad.values():
+        rows.sort(key=lambda r: r["date"])
+    return by_ad
+
+
+def analyze_csv(path: Path, min_impressions: int, include_inactive: bool) -> list[dict]:
+    """Analizza un export CSV Ads Manager con la stessa logica di `analyze()`.
+
+    Senza `created_time` (non presente in questo export) l'età non è
+    calcolabile: la severità si basa solo su trend CTR/frequency, confrontando
+    la prima metà vs la seconda metà dei giorni con delivery reale nel file.
+    """
+    by_ad = parse_meta_csv(path)
+    results = []
+
+    for name, rows in by_ad.items():
+        latest_status = rows[-1]["delivery"] if rows else ""
+        if not include_inactive and latest_status != "active":
+            continue
+
+        active_days = [r for r in rows if r["impressions"] > 0]
+        total_impr = sum(r["impressions"] for r in active_days)
+        if total_impr < min_impressions or len(active_days) < 2:
+            continue
+
+        mid = max(1, len(active_days) // 2)
+        first_half = active_days[:mid]
+        second_half = active_days[mid:] or active_days[-1:]
+
+        def _wavg(subset: list[dict], key: str) -> float:
+            impr_sum = sum(r["impressions"] for r in subset) or 1
+            return sum(r[key] * r["impressions"] for r in subset) / impr_sum
+
+        ctr_before, ctr_after = _wavg(first_half, "ctr"), _wavg(second_half, "ctr")
+        freq_before, freq_after = _wavg(first_half, "frequency"), _wavg(second_half, "frequency")
+        ctr_change = _pct_change(ctr_before, ctr_after)
+        freq_change = _pct_change(freq_before, freq_after)
+
+        severity, signals, action = _classify(None, ctr_change, freq_change)
+        signals = signals + [f"{len(active_days)} giorni con delivery reale nel file"]
+
+        results.append({
+            "ad_id": name,
+            "name": name,
+            "adset": "—",
+            "campaign": "—",
+            "status": latest_status.upper() or "N/D",
+            "age_days": None,
+            "ctr_last": ctr_after,
+            "ctr_change": ctr_change,
+            "frequency_last": freq_after,
+            "freq_change": freq_change,
+            "impressions_period": total_impr,
+            "severity": severity,
+            "signals": signals,
+            "action": action,
+        })
+
+    order = {"URGENTE": 0, "WATCH": 1, "OK": 2}
+    results.sort(key=lambda r: (order[r["severity"]], -r["impressions_period"]))
+    return results
+
+
+def print_report(results: list[dict], period_label: str) -> None:
+    print(f"\n[creative-fatigue] Analisi {period_label} — {len(results)} annunci con dati sufficienti\n")
     if not results:
-        print("Nessun annuncio con abbastanza impressioni nel periodo (soglia: "
-              f"{MIN_IMPRESSIONS}).")
+        print("Nessun annuncio con abbastanza impressioni nel periodo.")
         return
 
     icons = {"URGENTE": "🔴", "WATCH": "🟡", "OK": "🟢"}
@@ -214,7 +314,7 @@ def print_report(results: list[dict], days: int) -> None:
         age_str = f"{r['age_days']}gg" if r["age_days"] is not None else "n/d"
         ctr_str = f"{r['ctr_last']:.2f}%"
         if r["ctr_change"] is not None:
-            ctr_str += f" ({r['ctr_change']:+.0%} vs sett. prec.)"
+            ctr_str += f" ({r['ctr_change']:+.0%} vs periodo prec.)"
         freq_str = f"{r['frequency_last']:.2f}"
         if r["freq_change"] is not None:
             freq_str += f" ({r['freq_change']:+.0%})"
@@ -302,7 +402,7 @@ _HTML_TEMPLATE = """<!doctype html>
 <div class="wrap">
   <p class="eyebrow">Mailift — Meta Ads</p>
   <h1>Creative Fatigue Dashboard</h1>
-  <p class="sub">Generato {generated_at} · finestra {days}gg · soglia minima {min_impr} impr.</p>
+  <p class="sub">Generato {generated_at} · {period_label} · soglia minima {min_impr} impr.</p>
 
   <div class="stat-row">
     <div class="stat-tile"><p class="stat-label"><span class="dot critical"></span>Urgenti</p>
@@ -346,7 +446,7 @@ def _delta_html(v: float | None, invert: bool) -> str:
     return f'<span class="delta {cls}">{sign}{round(v * 100)}%</span>'
 
 
-def render_html(results: list[dict], days: int) -> str:
+def render_html(results: list[dict], period_label: str, min_impr: int) -> str:
     urgent = sum(1 for r in results if r["severity"] == "URGENTE")
     watch = sum(1 for r in results if r["severity"] == "WATCH")
     ok = len(results) - urgent - watch
@@ -367,9 +467,9 @@ def render_html(results: list[dict], days: int) -> str:
             adset=r["adset"],
             age=f"{r['age_days']}gg" if r["age_days"] is not None else "n/d",
             ctr=r["ctr_last"],
-            ctr_delta=_delta_html(r["ctr_change"], invert=True),
+            ctr_delta=_delta_html(r["ctr_change"], invert=False),
             freq=r["frequency_last"],
-            freq_delta=_delta_html(r["freq_change"], invert=False),
+            freq_delta=_delta_html(r["freq_change"], invert=True),
             css=_SEVERITY_CSS[r["severity"]],
             icon=_SEVERITY_ICON[r["severity"]],
             label=_SEVERITY_LABEL[r["severity"]],
@@ -382,8 +482,8 @@ def render_html(results: list[dict], days: int) -> str:
 
     return _HTML_TEMPLATE.format(
         generated_at=datetime.now(timezone.utc).strftime("%d/%m/%Y %H:%M UTC"),
-        days=days,
-        min_impr=MIN_IMPRESSIONS,
+        period_label=period_label,
+        min_impr=min_impr,
         urgent=urgent,
         watch=watch,
         ok=ok,
@@ -397,37 +497,56 @@ def render_html(results: list[dict], days: int) -> str:
     )
 
 
-def write_html_report(results: list[dict], days: int, out_path: Path) -> None:
+def write_html_report(results: list[dict], period_label: str, min_impr: int, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(render_html(results, days), encoding="utf-8")
+    out_path.write_text(render_html(results, period_label, min_impr), encoding="utf-8")
     print(f"\n📊 Report HTML: {out_path}")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Rileva creative fatigue sugli annunci Meta")
-    parser.add_argument("--days", type=int, default=28, help="Finestra di analisi in giorni (default 28)")
-    parser.add_argument("--all", action="store_true", help="Includi anche annunci PAUSED")
+    parser.add_argument("--days", type=int, default=28, help="Finestra di analisi in giorni (default 28, ignorato con --csv)")
+    parser.add_argument("--all", action="store_true", help="Includi anche annunci PAUSED/non ACTIVE")
+    parser.add_argument("--csv", type=str, default=None,
+                        help="Analizza un export CSV di Ads Manager invece di chiamare l'API (nessun token richiesto)")
+    parser.add_argument("--min-impressions", type=int, default=None,
+                        help="Soglia minima impressioni nel periodo (default: 500 via API, 100 via --csv)")
     parser.add_argument("--html", type=str, default=str(PROJECT_ROOT / ".tmp" / "creative_fatigue_report.html"),
                         help="Percorso del report HTML (default .tmp/creative_fatigue_report.html)")
     parser.add_argument("--no-html", action="store_true", help="Salta la scrittura del report HTML")
     args = parser.parse_args()
 
-    if not TOKEN or not ACCOUNT_ID:
-        print("❌ FB_ACCESS_TOKEN o FB_AD_ACCOUNT_ID non configurati nel .env")
-        sys.exit(1)
+    if args.csv:
+        csv_path = Path(args.csv)
+        if not csv_path.exists():
+            print(f"❌ File non trovato: {csv_path}")
+            sys.exit(1)
+        min_impr = args.min_impressions if args.min_impressions is not None else 100
+        print(f"[creative-fatigue] Analisi export CSV: {csv_path}")
+        results = analyze_csv(csv_path, min_impressions=min_impr, include_inactive=args.all)
+        period_label = "export CSV (nessuna finestra temporale fissa — vedi giorni per annuncio)"
+    else:
+        if not TOKEN or not ACCOUNT_ID:
+            print("❌ FB_ACCESS_TOKEN o FB_AD_ACCOUNT_ID non configurati nel .env "
+                  "(oppure usa --csv per analizzare un export manuale di Ads Manager)")
+            sys.exit(1)
 
-    print(f"[creative-fatigue] Recupero annunci ({'tutti' if args.all else 'solo ACTIVE'})...")
-    ads = fetch_ads(include_all=args.all)
-    print(f"    {len(ads)} annunci trovati")
+        min_impr = args.min_impressions if args.min_impressions is not None else MIN_IMPRESSIONS
 
-    print(f"[creative-fatigue] Recupero insight settimanali ultimi {args.days}gg...")
-    weekly = fetch_weekly_insights(args.days)
+        print(f"[creative-fatigue] Recupero annunci ({'tutti' if args.all else 'solo ACTIVE'})...")
+        ads = fetch_ads(include_all=args.all)
+        print(f"    {len(ads)} annunci trovati")
 
-    results = analyze(ads, weekly)
-    print_report(results, args.days)
+        print(f"[creative-fatigue] Recupero insight settimanali ultimi {args.days}gg...")
+        weekly = fetch_weekly_insights(args.days)
+
+        results = analyze(ads, weekly, min_impressions=min_impr)
+        period_label = f"ultimi {args.days}gg"
+
+    print_report(results, period_label)
 
     if not args.no_html:
-        write_html_report(results, args.days, Path(args.html))
+        write_html_report(results, period_label, min_impr, Path(args.html))
 
 
 if __name__ == "__main__":
