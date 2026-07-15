@@ -31,10 +31,27 @@ Fonte: [next2ad.com — Creative fatigue: gestire le ads su Meta dopo Andromeda]
 python tools/creative_fatigue_detector.py            # ultimi 28gg, solo annunci ACTIVE
 python tools/creative_fatigue_detector.py --days 35   # finestra più ampia
 python tools/creative_fatigue_detector.py --all       # include anche PAUSED
+
+# Senza token FB_ACCESS_TOKEN (es. sessione cloud senza .env): export manuale
+python tools/creative_fatigue_detector.py --csv percorso/export.csv
 ```
 
 Richiede `FB_ACCESS_TOKEN` e `FB_AD_ACCOUNT_ID` nel `.env` (stessi usati da
 `tools/fb_ads_client.py`).
+
+### Modalità `--csv` (nessun token richiesto)
+Se non hai accesso al `.env` (es. Claude Code on the web, o vuoi un check
+rapido senza esporre credenziali), esporta da Ads Manager un breakdown
+**giornaliero per annuncio** (colonne minime: `Reporting starts`, `Ad name`,
+`Ad delivery`, `Reach`, `Frequency`, `Impressions`, `CTR (all)`) e passa il
+file con `--csv`. Limiti rispetto alla modalità API:
+- **Età non disponibile** (l'export non include `created_time`): la
+  severità si basa solo su trend CTR/frequency, confrontando la prima metà
+  vs la seconda metà dei giorni con delivery reale nel file.
+- Con pochi giorni di dati reali nel file (es. campagna appena (ri)lanciata),
+  i delta % sono rumorosi — leggi i risultati come indicativi, non come
+  fatica creativa confermata, finché non ci sono almeno 2 settimane di
+  storico continuo.
 
 ## Come legge i segnali
 Per ogni annuncio con almeno 500 impressioni nel periodo, il tool calcola:
