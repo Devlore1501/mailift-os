@@ -244,14 +244,18 @@ def parse_meta_csv(path: Path) -> dict[str, list[dict]]:
     return by_ad
 
 
-def analyze_csv(path: Path, min_impressions: int, include_inactive: bool) -> list[dict]:
+def analyze_csv(path: Path, min_impressions: int, include_inactive: bool, exclude_today: bool = True) -> list[dict]:
     """Analizza un export CSV Ads Manager con la stessa logica di `analyze()`.
 
     Senza `created_time` (non presente in questo export) l'età non è
     calcolabile: la severità si basa solo su trend CTR/frequency, confrontando
     la prima metà vs la seconda metà dei giorni con delivery reale nel file.
+
+    Per default esclude la giornata odierna (`exclude_today`): un giorno
+    ancora in corso ha metriche parziali e falsa il confronto di trend.
     """
     by_ad = parse_meta_csv(path)
+    today_str = datetime.now(timezone.utc).date().isoformat()
     results = []
 
     for name, rows in by_ad.items():
@@ -260,6 +264,9 @@ def analyze_csv(path: Path, min_impressions: int, include_inactive: bool) -> lis
             continue
 
         active_days = [r for r in rows if r["impressions"] > 0]
+        today_excluded = exclude_today and any(r["date"] == today_str for r in active_days)
+        if exclude_today:
+            active_days = [r for r in active_days if r["date"] != today_str]
         total_impr = sum(r["impressions"] for r in active_days)
         if total_impr < min_impressions or len(active_days) < 2:
             continue
@@ -279,6 +286,8 @@ def analyze_csv(path: Path, min_impressions: int, include_inactive: bool) -> lis
 
         severity, signals, action = _classify(None, ctr_change, freq_change)
         signals = signals + [f"{len(active_days)} giorni con delivery reale nel file"]
+        if today_excluded:
+            signals.append("giorno odierno escluso (dati parziali)")
 
         results.append({
             "ad_id": name,
@@ -511,6 +520,8 @@ def main() -> None:
                         help="Analizza un export CSV di Ads Manager invece di chiamare l'API (nessun token richiesto)")
     parser.add_argument("--min-impressions", type=int, default=None,
                         help="Soglia minima impressioni nel periodo (default: 500 via API, 100 via --csv)")
+    parser.add_argument("--include-today", action="store_true",
+                        help="(solo --csv) includi la giornata odierna, di default esclusa perché parziale")
     parser.add_argument("--html", type=str, default=str(PROJECT_ROOT / ".tmp" / "creative_fatigue_report.html"),
                         help="Percorso del report HTML (default .tmp/creative_fatigue_report.html)")
     parser.add_argument("--no-html", action="store_true", help="Salta la scrittura del report HTML")
@@ -523,7 +534,8 @@ def main() -> None:
             sys.exit(1)
         min_impr = args.min_impressions if args.min_impressions is not None else 100
         print(f"[creative-fatigue] Analisi export CSV: {csv_path}")
-        results = analyze_csv(csv_path, min_impressions=min_impr, include_inactive=args.all)
+        results = analyze_csv(csv_path, min_impressions=min_impr, include_inactive=args.all,
+                               exclude_today=not args.include_today)
         period_label = "export CSV (nessuna finestra temporale fissa — vedi giorni per annuncio)"
     else:
         if not TOKEN or not ACCOUNT_ID:
