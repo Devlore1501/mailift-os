@@ -53,6 +53,14 @@ CTR_DECLINE_URGENT = 0.20  # -20% CTR settimana su settimana
 FREQ_RISE_WATCH = 0.15     # +15% frequency settimana su settimana
 MIN_IMPRESSIONS = 500      # sotto questa soglia il dato non è statisticamente significativo
 
+# Stati "Ad delivery" da considerare spenti/esclusi di default nella modalità --csv.
+# "not_delivering" NON è qui: l'annuncio è acceso ma non consegna al momento
+# (pausa a livello adset/campagna, delivery issue, ecc.) — diverso da spento
+# dall'utente ("inactive"/"paused"), e comunque analizzabile sui giorni storici.
+CSV_OFF_STATUSES = {"inactive", "paused", "campaign paused", "adset paused",
+                     "campaign_paused", "adset_paused", "deleted", "archived",
+                     "rejected", "disapproved"}
+
 
 def _paginate(path: str, **params) -> list[dict]:
     rows: list[dict] = []
@@ -260,7 +268,7 @@ def analyze_csv(path: Path, min_impressions: int, include_inactive: bool, exclud
 
     for name, rows in by_ad.items():
         latest_status = rows[-1]["delivery"] if rows else ""
-        if not include_inactive and latest_status != "active":
+        if not include_inactive and latest_status in CSV_OFF_STATUSES:
             continue
 
         active_days = [r for r in rows if r["impressions"] > 0]
@@ -288,12 +296,14 @@ def analyze_csv(path: Path, min_impressions: int, include_inactive: bool, exclud
         signals = signals + [f"{len(active_days)} giorni con delivery reale nel file"]
         if today_excluded:
             signals.append("giorno odierno escluso (dati parziali)")
+        if latest_status and latest_status != "active":
+            signals.append(f"stato attuale Ads Manager: {latest_status}")
 
         results.append({
             "ad_id": name,
             "name": name,
-            "adset": "—",
-            "campaign": "—",
+            "adset": f"stato: {latest_status or 'n/d'}",
+            "campaign": "export CSV",
             "status": latest_status.upper() or "N/D",
             "age_days": None,
             "ctr_last": ctr_after,
