@@ -1,12 +1,12 @@
 {
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "permissions": {
     "allow": [
       "mcp__claude_ai_Notion__notion-search",
       "mcp__claude_ai_Notion__notion-fetch"
     ]
-  },
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "hooks": {
     "SessionStart": [
@@ -19,5 +19,16 @@
         ]
       }
     ]
+  },
+  "extraKnownMarketplaces": {
+    "talk-to-anyone": {
+      "source": {
+        "source": "github",
+        "repo": "coltonjosephdean-rgb/talk-to-anyone"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "talk-to-anyone@talk-to-anyone": true
   }
 }
