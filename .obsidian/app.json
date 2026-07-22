@@ -1,0 +1,8 @@
+{
+  "alwaysUpdateLinks": true,
+  "userIgnoreFilters": [
+    "apps/",
+    "tools/",
+    "quiz-to-customer/"
+  ]
+}

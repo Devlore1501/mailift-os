@@ -42,3 +42,9 @@ apps_script_id.txt
 
 # Claude Code internals (trascrizioni sessioni)
 .claude/projects/
+
+# Obsidian: config per-utente (tieni versionato solo app.json condiviso)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache
+.obsidian/graph.json

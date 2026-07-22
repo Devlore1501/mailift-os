@@ -2,17 +2,18 @@
 # Avvia la webapp Autofatture in dev mode (backend + frontend).
 #
 # Uso:
-#   ./webapp/start.sh           # avvia entrambi, Ctrl+C ferma tutto
-#   ./webapp/start.sh backend   # solo backend su :8000
-#   ./webapp/start.sh frontend  # solo frontend su :5173
+#   ./apps/webapp/start.sh           # avvia entrambi, Ctrl+C ferma tutto
+#   ./apps/webapp/start.sh backend   # solo backend su :8000
+#   ./apps/webapp/start.sh frontend  # solo frontend su :5173
 #
-# Log backend: webapp/backend/.tmp/backend.log (viene seguito a schermo)
-# Log frontend: webapp/frontend/.tmp/frontend.log (viene seguito a schermo)
+# Log backend: apps/webapp/backend/.tmp/backend.log (viene seguito a schermo)
+# Log frontend: apps/webapp/frontend/.tmp/frontend.log (viene seguito a schermo)
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
-ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+# Repo root is two levels up: apps/webapp -> apps -> repo root (dove sta .venv)
+ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 BACKEND_DIR="$SCRIPT_DIR/backend"
 FRONTEND_DIR="$SCRIPT_DIR/frontend"
 VENV="$ROOT/.venv"
@@ -21,7 +22,7 @@ FRONTEND_LOG="$FRONTEND_DIR/.tmp/frontend.log"
 mkdir -p "$BACKEND_DIR/.tmp" "$FRONTEND_DIR/.tmp"
 
 if [ ! -x "$VENV/bin/python" ]; then
-    echo "❌ .venv non trovato in $VENV. Eseguire prima: python3 -m venv .venv && source .venv/bin/activate && pip install -r webapp/backend/requirements.txt"
+    echo "❌ .venv non trovato in $VENV. Eseguire prima: python3 -m venv .venv && source .venv/bin/activate && pip install -r apps/webapp/backend/requirements.txt"
     exit 1
 fi
 

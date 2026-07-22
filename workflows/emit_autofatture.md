@@ -15,7 +15,7 @@ invia" sulla UI di FiC.
 ## Due modi per usarlo
 
 ### 1. Webapp v2 (consigliato per uso interattivo)
-La webapp locale in [webapp/](../webapp/) wrappa tutto il workflow con UI shadcn/ui:
+La webapp locale in [apps/webapp/](../apps/webapp/) wrappa tutto il workflow con UI shadcn/ui:
 - Drag&drop dell'estratto conto
 - Step "Verifica fornitori" che scarica le fatture PDF reali da Gmail (personal+business) e pre-popola i dati fiscali
 - Country-aware vat_id automatico (UE 22% RC vs extra-UE 0% non soggetta)
@@ -27,13 +27,13 @@ La webapp locale in [webapp/](../webapp/) wrappa tutto il workflow con UI shadcn
 Avvio:
 ```
 # Backend
-cd webapp/backend && source ../../.venv/bin/activate && uvicorn app.main:app --port 8000
+cd apps/webapp/backend && source ../../../.venv/bin/activate && uvicorn app.main:app --port 8000
 # Frontend (altro terminale)
-cd webapp/frontend && npm run dev
+cd apps/webapp/frontend && npm run dev
 # Apri http://localhost:5173
 ```
 
-Documentazione interna: [webapp/design/api_contract_v2.md](../webapp/design/api_contract_v2.md), [webapp/design/design_system.md](../webapp/design/design_system.md), [webapp/design/verify_pipeline_test_report.md](../webapp/design/verify_pipeline_test_report.md).
+Documentazione interna: [apps/webapp/design/api_contract_v2.md](../apps/webapp/design/api_contract_v2.md), [apps/webapp/design/design_system.md](../apps/webapp/design/design_system.md), [apps/webapp/design/verify_pipeline_test_report.md](../apps/webapp/design/verify_pipeline_test_report.md).
 
 ### 2. Automazione mensile via scheduler (consigliato per uso ricorrente)
 Il job `monthly_autofatture` nello scheduler ([tools/scheduler.py](../tools/scheduler.py))

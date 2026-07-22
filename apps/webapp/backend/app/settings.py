@@ -7,8 +7,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# webapp/backend/app/settings.py -> parents[3] = root del progetto "workflow ai"
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
+# apps/webapp/backend/app/settings.py -> parents[4] = root del progetto "workflow ai"
+PROJECT_ROOT = Path(__file__).resolve().parents[4]
 TOOLS_DIR = PROJECT_ROOT / "tools"
 ENV_PATH = Path.home() / ".secrets" / "mailift" / ".env"
 if not ENV_PATH.exists():

@@ -32,7 +32,7 @@ from typing import Any
 import httpx
 
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[4]
 INBOX = ROOT / "inbox" / "processed"
 
 # Seed deterministico per quando classify fallisce per credit Anthropic.
@@ -102,7 +102,7 @@ class Reporter:
 
 
 def _seed_candidates_in_db(statement_id: str) -> int:
-    sys.path.insert(0, str(ROOT / "webapp" / "backend"))
+    sys.path.insert(0, str(ROOT / "apps" / "webapp" / "backend"))
     from app.services import workflow as workflow_svc  # type: ignore
 
     workflow_svc._statement_candidates[statement_id] = list(SEED_CANDIDATES)

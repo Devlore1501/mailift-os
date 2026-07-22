@@ -16,12 +16,12 @@ Costruita sopra il workflow CLI in [`tools/`](../tools/) — non duplica logica 
 ## Avvio rapido
 
 ```bash
-./webapp/start.sh
+./apps/webapp/start.sh
 ```
 
 Apre backend (`:8000`) + frontend (`:5173`) in parallelo, logs affiancati con prefisso `[backend]` / `[frontend]`, Ctrl+C ferma entrambi. Poi vai su [http://localhost:5173](http://localhost:5173).
 
-Solo backend: `./webapp/start.sh backend`. Solo frontend: `./webapp/start.sh frontend`.
+Solo backend: `./apps/webapp/start.sh backend`. Solo frontend: `./apps/webapp/start.sh frontend`.
 
 ## Setup one-time
 
@@ -29,10 +29,10 @@ Già fatto se lavori dal venv del progetto. In caso servisse rifarlo:
 
 ```bash
 # 1. Python deps (sqlalchemy, fastapi, uvicorn, python-multipart, pdfplumber, anthropic)
-.venv/bin/pip install -r webapp/backend/requirements.txt
+.venv/bin/pip install -r apps/webapp/backend/requirements.txt
 
 # 2. Frontend deps (installa tutto: shadcn, tailwind, react-query, ecc.)
-cd webapp/frontend && npm install
+cd apps/webapp/frontend && npm install
 ```
 
 ## Flusso utente (wizard 6 step)
@@ -95,14 +95,14 @@ Stati possibili per fornitore: `pending`, `verified`, `pdf_only`, `not_found`, `
 | `GET` | `/api/history/{run_id}` | dettagli run |
 | `GET` | `/api/jobs/{id}` | polling job async |
 
-Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs). Contratto completo con esempi JSON: [`webapp/design/api_contract_v2.md`](design/api_contract_v2.md).
+Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs). Contratto completo con esempi JSON: [`apps/webapp/design/api_contract_v2.md`](design/api_contract_v2.md).
 
 ## Modalità dry-run
 
 Per testare il flusso senza creare autofatture reali su FiC:
 
 - **Per-richiesta**: toggle "Live ↔ Dry-run" nella topbar (stato persistito in localStorage)
-- **Globale**: avviare il backend con `WEBAPP_DRY_RUN=true ./webapp/start.sh backend`
+- **Globale**: avviare il backend con `WEBAPP_DRY_RUN=true ./apps/webapp/start.sh backend`
 
 In dry-run il backend segue tutto il flusso ma nel create step salta la chiamata a `FicClient` e ritorna status `skipped` per ogni riga.
 
@@ -112,11 +112,11 @@ Smoke test E2E completo del backend (19 step, no frontend):
 
 ```bash
 # Terminal 1 — avvia backend su porta 8001 (non collide col dev server)
-cd webapp/backend
-../../.venv/bin/uvicorn app.main:app --port 8001
+cd apps/webapp/backend
+../../../.venv/bin/uvicorn app.main:app --port 8001
 
 # Terminal 2 — esegui test
-.venv/bin/python webapp/backend/tests/smoke_test_e2e.py
+.venv/bin/python apps/webapp/backend/tests/smoke_test_e2e.py
 ```
 
 Copre: health, upload, parse, classify (con fallback seed se Anthropic esausto), preview, check critici country-aware, verify suppliers reale Gmail, create dry-run, history, CRUD overrides, verify-rejects.
@@ -141,7 +141,7 @@ Anthropic credits esausti. Due opzioni:
 - Bill-to mismatch: la fattura è nella mail ma intestata ad un'altra entità — è lo scenario Gamma/ElevenLabs. Regola operativa: autofattura emessa lo stesso, warning visibile in UI, da correggere sul portale del fornitore.
 
 ### `sqlalchemy` import error
-Dipendenze non installate nel venv. Rilancia: `.venv/bin/pip install -r webapp/backend/requirements.txt`.
+Dipendenze non installate nel venv. Rilancia: `.venv/bin/pip install -r apps/webapp/backend/requirements.txt`.
 
 ### Frontend: errore `Failed to fetch` o CORS
 Il backend non è up, oppure è su porta diversa da 8000. Verifica: `curl http://localhost:8000/api/health`. CORS è già abilitato per `localhost:5173`.
@@ -152,7 +152,7 @@ Il PDF per quel fornitore non è stato scaricato (verify step saltato o `not_fou
 ## File structure
 
 ```
-webapp/
+apps/webapp/
 ├── start.sh                  # avvio unificato backend + frontend
 ├── README.md                 # questo file
 ├── backend/

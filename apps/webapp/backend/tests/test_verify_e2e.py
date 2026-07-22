@@ -24,7 +24,7 @@ from pathlib import Path
 import httpx
 
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[4]
 INBOX = ROOT / "inbox" / "processed"
 
 # Seed deterministico: fornitori presenti in SUPPLIERS (verify_suppliers_from_email.py)
@@ -58,7 +58,7 @@ def _seed_candidates_in_db(statement_id: str) -> int:
     raccoglie da lì. Usato SOLO se classify fallisce per credit_balance.
     """
     # Import lazy: richiede che PYTHONPATH includa webapp/backend per trovare `app.*`
-    sys.path.insert(0, str(ROOT / "webapp" / "backend"))
+    sys.path.insert(0, str(ROOT / "apps" / "webapp" / "backend"))
     from app.services import workflow as workflow_svc  # type: ignore
 
     # Mark come "classificati"
