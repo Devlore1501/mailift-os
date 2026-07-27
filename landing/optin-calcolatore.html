@@ -698,26 +698,33 @@ button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color
       <div class="ml-modal__eyebrow" id="mlRevEyebrow">Step 2 di 3</div>
       <div class="ml-modal__title">Quanto fattura il tuo store?</div>
       <div class="ml-modal__sub">Ci serve per confrontarti col benchmark giusto — il calcolo non è attendibile senza</div>
-      <!-- ATTENZIONE: i data-value devono combaciare CARATTERE PER CARATTERE con le
-           picklistOptions del campo GHL "Quale è il tuo attuale fatturato Mensile? 1"
-           (id bW87MPPTFNr51QBtNZmG), altrimenti il valore RADIO viene scartato.
-           Usano l'en-dash "–" (U+2013) e "50k –  80k" ha un DOPPIO SPAZIO dopo il trattino.
-           Non riformattare questi attributi. -->
+      <!-- Le opzioni sono generate dalle picklistOptions del campo GHL RADIO
+           "Quale è il tuo attuale fatturato Mensile? 1" (id bW87MPPTFNr51QBtNZmG)
+           e devono combaciare CARATTERE PER CARATTERE: usano l'en-dash (U+2013)
+           e non hanno spazio prima di "€/mese".
+           Sono le stesse identiche fasce del quiz (revenueOptions in
+           EmailMarketingSurvey.tsx): landing, quiz e CRM parlano una lingua sola.
+           Se cambi le opzioni in GHL, rigenera anche qui — un valore fuori
+           picklist viene scritto lo stesso, ma non funziona più in segmenti,
+           filtri e workflow. -->
       <div class="ml-choices">
-        <button type="button" class="ml-choice ml-rev" data-value="meno di 15k €/mese" data-qualified="0">
-          <span class="ml-choice__t">Meno di 15k € / mese</span><span class="ml-choice__arrow">→</span>
+        <button type="button" class="ml-choice ml-rev" data-value="Meno di 10.000€/mese" data-qualified="0">
+          <span class="ml-choice__t">Meno di 10.000 € / mese</span><span class="ml-choice__arrow">→</span>
         </button>
-        <button type="button" class="ml-choice ml-rev" data-value="15k – 25k €/mese" data-qualified="1">
-          <span class="ml-choice__t">15k – 25k € / mese</span><span class="ml-choice__arrow">→</span>
+        <button type="button" class="ml-choice ml-rev" data-value="10.000 – 25.000€/mese" data-qualified="1">
+          <span class="ml-choice__t">10.000 – 25.000 € / mese</span><span class="ml-choice__arrow">→</span>
         </button>
-        <button type="button" class="ml-choice ml-rev" data-value="25k – 50k €/mese" data-qualified="1">
-          <span class="ml-choice__t">25k – 50k € / mese</span><span class="ml-choice__arrow">→</span>
+        <button type="button" class="ml-choice ml-rev" data-value="25.000 – 50.000€/mese" data-qualified="1">
+          <span class="ml-choice__t">25.000 – 50.000 € / mese</span><span class="ml-choice__arrow">→</span>
         </button>
-        <button type="button" class="ml-choice ml-rev" data-value="50k –  80k €/mese" data-qualified="1">
-          <span class="ml-choice__t">50k – 80k € / mese</span><span class="ml-choice__arrow">→</span>
+        <button type="button" class="ml-choice ml-rev" data-value="50.000 – 100.000€/mese" data-qualified="1">
+          <span class="ml-choice__t">50.000 – 100.000 € / mese</span><span class="ml-choice__arrow">→</span>
         </button>
-        <button type="button" class="ml-choice ml-rev" data-value="oltre 80k €/mese" data-qualified="1">
-          <span class="ml-choice__t">Oltre 80k € / mese</span><span class="ml-choice__arrow">→</span>
+        <button type="button" class="ml-choice ml-rev" data-value="100.000 – 300.000€/mese" data-qualified="1">
+          <span class="ml-choice__t">100.000 – 300.000 € / mese</span><span class="ml-choice__arrow">→</span>
+        </button>
+        <button type="button" class="ml-choice ml-rev" data-value="Oltre 300.000€/mese" data-qualified="1">
+          <span class="ml-choice__t">Oltre 300.000 € / mese</span><span class="ml-choice__arrow">→</span>
         </button>
       </div>
     </div>
