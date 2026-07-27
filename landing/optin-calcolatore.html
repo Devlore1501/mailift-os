@@ -42,9 +42,30 @@ body{
   background:var(--navy-deep);color:var(--text-white);
   line-height:1.6;-webkit-font-smoothing:antialiased;
   overflow-x:hidden;
-  padding-bottom:calc(var(--sticky-h) + env(safe-area-inset-bottom,0px));
+  /* il padding per la sticky bar sta su .ml-page: se stesse anche qui
+     si sommerebbe, lasciando un vuoto doppio in fondo */
 }
 body.ml-noscroll{overflow:hidden}
+
+/* ─── Contenitore di pagina ───
+   Incollata in GHL, questa pagina vive DENTRO il DOM di GHL: le regole su
+   <body> non vincono e i wrapper bianchi di GHL restano visibili sotto le
+   sezioni trasparenti (hero, .section, footer non hanno un background
+   proprio) → testo chiaro su bianco, illeggibile.
+   Quindi sfondo, colore e font stanno qui, su un elemento NOSTRO, che dipinge
+   sopra qualunque cosa ci metta l'host. Le stesse regole restano su <body>
+   per quando il file viene aperto da solo.
+   Niente transform/filter/will-change qui: creerebbero un containing block e
+   romperebbero la sticky bar e la modale in position:fixed. */
+.ml-page{
+  background:var(--navy-deep);
+  color:var(--text-white);
+  font-family:'Montserrat',system-ui,-apple-system,sans-serif;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;          /* se il contenuto è corto, sotto non spunta il bianco */
+  padding-bottom:calc(var(--sticky-h) + env(safe-area-inset-bottom,0px));
+}
 img{max-width:100%;height:auto;display:block}
 a{text-decoration:none;color:inherit}
 button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
@@ -462,6 +483,12 @@ button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color
 <!-- ══════════ TOP BAR ══════════ -->
 <a href="#main" class="skip-link">Salta al contenuto</a>
 
+<!-- Tutto dentro .ml-page: è questo elemento a portare sfondo, colore e font.
+     Incollata in GHL non possiamo contare su <body>. Ci stanno dentro anche
+     sticky bar e modale, così ereditano il font anche quando l'host sovrascrive
+     il body (restano position:fixed: .ml-page non crea containing block). -->
+<div class="ml-page">
+
 <!-- Testo tenuto entro una riga a 375px: a due righe rubava 20px di fold -->
 <div class="offer-bar">Gratuito · <strong>2 minuti</strong> · nessun accesso a Klaviyo</div>
 
@@ -757,6 +784,8 @@ button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color
     </div>
   </div>
 </div>
+
+</div><!-- /.ml-page -->
 
 <script>
 /* ——— Contatore animato Revenue Leak ——— */
