@@ -454,6 +454,14 @@ button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color
 }
 
 /* Schermi molto stretti (≤340px): rotture reali verificate a 320px */
+/* L'eyebrow ora qualifica ed è più lungo: sotto i 420px andava a capo
+   lasciando "25K€/MESE" orfano su una seconda riga, e rubava ~18px di fold.
+   Si stringe la spaziatura invece di accorciare il testo: il qualificatore
+   deve restare per intero. */
+@media(max-width:420px){
+  .hero__eyebrow{font-size:10.5px;letter-spacing:.045em;padding:6px 11px}
+}
+
 @media(max-width:340px){
   .container{padding-inline:14px}
   /* il bleed del carosello deve pareggiare il padding del container, altrimenti
@@ -499,11 +507,20 @@ button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color
 <!-- ══════════ HERO ══════════ -->
 <section class="hero">
   <div class="container">
-    <div class="hero__eyebrow">eCommerce italiani · Shopify + Klaviyo</div>
-    <h1>Quanti <span class="accent gold">€ al mese</span> perde la tua email?</h1>
-    <p class="hero__sub">Il numero esatto in 2 minuti, sul benchmark di 150+ eCommerce italiani.</p>
+    <!-- L'eyebrow qualifica in apertura: è la prima cosa che si legge e tiene
+         fuori chi non è in target, prima ancora del titolo. -->
+    <div class="hero__eyebrow">Il tuo eCommerce fattura almeno 25k€/mese</div>
+    <h1>Scopri quanti <span class="accent gold">ordini al mese</span> perdi con la tua email?</h1>
+    <p class="hero__sub">Il numero esatto in 2 minuti, sul benchmark di 150+ eCommerce già analizzati</p>
 
-    <!-- Il widget è il gancio: deve stare sopra la piega, non dopo la CTA -->
+    <!-- CTA prima del widget: si chiede l'azione appena la promessa è chiara,
+         e il widget che segue resta visibile a metà — invita a scorrere invece
+         di chiudere il discorso. -->
+    <div class="hero__cta">
+      <button class="btn-primary btn-arrow ml-open" aria-haspopup="dialog">Calcola le tue perdite</button>
+      <div class="hero__micro">🔒 Gratuito · 2 minuti · nessun accesso al Klaviyo</div>
+    </div>
+
     <div class="widget" aria-hidden="true">
       <div class="widget__tag">IL TUO REPORT</div>
       <div class="widget__label">Revenue leak stimato / mese</div>
@@ -520,11 +537,6 @@ button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color
       </div>
       <!-- una riga sola: a due righe la CTA usciva dal fold a 375x667 -->
       <div class="widget__disc">Valori medi di esempio. Il tuo numero reale può variare.</div>
-    </div>
-
-    <div class="hero__cta">
-      <button class="btn-primary btn-arrow ml-open" aria-haspopup="dialog">Calcola il mio Revenue Leak</button>
-      <div class="hero__micro">🔒 Gratuito · 2 minuti · nessun accesso al Klaviyo</div>
     </div>
   </div>
 </section>
