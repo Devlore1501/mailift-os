@@ -46,10 +46,31 @@
   /* altezza riservata alla sticky bar, così il footer non ci finisce sotto */
   --sticky-h:84px;
 }
+/* ─── Fallback con metriche allineate a Montserrat ───
+   Caricando il font in modo non bloccante la pagina disegna prima col font di
+   sistema. Ma Montserrat e' ~12% piu' largo di Arial: quando arriva, i titoli
+   vanno a capo in modo diverso, l'hero cambia altezza e il widget scende.
+   E' il CLS di 0.151 che PageSpeed attribuiva proprio a <div class="widget">.
+
+   size-adjust riporta il fallback alla larghezza di Montserrat, cosi' il
+   numero di righe non cambia e il salto sparisce. Le percentuali sono
+   MISURATE sui due font, un peso alla volta, non stimate.
+   size-adjust non tocca il font-size dichiarato: le line-height unitless
+   restano identiche, quindi si corregge la larghezza senza alterare
+   l'altezza delle righe. */
+@font-face{font-family:'Montserrat fallback';font-weight:400;size-adjust:112.7%;
+  src:local('Arial'),local('Roboto'),local('Helvetica Neue')}
+@font-face{font-family:'Montserrat fallback';font-weight:700;size-adjust:110.2%;
+  src:local('Arial'),local('Roboto'),local('Helvetica Neue')}
+@font-face{font-family:'Montserrat fallback';font-weight:800;size-adjust:112.2%;
+  src:local('Arial'),local('Roboto'),local('Helvetica Neue')}
+@font-face{font-family:'Montserrat fallback';font-weight:900;size-adjust:114.3%;
+  src:local('Arial'),local('Roboto'),local('Helvetica Neue')}
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{
-  font-family:'Montserrat',system-ui,-apple-system,sans-serif;
+  font-family:'Montserrat','Montserrat fallback',system-ui,-apple-system,sans-serif;
   background:var(--navy-deep);color:var(--text-white);
   line-height:1.6;-webkit-font-smoothing:antialiased;
   overflow-x:hidden;
@@ -71,7 +92,7 @@ body.ml-noscroll{overflow:hidden}
 .ml-page{
   background:var(--navy-deep);
   color:var(--text-white);
-  font-family:'Montserrat',system-ui,-apple-system,sans-serif;
+  font-family:'Montserrat','Montserrat fallback',system-ui,-apple-system,sans-serif;
   line-height:1.6;
   -webkit-font-smoothing:antialiased;
   min-height:100vh;          /* se il contenuto è corto, sotto non spunta il bianco */
