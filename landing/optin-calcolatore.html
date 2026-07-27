@@ -11,8 +11,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- Pesi ridotti da 6 a 4 (400/700/800/900) + Playfair solo italic 700.
-     Erano 8 file font su una pagina che deve caricare in <1s su rete mobile. -->
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800;900&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+     Erano 8 file font su una pagina che deve caricare in <1s su rete mobile.
+
+     Caricamento NON bloccante: un <link rel=stylesheet> normale ferma il primo
+     rendering finché il CSS non arriva, e qui il font non serve per capire la
+     pagina — serve solo per farla bella. Il trucco media="print" fa scaricare
+     il foglio senza applicarlo, poi onload lo promuove a "all".
+     Il testo appare subito col font di sistema e passa a Montserrat quando è
+     pronto (è già il comportamento di display=swap, quindi nessun cambiamento
+     visibile in più rispetto a prima). -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800;900&family=Playfair+Display:ital,wght@1,700&display=swap">
+<link rel="stylesheet" media="print" onload="this.media='all';this.onload=null"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800;900&family=Playfair+Display:ital,wght@1,700&display=swap">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800;900&family=Playfair+Display:ital,wght@1,700&display=swap"></noscript>
 <!-- Handshake TLS col Worker aperto in anticipo: al submit la POST parte subito
      invece di pagare DNS+TLS proprio nel momento più costoso del funnel. -->
 <link rel="dns-prefetch" href="https://ghl-form-proxy.mailift.workers.dev">
@@ -152,12 +163,16 @@ button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color
 .widget__score{font-size:clamp(38px,11.5vw,56px);line-height:1;color:var(--bad);margin-bottom:3px}
 .widget__note{font-size:12.5px;color:var(--text-muted);margin-bottom:11px;line-height:1.35}
 .widget__bar{height:6px;background:rgba(0,0,0,.3);border-radius:var(--pill);overflow:hidden;margin-bottom:11px}
+/* Anima transform, non width: width fa ricalcolare il layout a ogni frame
+   (è l'"animazione non-composited" segnalata da PageSpeed), mentre scaleX
+   resta sul compositor e non tocca il main thread. */
 .widget__bar-fill{
-  height:100%;width:0;border-radius:var(--pill);
+  height:100%;width:74%;border-radius:var(--pill);
   background:linear-gradient(90deg,var(--warn),var(--bad));
+  transform:scaleX(0);transform-origin:left;
   animation:fill 1.8s cubic-bezier(.22,.9,.3,1) forwards .25s;
 }
-@keyframes fill{to{width:74%}}
+@keyframes fill{to{transform:scaleX(1)}}
 .widget__items{display:flex;flex-direction:column;gap:6px}
 /* flex-wrap + min-width:0: senza, il valore in € non si restringe e sfonda la riga */
 .widget-item{
@@ -481,7 +496,7 @@ button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   *{animation:none!important;transition:none!important}
-  .widget__bar-fill{width:74%}
+  .widget__bar-fill{transform:scaleX(1)}
   .sticky{transition:none}
 }
 </style>
