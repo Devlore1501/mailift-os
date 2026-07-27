@@ -99,10 +99,59 @@ def chiedi(client, persona, img_b64, mime):
         return {"errore": str(e)}
 
 
+SCHEMA_COPY = """Rispondi SOLO con JSON valido, nient'altro:
+{"fermo_scroll": true|false,
+ "cliccherei": true|false,
+ "cosa_promette": "cosa offre secondo te, in una frase",
+ "per_chi_e": "che tipo di persona pensi sia il destinatario",
+ "reazione": "il tuo pensiero istintivo, con le tue parole",
+ "cosa_non_va": "cosa ti frena o ti insospettisce, o null"}"""
+
+
+def leggi_varianti(percorso: Path) -> list[dict]:
+    """Estrae le varianti da un markdown con sezioni '### Variante N'."""
+    testo = percorso.read_text(encoding="utf-8")
+    fuori = []
+    for blocco in re.split(r"^###\s+", testo, flags=re.M)[1:]:
+        campo = lambda k: (re.search(rf"\*\*{k}:\*\*\s*(.+?)(?=\n\*\*|\Z)",
+                                     blocco, flags=re.S) or [None, ""])[1].strip()
+        fuori.append({
+            "nome": blocco.splitlines()[0].strip(),
+            "angle": campo("ANGLE"), "titolo": campo("TITOLO"),
+            "prima_riga": campo("PRIMA RIGA"), "corpo": campo("CORPO"),
+        })
+    return [v for v in fuori if v["corpo"]]
+
+
+def chiedi_copy(client, persona, v):
+    sistema = (
+        f"Sei {persona['nome']}, {persona['eta']} anni. {persona['profilo']}\n"
+        "Stai scorrendo il feed di Instagram. Ti passa davanti una sponsorizzata: "
+        "vedi il titolo e le prime righe, il resto e' nascosto dietro 'altro...'. "
+        "Rispondi come faresti davvero: quasi tutte le sponsorizzate si scorrono via."
+    )
+    testo = (f"TITOLO: {v['titolo']}\n\n{v['corpo']}\n\n"
+             "[link: calcolatore gratuito, 2 minuti]\n\n" + SCHEMA_COPY)
+    r = client.messages.create(model=MODELLO, max_tokens=600, system=sistema,
+                               messages=[{"role": "user", "content": testo}])
+    m = re.search(r"\{.*\}", r.content[0].text.strip(), flags=re.S)
+    if not m:
+        return {"errore": "no json"}
+    try:
+        return json.loads(m.group(0))
+    except json.JSONDecodeError as e:
+        return {"errore": str(e)}
+
+
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Scroll-stop test sulle creative")
-    ap.add_argument("percorsi", nargs="+", help="immagini o cartella")
+    ap = argparse.ArgumentParser(description="Scroll-stop test su creative o copy")
+    ap.add_argument("percorsi", nargs="+", help="immagini, cartella, o .md di copy")
     args = ap.parse_args()
+
+    # modalita' testo: un markdown di varianti invece che immagini
+    md = [Path(p) for p in args.percorsi if Path(p).suffix.lower() == ".md"]
+    if md:
+        return main_copy(md[0])
 
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise SystemExit("ANTHROPIC_API_KEY mancante")
@@ -184,6 +233,69 @@ def main() -> None:
     peggiore = min(risultati, key=lambda x: x["punteggio"])
     if peggiore["f_click"] > peggiore["d_click"]:
         print(f"  ⚠ {peggiore['file']}: attira piu' fuori target che in target.")
+    print()
+
+
+def main_copy(percorso: Path) -> None:
+    """Stessa logica, ma sul TESTO dell'annuncio invece che sull'immagine."""
+    import anthropic
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise SystemExit("ANTHROPIC_API_KEY mancante")
+    varianti = leggi_varianti(percorso)
+    if not varianti:
+        raise SystemExit(f"Nessuna variante in {percorso} (attese sezioni '### Variante N')")
+
+    client = anthropic.Anthropic()
+    dentro = [p for p in PERSONE if p["in_target"]]
+    fuori = [p for p in PERSONE if not p["in_target"]]
+
+    print(f"\nTEST COPY · {len(varianti)} varianti × {len(PERSONE)} persone · {MODELLO}")
+    print("Non e' una previsione di CTR: sono reazioni ragionate, non statistica.")
+    print("=" * 94)
+
+    risultati = []
+    for v in varianti:
+        def valuta(p):
+            try:
+                return (p, chiedi_copy(client, p, v))
+            except Exception as e:
+                return (p, {"errore": str(e)[:150]})
+
+        with ThreadPoolExecutor(max_workers=6) as ex:
+            esiti = list(ex.map(valuta, PERSONE))
+
+        d_click = sum(1 for p, e in esiti if p["in_target"] and e.get("cliccherei"))
+        f_click = sum(1 for p, e in esiti if not p["in_target"] and e.get("cliccherei"))
+        d_stop = sum(1 for p, e in esiti if p["in_target"] and e.get("fermo_scroll"))
+        risultati.append(dict(v=v, d_click=d_click, f_click=f_click, d_stop=d_stop,
+                              punteggio=d_click - f_click, esiti=esiti))
+
+        print(f"\n┌─ {v['nome']} · {v['angle']}")
+        print(f"│  \"{v['titolo']}\"")
+        print(f"│  IN TARGET    si ferma {d_stop}/{len(dentro)}   cliccherebbe {d_click}/{len(dentro)}")
+        print(f"│  fuori target                cliccherebbe {f_click}/{len(fuori)}")
+        for p, e in esiti:
+            if e.get("errore"):
+                print(f"│   {p['nome']}: errore {e['errore'][:60]}")
+                continue
+            tag = "IN TGT" if p["in_target"] else "fuori "
+            az = "CLICCA" if e.get("cliccherei") else ("si ferma" if e.get("fermo_scroll") else "scorre via")
+            print(f"│   [{tag}] {p['nome']:8s} {az:10s} \"{(e.get('reazione') or '')[:84]}\"")
+            if e.get("cosa_non_va"):
+                print(f"│            → lo frena: {str(e['cosa_non_va'])[:74]}")
+        print("└" + "─" * 92)
+
+    print("\n" + "=" * 94)
+    print("CLASSIFICA — per capacita' di SELEZIONARE")
+    print("-" * 94)
+    print(f"{'variante':44s} {'in target':>10s} {'fuori':>7s} {'scarto':>8s}")
+    for r in sorted(risultati, key=lambda x: -x["punteggio"]):
+        et = f"{r['v']['nome']} · {r['v']['angle']}"
+        print(f"{et[:44]:44s} {r['d_click']:>10d} {r['f_click']:>7d} {r['punteggio']:>+8d}")
+    top = max(risultati, key=lambda x: x["punteggio"])
+    print(f"\n  Migliore: {top['v']['nome']} — \"{top['v']['titolo']}\"")
+    if top["punteggio"] <= 0:
+        print("  ⚠ Nessuna variante seleziona: rivedere l'angle, non il copy.")
     print()
 
 
