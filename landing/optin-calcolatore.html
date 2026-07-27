@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<!-- viewport-fit=cover: serve per env(safe-area-inset-*), altrimenti la sticky bar
+     finisce sotto la home-indicator negli iPhone con notch (89% del traffico è
+     webview in-app iOS/Android). -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Revenue Leak Calculator — Scopri quanta revenue email stai perdendo | Mailift</title>
+<meta name="description" content="Scopri in 2 minuti quanti € al mese lasci sul tavolo perché la tua email non rende come dovrebbe. Gratis, senza accesso al tuo Klaviyo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Pesi ridotti da 6 a 4 (400/700/800/900) + Playfair solo italic 700.
+     Erano 8 file font su una pagina che deve caricare in <1s su rete mobile. -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800;900&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+<!-- Handshake TLS col Worker aperto in anticipo: al submit la POST parte subito
+     invece di pagare DNS+TLS proprio nel momento più costoso del funnel. -->
+<link rel="dns-prefetch" href="https://ghl-form-proxy.mailift.workers.dev">
+<link rel="preconnect" href="https://ghl-form-proxy.mailift.workers.dev" crossorigin>
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN TOKENS
+   ═══════════════════════════════════════════════════════════════ */
+:root{
+  --navy-deep:#0F1825; --navy-mid:#121D2B; --navy-card:#1A2942; --navy-hover:#1F3354;
+  --gold:#FAB450; --gold-hi:#FFC873; --gold-hover:#e8a23a; --gold-dim:rgba(250,180,80,.10);
+  --gold-glow:rgba(250,180,80,.30);
+  --text-white:#F0F0EB; --text-muted:#93A4B8; --text-dim:#647a8f;
+  --border:rgba(255,255,255,.08); --border-gold:rgba(250,180,80,.20);
+  --bad:#e86a6a; --warn:#f5a623; --good:#4db67a;
+  --pill:9999px; --r-lg:20px; --r:14px; --r-sm:10px;
+  --shadow-card:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.22);
+  --shadow-lift:0 2px 4px rgba(0,0,0,.3), 0 20px 50px rgba(0,0,0,.42);
+  /* altezza riservata alla sticky bar, così il footer non ci finisce sotto */
+  --sticky-h:84px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Montserrat',system-ui,-apple-system,sans-serif;
+  background:var(--navy-deep);color:var(--text-white);
+  line-height:1.6;-webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  padding-bottom:calc(var(--sticky-h) + env(safe-area-inset-bottom,0px));
+}
+body.ml-noscroll{overflow:hidden}
+img{max-width:100%;height:auto;display:block}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4px}
+.skip-link{position:absolute;top:-48px;left:0;background:var(--gold);color:#0F1825;padding:10px 16px;font-weight:800;font-size:14px;z-index:10000;transition:top .2s}
+.skip-link:focus{top:0}
+
+.container{
+  max-width:900px;margin:0 auto;
+  padding-left:max(18px,env(safe-area-inset-left,0px));
+  padding-right:max(18px,env(safe-area-inset-right,0px));
+}
+.accent{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-weight:700}
+.gold{color:var(--gold)}
+.num{font-variant-numeric:tabular-nums;font-style:italic;font-weight:900;letter-spacing:-.02em}
+
+/* ═══════════════════════════════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════════════════════════════ */
+.btn-primary{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;min-height:56px;padding:16px 24px;
+  background:linear-gradient(180deg,var(--gold-hi),var(--gold));
+  color:#0F1825;font-weight:800;font-size:17px;line-height:1.25;letter-spacing:.005em;
+  border:none;border-radius:var(--pill);cursor:pointer;text-align:center;
+  box-shadow:0 2px 0 rgba(0,0,0,.12), 0 6px 22px var(--gold-glow);
+  transition:transform .12s ease, box-shadow .18s ease, filter .18s ease;
+}
+.btn-primary:hover{filter:brightness(1.04);box-shadow:0 2px 0 rgba(0,0,0,.12),0 10px 32px rgba(250,180,80,.45)}
+.btn-primary:active{transform:translateY(1px)}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed;box-shadow:none}
+.btn-arrow::after{content:"→";font-size:1.05em;font-weight:900}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOP BAR — statica (non sticky): in un webview in-app la chrome del
+   browser è già alta, una barra fissa rubava ~40px di fold.
+   ═══════════════════════════════════════════════════════════════ */
+.offer-bar{
+  background:var(--gold);color:#0F1825;text-align:center;
+  padding:9px 16px;font-weight:700;font-size:12.5px;line-height:1.35;letter-spacing:.005em;
+}
+.offer-bar strong{font-weight:900}
+
+/* ═══════════════════════════════════════════════════════════════
+   HERO — tutto ciò che conta deve stare nella prima schermata:
+   hook → numero (il vero gancio) → CTA
+   ═══════════════════════════════════════════════════════════════ */
+.hero{padding:18px 0 36px;text-align:center;position:relative;overflow:hidden}
+.hero::before{
+  content:'';position:absolute;top:-260px;left:50%;transform:translateX(-50%);
+  width:640px;height:640px;pointer-events:none;
+  background:radial-gradient(circle,rgba(250,180,80,.09) 0%,transparent 68%);
+}
+.hero > .container{position:relative}
+.hero__eyebrow{
+  display:inline-block;background:var(--gold-dim);border:1px solid var(--border-gold);
+  color:var(--gold);font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
+  padding:6px 14px;border-radius:var(--pill);margin-bottom:12px;
+}
+.hero h1{
+  font-size:clamp(30px,8.2vw,60px);font-weight:900;letter-spacing:-.025em;line-height:1.08;
+  max-width:16ch;margin:0 auto 12px;text-wrap:balance;
+}
+.hero__sub{
+  font-size:15.5px;color:var(--text-muted);max-width:38ch;margin:0 auto;
+  line-height:1.55;text-wrap:pretty;
+}
+
+/* ── Widget report (il mockup È la promessa: sta sopra la piega) ── */
+.widget{
+  background:linear-gradient(180deg,var(--navy-card),#16243a);
+  border:1px solid var(--border-gold);border-radius:var(--r-lg);
+  padding:18px 14px 12px;max-width:440px;margin:14px auto 0;
+  box-shadow:var(--shadow-lift);text-align:left;position:relative;
+}
+.widget__tag{
+  position:absolute;top:-11px;right:16px;background:var(--gold);color:#0F1825;
+  font-size:10px;font-weight:900;padding:4px 11px;border-radius:var(--pill);letter-spacing:.05em;
+}
+.widget__label{
+  font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:4px;
+}
+.widget__score{font-size:clamp(38px,11.5vw,56px);line-height:1;color:var(--bad);margin-bottom:3px}
+.widget__note{font-size:12.5px;color:var(--text-muted);margin-bottom:11px;line-height:1.35}
+.widget__bar{height:6px;background:rgba(0,0,0,.3);border-radius:var(--pill);overflow:hidden;margin-bottom:11px}
+.widget__bar-fill{
+  height:100%;width:0;border-radius:var(--pill);
+  background:linear-gradient(90deg,var(--warn),var(--bad));
+  animation:fill 1.8s cubic-bezier(.22,.9,.3,1) forwards .25s;
+}
+@keyframes fill{to{width:74%}}
+.widget__items{display:flex;flex-direction:column;gap:6px}
+/* flex-wrap + min-width:0: senza, il valore in € non si restringe e sfonda la riga */
+.widget-item{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
+  padding:8px 12px;background:rgba(0,0,0,.22);border-radius:var(--r-sm);font-size:13.5px;
+}
+.widget-item__name{color:var(--text-white);font-weight:700;min-width:0}
+.widget-item__val{font-size:14.5px;font-weight:900;font-style:italic;white-space:nowrap;font-variant-numeric:tabular-nums}
+.widget-item__val.red{color:var(--bad)} .widget-item__val.orange{color:var(--warn)}
+.widget__disc{font-size:11px;color:var(--text-dim);margin-top:10px;line-height:1.4}
+
+.hero__cta{margin-top:14px;max-width:440px;margin-left:auto;margin-right:auto}
+.hero__micro{
+  font-size:12.5px;color:var(--text-dim);margin-top:11px;
+  display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SEZIONI
+   ═══════════════════════════════════════════════════════════════ */
+.section{padding:48px 0}
+.section--dark{background:var(--navy-mid)}
+/* content-visibility: il browser salta layout/paint di ciò che è fuori schermo.
+   contain-intrinsic-size evita il salto della scrollbar. */
+.section--defer{content-visibility:auto;contain-intrinsic-size:auto 560px}
+.section__eyebrow{
+  font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:10px;display:block;
+}
+.section__title{
+  font-size:clamp(24px,6.4vw,40px);font-weight:800;letter-spacing:-.022em;
+  line-height:1.14;margin-bottom:12px;text-wrap:balance;
+}
+.section__lead{font-size:15px;color:var(--text-muted);max-width:56ch;line-height:1.6}
+
+.card{background:var(--navy-card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-card)}
+
+/* ── Proof strip ── */
+.proof{background:var(--navy-mid);border-block:1px solid var(--border);padding:22px 0}
+.proof__stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}
+.proof__num{font-size:clamp(21px,6vw,30px);line-height:1.05;color:var(--gold);font-weight:900;font-style:italic;font-variant-numeric:tabular-nums}
+.proof__lbl{font-size:11.5px;color:var(--text-muted);line-height:1.35;margin-top:5px}
+/* Il blocco loghi è su fondo chiaro: contenuto in una card, non full-bleed,
+   così non spara una banda bianca a tutta larghezza dentro una pagina dark. */
+.proof__logos{background:#fff;border-radius:var(--r);padding:16px 14px;margin-top:20px}
+
+/* ── Value list ── */
+.value{margin-top:8px}
+.value__list{list-style:none;display:flex;flex-direction:column;gap:11px;margin-top:22px}
+/* NON usare display:flex sui <li>: i nodi di testo e i <strong> diventerebbero
+   flex item separati, spezzando la frase in colonne affiancate. Checkmark
+   appeso con ::before assoluto, testo che scorre normale. */
+.value__list li{position:relative;padding-left:28px;font-size:15px;line-height:1.5;color:var(--text-white)}
+.value__list li::before{
+  content:"✓";position:absolute;left:0;top:0;width:19px;height:19px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--gold-dim);border:1px solid var(--border-gold);border-radius:50%;
+  color:var(--gold);font-weight:900;font-size:11px;
+}
+
+/* ── Case study ── */
+.case{display:flex;flex-direction:column;gap:14px;margin-top:26px}
+.case-card{overflow:hidden;border-radius:var(--r)}
+.case-card__label{padding:9px 14px;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.case-card--before .case-card__label{background:rgba(232,106,106,.14);color:var(--bad)}
+.case-card--after  .case-card__label{background:rgba(77,182,122,.14);color:var(--good)}
+.case-card__stat{padding:12px 14px;font-size:14px;font-weight:700;border-top:1px solid var(--border)}
+.case-card__stat span{display:block;font-size:12.5px;font-weight:400;color:var(--text-muted);margin-top:2px}
+
+/* ── Steps ── */
+.steps{display:flex;flex-direction:column;gap:10px;margin-top:24px}
+.step{display:flex;gap:14px;align-items:flex-start;padding:16px;border-radius:var(--r)}
+.step__num{
+  width:34px;height:34px;flex-shrink:0;border-radius:50%;
+  background:var(--gold-dim);border:1px solid var(--border-gold);color:var(--gold);
+  display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;
+}
+.step__title{font-weight:800;font-size:15px;margin-bottom:3px}
+.step__desc{font-size:13.5px;color:var(--text-muted);line-height:1.55}
+
+/* ── Qualifica ── */
+.qual{margin-top:24px;padding:20px 18px;border-radius:var(--r);border:1px solid rgba(77,182,122,.28);background:var(--navy-card);box-shadow:var(--shadow-card)}
+.qual__head{font-size:12.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:var(--good);margin-bottom:14px}
+.qual__list{list-style:none;display:flex;flex-direction:column;gap:9px}
+.qual__list li{position:relative;padding-left:24px;font-size:14.5px;color:var(--text-muted);line-height:1.5}
+.qual__list li::before{content:"✓";position:absolute;left:0;top:0;color:var(--good);font-weight:900}
+.qual__no{
+  margin-top:16px;padding-top:14px;border-top:1px solid var(--border);
+  font-size:13px;color:var(--text-dim);line-height:1.55;
+}
+.qual__no b{color:var(--text-muted);font-weight:700}
+
+/* ── Founder ── */
+.founder{display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;margin-top:24px;padding:26px 20px;border-radius:var(--r-lg)}
+.founder__avatar{width:84px;height:84px;border-radius:50%;border:2px solid var(--border-gold);overflow:hidden;flex-shrink:0}
+.founder__avatar img{width:100%;height:100%;object-fit:cover}
+.founder__name{font-size:21px;font-weight:900;letter-spacing:-.01em}
+.founder__role{font-size:11.5px;font-weight:800;color:var(--gold);letter-spacing:.05em;text-transform:uppercase;margin-top:3px}
+.founder__bio{font-size:14.5px;color:var(--text-muted);line-height:1.65;margin-top:12px;max-width:52ch}
+.founder__stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px;width:100%;max-width:420px}
+.founder__stat-n{font-size:23px;color:var(--gold);font-weight:900;font-style:italic;line-height:1}
+.founder__stat-l{font-size:11px;color:var(--text-muted);margin-top:3px;line-height:1.3}
+
+/* ── Testimonial: carosello con snap su mobile, griglia su desktop ── */
+.tst{
+  display:grid;grid-auto-flow:column;grid-auto-columns:82%;gap:12px;margin-top:24px;
+  overflow-x:auto;scroll-snap-type:x mandatory;
+  padding-bottom:10px;margin-inline:-18px;padding-inline:18px;
+  scrollbar-width:none;
+}
+.tst::-webkit-scrollbar{display:none}
+.tst__card{scroll-snap-align:center;padding:20px 18px;border-radius:var(--r)}
+.tst__stars{color:var(--gold);font-size:13px;letter-spacing:2px;margin-bottom:10px}
+.tst__text{font-size:14px;color:var(--text-muted);line-height:1.65;font-style:italic;margin-bottom:14px}
+.tst__author{font-size:13px;font-weight:800}
+.tst__company{font-size:12px;color:var(--text-dim);margin-top:2px}
+.tst__hint{font-size:11.5px;color:var(--text-dim);text-align:center;margin-top:4px}
+
+/* ── FAQ ── */
+.faq{display:flex;flex-direction:column;gap:8px;margin-top:24px}
+.faq-item{border-radius:var(--r-sm);overflow:hidden;background:var(--navy-card);border:1px solid var(--border)}
+.faq-item__q{
+  width:100%;background:none;border:none;text-align:left;
+  padding:16px 18px;min-height:56px;
+  font-size:14.5px;font-weight:700;color:var(--text-white);cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;gap:14px;line-height:1.4;
+}
+.faq-item__q::after{content:"+";font-size:21px;color:var(--gold);flex-shrink:0;font-weight:400;transition:transform .2s}
+.faq-item.open .faq-item__q{color:var(--gold)}
+.faq-item.open .faq-item__q::after{transform:rotate(45deg)}
+.faq-item__a{display:none;padding:14px 18px 18px;font-size:13.5px;color:var(--text-muted);line-height:1.7;border-top:1px solid var(--border)}
+.faq-item.open .faq-item__a{display:block}
+
+/* ── Final CTA ── */
+.final{background:var(--navy-mid);border-top:1px solid var(--border-gold);padding:56px 0;text-align:center;position:relative;overflow:hidden}
+.final::before{
+  content:'';position:absolute;bottom:-240px;left:50%;transform:translateX(-50%);
+  width:560px;height:560px;pointer-events:none;
+  background:radial-gradient(circle,rgba(250,180,80,.10) 0%,transparent 68%);
+}
+.final > .container{position:relative}
+.final h2{font-size:clamp(26px,7.4vw,46px);font-weight:900;letter-spacing:-.025em;line-height:1.12;margin-bottom:14px;max-width:18ch;margin-inline:auto;text-wrap:balance}
+.final__sub{font-size:15px;color:var(--text-muted);margin-bottom:26px;max-width:42ch;margin-inline:auto;line-height:1.55}
+.final__cta{max-width:440px;margin-inline:auto}
+
+/* ── Footer ── */
+.footer{border-top:1px solid var(--border);padding:26px 0;text-align:center}
+.footer__logo{font-size:14px;font-weight:900;color:var(--gold);letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px}
+.footer__copy{font-size:11.5px;color:var(--text-dim);line-height:1.6;max-width:60ch;margin-inline:auto}
+
+/* ── Sticky bar ──
+   niente backdrop-filter: su webview mobile è uno dei costi di paint più alti
+   e qui il fondo è comunque opaco. */
+.sticky{
+  position:fixed;left:0;right:0;bottom:0;z-index:900;
+  background:rgba(18,29,43,.98);border-top:1px solid var(--border-gold);
+  padding:12px max(16px,env(safe-area-inset-left,0px)) calc(12px + env(safe-area-inset-bottom,0px));
+  transform:translateY(110%);transition:transform .28s cubic-bezier(.22,.9,.3,1);
+  will-change:transform;
+}
+.sticky.visible{transform:translateY(0)}
+.sticky__inner{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:14px}
+.sticky__text{flex:1;min-width:0;font-size:12.5px;color:var(--text-muted);line-height:1.3}
+.sticky__text strong{display:block;color:var(--text-white);font-size:13.5px;font-weight:800;margin-bottom:1px}
+.sticky .btn-primary{width:auto;min-height:48px;padding:12px 20px;font-size:14.5px;flex-shrink:0}
+/* Sotto i 380px la barra a due colonne strozza il bottone: passa a CTA piena. */
+@media(max-width:379px){
+  .sticky__text{display:none}
+  .sticky .btn-primary{width:100%}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   POP-UP 2 STEP
+   ═══════════════════════════════════════════════════════════════ */
+.ml-modal-overlay{
+  position:fixed;inset:0;background:rgba(6,11,18,.82);z-index:9000;display:none;
+  align-items:flex-start;justify-content:center;
+  padding:18px 12px calc(18px + env(safe-area-inset-bottom,0px));
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+}
+.ml-modal-overlay.open{display:flex}
+.ml-modal{
+  background:var(--navy-mid);border:1px solid var(--border-gold);border-radius:var(--r-lg);
+  padding:30px 20px 22px;max-width:460px;width:100%;margin:auto;position:relative;
+  box-shadow:var(--shadow-lift);animation:popupIn .2s cubic-bezier(.22,.9,.3,1);
+}
+@keyframes popupIn{from{opacity:0;transform:translateY(12px) scale(.99)}to{opacity:1;transform:none}}
+.ml-modal:focus{outline:none}
+/* area di tocco 44x44 (linea guida mobile): prima era alta 24px e si sbagliava il colpo */
+.ml-modal__close{
+  position:absolute;top:4px;right:6px;background:none;border:none;color:var(--text-muted);
+  font-size:26px;line-height:1;cursor:pointer;z-index:2;
+  min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;
+}
+.ml-modal__close:hover{color:var(--text-white)}
+.ml-progress{display:flex;gap:5px;justify-content:center;margin-bottom:16px}
+.ml-progress i{width:26px;height:4px;border-radius:3px;background:rgba(255,255,255,.14);transition:background .2s}
+.ml-progress i.on{background:var(--gold)}
+.ml-modal__eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:7px;text-align:center}
+.ml-modal__title{font-size:23px;font-weight:900;letter-spacing:-.022em;line-height:1.18;margin-bottom:6px;text-align:center;text-wrap:balance}
+.ml-modal__sub{font-size:13.5px;color:var(--text-muted);margin-bottom:20px;line-height:1.5;text-align:center;text-wrap:pretty}
+.ml-step[hidden]{display:none}
+.ml-choices{display:flex;flex-direction:column;gap:10px}
+.ml-choice{
+  position:relative;text-align:left;width:100%;
+  background:var(--navy-card);border:1px solid var(--border);border-radius:12px;
+  padding:15px 42px 15px 15px;min-height:56px;cursor:pointer;
+  transition:border-color .12s,background .12s,transform .12s;
+}
+.ml-choice:hover{border-color:var(--gold);background:var(--navy-hover)}
+.ml-choice:active{transform:scale(.99)}
+.ml-choice__t{display:block;font-size:15.5px;font-weight:700;color:var(--text-white);line-height:1.3}
+.ml-choice__s{display:block;font-size:12.5px;color:var(--text-muted);margin-top:3px;line-height:1.4}
+.ml-choice__arrow{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:var(--gold);font-size:19px;font-weight:700}
+/* La primaria deve pesare PIÙ della secondaria: un tint gold al 10% su fondo
+   navy-mid risultava più scuro del navy-card della secondaria, invertendo la
+   gerarchia. Qui: bordo gold pieno + tint più marcato + alone. */
+.ml-choice--primary{border-color:var(--gold);background:linear-gradient(180deg,rgba(250,180,80,.17),rgba(250,180,80,.08));box-shadow:0 4px 18px rgba(250,180,80,.12)}
+.ml-choice--primary:hover{background:linear-gradient(180deg,rgba(250,180,80,.24),rgba(250,180,80,.12))}
+.ml-choice--secondary{background:transparent}
+.ml-choice--secondary:hover{background:var(--navy-card)}
+.ml-choice__tag{display:inline-block;background:var(--gold);color:#0F1825;font-size:9.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:var(--pill);margin-bottom:6px}
+.ml-choice--secondary .ml-choice__t{font-size:15px;color:var(--text-muted)}
+.ml-back{background:none;border:0;color:var(--text-muted);font-size:13px;cursor:pointer;padding:10px 8px 10px 0;min-height:44px;display:inline-flex;align-items:center}
+.ml-back:hover{color:var(--gold)}
+.ml-form{display:flex;flex-direction:column;gap:12px}
+.ml-form input[type=text],.ml-form input[type=email]{
+  width:100%;background:var(--navy-card);border:1px solid var(--border);border-radius:var(--r-sm);
+  padding:14px 15px;font-family:inherit;font-size:16px; /* 16px: sotto, iOS zooma al focus */
+  color:var(--text-white);outline:none;transition:border-color .18s,box-shadow .18s;
+}
+.ml-form input::placeholder{color:var(--text-dim)}
+.ml-form input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(250,180,80,.14)}
+.ml-consent{
+  display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--text-dim);line-height:1.5;
+  padding:10px;margin:-10px;border:1px solid transparent;border-radius:var(--r-sm);
+  transition:border-color .18s,background .18s;cursor:pointer;
+}
+.ml-consent input{margin-top:2px;flex-shrink:0;accent-color:var(--gold);width:20px;height:20px}
+.ml-consent a{color:var(--gold);text-decoration:underline}
+.ml-consent__req{color:var(--gold);font-weight:800}
+/* stato errore: la checkbox privacy è obbligatoria ma il bubble nativo non
+   viene mostrato nei webview in-app iOS → evidenziamo noi, in modo esplicito */
+.ml-consent--error{border-color:var(--bad);background:rgba(232,106,106,.10)}
+.ml-consent--error .ml-consent__req{color:var(--bad)}
+.ml-consent--error input{outline:2px solid var(--bad);outline-offset:2px}
+@keyframes mlShake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-3px)}40%,60%{transform:translateX(3px)}}
+.ml-shake{animation:mlShake .4s}
+.ml-form input.ml-invalid{border-color:var(--bad)}
+.ml-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.ml-err{display:none;color:var(--bad);font-size:13px;text-align:center;line-height:1.45}
+.ml-modal__micro{text-align:center;font-size:11.5px;color:var(--text-dim);margin-top:13px;line-height:1.45}
+
+/* ═══════════════════════════════════════════════════════════════
+   DESKTOP (mobile-first: qui sopra è tutto per il 375px)
+   ═══════════════════════════════════════════════════════════════ */
+@media(min-width:768px){
+  :root{--sticky-h:76px}
+  .container{padding-inline:24px}
+  .offer-bar{font-size:14px;padding:11px 20px}
+  .hero{padding:56px 0 64px}
+  .hero__eyebrow{font-size:12px;margin-bottom:24px}
+  .hero h1{margin-bottom:18px}
+  .hero__sub{font-size:19px;max-width:44ch}
+  .widget{max-width:480px;padding:26px 28px 22px;margin-top:34px}
+  .widget__score{font-size:58px}
+  .widget-item{font-size:14px;padding:10px 14px}
+  .section{padding:76px 0}
+  .section__lead{font-size:17px}
+  .value__list li{font-size:16px}
+  .case{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .case--full{grid-column:1/-1}
+  .steps{gap:12px}
+  .step{padding:20px 24px;gap:18px}
+  .step__num{width:44px;height:44px;font-size:18px}
+  .step__title{font-size:16.5px}
+  .step__desc{font-size:14.5px}
+  .qual{padding:28px 30px}
+  .founder{flex-direction:row;align-items:flex-start;text-align:left;gap:28px;padding:36px}
+  .founder__avatar{width:104px;height:104px}
+  .founder__name{font-size:26px}
+  .founder__bio{margin-top:14px}
+  .founder__stats{max-width:none;margin-top:20px}
+  .founder__stat-n{font-size:28px}
+  .tst{grid-auto-flow:row;grid-template-columns:repeat(3,1fr);overflow:visible;margin-inline:0;padding-inline:0}
+  .tst__hint{display:none}
+  .faq-item__q{font-size:15.5px;padding:19px 22px}
+  .faq-item__a{font-size:14.5px;padding:16px 22px 20px}
+  .final{padding:92px 0}
+  .final__sub{font-size:16.5px}
+  .ml-modal{padding:36px 32px 26px}
+  .ml-modal__title{font-size:26px}
+  .ml-modal__sub{font-size:14px}
+}
+
+/* Schermi molto stretti (≤340px): rotture reali verificate a 320px */
+@media(max-width:340px){
+  .container{padding-inline:14px}
+  /* il bleed del carosello deve pareggiare il padding del container, altrimenti
+     sporge di 4px per lato e i bordi delle card vengono tranciati */
+  .tst{margin-inline:-14px;padding-inline:14px}
+  .hero__eyebrow{font-size:10px;letter-spacing:.06em;padding:5px 11px}
+  .widget{padding:18px 13px 16px}
+  .widget-item{font-size:12.5px;padding:8px 10px}
+  .widget-item__val{font-size:13px}
+  .btn-primary{font-size:15.5px;padding:15px 16px}
+  .proof__stats{grid-template-columns:1fr;gap:14px}
+  .founder__stats{grid-template-columns:1fr;gap:14px}
+  .ml-modal{padding:24px 14px 18px}
+  .ml-modal__title{font-size:20px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{animation:none!important;transition:none!important}
+  .widget__bar-fill{width:74%}
+  .sticky{transition:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ TOP BAR ══════════ -->
+<a href="#main" class="skip-link">Salta al contenuto</a>
+
+<!-- Testo tenuto entro una riga a 375px: a due righe rubava 20px di fold -->
+<div class="offer-bar">Gratuito · <strong>2 minuti</strong> · nessun accesso a Klaviyo</div>
+
+<!-- main avvolge TUTTO il contenuto, non solo l'hero: altrimenti lo skip-link
+     porta dentro un landmark che contiene una sezione sola -->
+<main id="main">
+
+<!-- ══════════ HERO ══════════ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero__eyebrow">eCommerce italiani · Shopify + Klaviyo</div>
+    <h1>Quanti <span class="accent gold">€ al mese</span> perde la tua email?</h1>
+    <p class="hero__sub">Il numero esatto in 2 minuti, sul benchmark di 150+ eCommerce italiani.</p>
+
+    <!-- Il widget è il gancio: deve stare sopra la piega, non dopo la CTA -->
+    <div class="widget" aria-hidden="true">
+      <div class="widget__tag">IL TUO REPORT</div>
+      <div class="widget__label">Revenue leak stimato / mese</div>
+      <!-- valore finale già nell'HTML: se JS non parte (o il webview blocca lo
+           script) si vede €8.500, non "€0" — che rovinerebbe proprio il gancio -->
+      <div class="widget__score num" id="counter">€8.500</div>
+      <div class="widget__note">⚠️ Email ferma sotto il 10% del fatturato</div>
+      <div class="widget__bar"><div class="widget__bar-fill"></div></div>
+      <div class="widget__items">
+        <div class="widget-item"><span class="widget-item__name">Welcome Series</span><span class="widget-item__val orange">–€1.200/mese</span></div>
+        <div class="widget-item"><span class="widget-item__name">Abandoned Cart</span><span class="widget-item__val red">–€3.400/mese</span></div>
+        <div class="widget-item"><span class="widget-item__name">Post-Purchase</span><span class="widget-item__val red">–€2.700/mese</span></div>
+        <div class="widget-item"><span class="widget-item__name">Win-Back</span><span class="widget-item__val orange">–€1.200/mese</span></div>
+      </div>
+      <!-- una riga sola: a due righe la CTA usciva dal fold a 375x667 -->
+      <div class="widget__disc">Valori medi di esempio. Il tuo numero reale può variare.</div>
+    </div>
+
+    <div class="hero__cta">
+      <button class="btn-primary btn-arrow ml-open" aria-haspopup="dialog">Calcola il mio Revenue Leak</button>
+      <div class="hero__micro">🔒 Gratuito · 2 minuti · nessun accesso al Klaviyo</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ PROOF ══════════ -->
+<div class="proof">
+  <div class="container">
+    <div class="proof__stats">
+      <div><div class="proof__num">150+</div><div class="proof__lbl">account eCommerce analizzati</div></div>
+      <div><div class="proof__num">€5M+</div><div class="proof__lbl">revenue email generata</div></div>
+      <div><div class="proof__num">67%</div><div class="proof__lbl">ha un Abandoned Cart non ottimizzato</div></div>
+    </div>
+    <div class="proof__logos">
+      <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/us5X0gC74A4Hjpwvd83e/media/6a2fc86b0a683b64fe3d3987.png"
+           alt="Brand eCommerce italiani seguiti da Mailift" width="1200" height="200" loading="lazy" decoding="async">
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ COSA OTTIENI ══════════ -->
+<section class="section section--defer">
+  <div class="container value">
+    <span class="section__eyebrow">Il report</span>
+    <h2 class="section__title">Cosa ottieni in 2 minuti</h2>
+    <ul class="value__list">
+      <li>Quanti <strong>euro al mese</strong> lasci sul tavolo rispetto al benchmark del 25–40% da email</li>
+      <li>Quali <strong>flow</strong> ti stanno perdendo di più — il tuo punto di leak nascosto</li>
+      <li>Se il tuo <strong>Abandoned Cart</strong> recupera almeno il 15% dei carrelli</li>
+      <li>Un <strong>piano d'azione prioritizzato</strong>: cosa sistemare per primo per recuperare di più, prima</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════ PROVA ══════════ -->
+<section class="section section--dark section--defer">
+  <div class="container">
+    <span class="section__eyebrow">Risultati reali</span>
+    <h2 class="section__title">Prima e dopo aver chiuso il leak</h2>
+    <p class="section__lead">Account reali che hanno individuato e corretto i loro flow.</p>
+    <div class="case">
+      <div class="case-card card case-card--before">
+        <div class="case-card__label">Prima</div>
+        <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/us5X0gC74A4Hjpwvd83e/media/6a2fc2cdb9af5312bc38362f.png"
+             alt="Revenue da flow Klaviyo prima dell'ottimizzazione" width="1200" height="600" loading="lazy" decoding="async">
+        <div class="case-card__stat">Revenue da flow: €1.240/mese<span>Flow attivi ma non ottimizzati</span></div>
+      </div>
+      <div class="case-card card case-card--after">
+        <div class="case-card__label">Dopo — 21 giorni</div>
+        <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/us5X0gC74A4Hjpwvd83e/media/6a2fc2cd1b95dbb2c2e3de76.png"
+             alt="Revenue da flow Klaviyo dopo l'ottimizzazione" width="1200" height="600" loading="lazy" decoding="async">
+        <div class="case-card__stat">Revenue da flow: <span style="display:inline;color:var(--good);font-weight:800">€3.410/mese · +174%</span><span>3 fix implementati</span></div>
+      </div>
+      <div class="case-card card case--full">
+        <div class="case-card__label" style="background:rgba(77,182,122,.14);color:var(--good)">✓ Incremento su un altro account</div>
+        <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/us5X0gC74A4Hjpwvd83e/media/e424c01c-4523-498c-97c0-6b14ddf85e0e.png"
+             alt="Secondo incremento di revenue verificato" width="1200" height="500" loading="lazy" decoding="async">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ COME FUNZIONA ══════════ -->
+<section class="section section--defer">
+  <div class="container">
+    <span class="section__eyebrow">Come funziona</span>
+    <h2 class="section__title">Il tuo numero in <span class="accent gold">3 passi</span></h2>
+    <div class="steps">
+      <div class="step card"><div class="step__num">1</div><div><div class="step__title">Rispondi a poche domande</div><div class="step__desc">Fatturato, settore, stato dei tuoi flow. Nessun accesso al Klaviyo, nessuna installazione.</div></div></div>
+      <div class="step card"><div class="step__num">2</div><div><div class="step__title">Calcoliamo il tuo Revenue Leak</div><div class="step__desc">Confrontiamo i tuoi numeri col benchmark del 25–40% da email su 150+ account italiani.</div></div></div>
+      <div class="step card"><div class="step__num">3</div><div><div class="step__title">Ricevi il numero e dove intervenire</div><div class="step__desc">Quanti € lasci sul tavolo ogni mese e i flow su cui agire per primi.</div></div></div>
+    </div>
+
+    <!-- Qualifica compatta: filtra il crowd senza una sezione dedicata -->
+    <div class="qual">
+      <div class="qual__head">✓ È per te se</div>
+      <ul class="qual__list">
+        <li>Hai un eCommerce su Shopify da almeno <strong>€20k/mese</strong></li>
+        <li>Usi già Klaviyo, anche solo con qualche flow attivo</li>
+        <li>Stai scalando a paid e vuoi ridurre la dipendenza dagli ads</li>
+      </ul>
+      <div class="qual__no"><b>Non fa per te se</b> non hai ancora un eCommerce attivo, non usi Klaviyo o fatturi sotto i €5k/mese.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FOUNDER ══════════ -->
+<section class="section section--dark section--defer">
+  <div class="container">
+    <span class="section__eyebrow">Chi c'è dietro</span>
+    <h2 class="section__title">Perché fidarsi di questa analisi</h2>
+    <div class="founder card">
+      <div class="founder__avatar">
+        <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/us5X0gC74A4Hjpwvd83e/media/69884cb10a7fd176fb22f7df.png"
+             alt="Lorenzo Baretta, founder di Mailift" width="208" height="208" loading="lazy" decoding="async">
+      </div>
+      <div>
+        <div class="founder__name">Lorenzo Baretta</div>
+        <div class="founder__role">Email Revenue Strategist · Founder Mailift</div>
+        <p class="founder__bio">7 anni di email marketing eCommerce e flow Klaviyo ottimizzati per oltre 150 account, da €20k a €500k/mese. Gli stessi errori si ripetono ovunque: questo calcolatore condensa quelle ore di analisi in un numero che ottieni in 2 minuti.</p>
+        <div class="founder__stats">
+          <div><div class="founder__stat-n">7+</div><div class="founder__stat-l">anni email marketing</div></div>
+          <div><div class="founder__stat-n">150+</div><div class="founder__stat-l">account analizzati</div></div>
+          <div><div class="founder__stat-n">€5M+</div><div class="founder__stat-l">revenue generata</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ TESTIMONIAL ══════════ -->
+<section class="section section--defer">
+  <div class="container">
+    <span class="section__eyebrow">Testimonianze</span>
+    <h2 class="section__title">Cosa dicono i founder</h2>
+    <div class="tst">
+      <div class="tst__card card"><div class="tst__stars">★★★★★</div><div class="tst__text">"Ho scoperto che il mio post-purchase non aveva nemmeno un upsell. In 3 settimane +€1.800/mese senza toccare gli ads."</div><div class="tst__author">Marco T.</div><div class="tst__company">eCommerce abbigliamento · €45k/mese</div></div>
+      <div class="tst__card card"><div class="tst__stars">★★★★★</div><div class="tst__text">"Non credevo di lasciare così tanto sul tavolo. Ho implementato le prime 3 priorità e l'Abandoned Cart è passato da 8% a 14%."</div><div class="tst__author">Silvia R.</div><div class="tst__company">eCommerce beauty · €30k/mese</div></div>
+      <div class="tst__card card"><div class="tst__stars">★★★★★</div><div class="tst__text">"Pensavo di avere i flow a posto. Il numero mi ha aperto gli occhi: Welcome Series completamente da rifare."</div><div class="tst__author">Davide M.</div><div class="tst__company">eCommerce food · €60k/mese</div></div>
+    </div>
+    <div class="tst__hint">← scorri →</div>
+  </div>
+</section>
+
+<!-- ══════════ FAQ ══════════ -->
+<section class="section section--dark section--defer">
+  <div class="container">
+    <span class="section__eyebrow">FAQ</span>
+    <h2 class="section__title">Domande frequenti</h2>
+    <div class="faq">
+      <div class="faq-item"><button class="faq-item__q" type="button" aria-expanded="false" onclick="toggleFaq(this)">Devo dare accesso al mio Klaviyo?</button><div class="faq-item__a">No. Non chiediamo nessun accesso né API key. Rispondi solo a poche domande sul tuo business e calcoliamo la stima.</div></div>
+      <div class="faq-item"><button class="faq-item__q" type="button" aria-expanded="false" onclick="toggleFaq(this)">Quanto ci vuole?</button><div class="faq-item__a">Circa 2 minuti. Ricevi il tuo Revenue Leak stimato subito dopo.</div></div>
+      <div class="faq-item"><button class="faq-item__q" type="button" aria-expanded="false" onclick="toggleFaq(this)">È davvero gratuito?</button><div class="faq-item__a">Sì, 100% gratuito. Nessun pagamento, nessuna carta.</div></div>
+      <div class="faq-item"><button class="faq-item__q" type="button" aria-expanded="false" onclick="toggleFaq(this)">Come calcolate il Revenue Leak?</button><div class="faq-item__a">Confrontiamo i tuoi numeri con il benchmark del 25–40% di fatturato da email, basato su oltre 150 account eCommerce italiani analizzati.</div></div>
+      <div class="faq-item"><button class="faq-item__q" type="button" aria-expanded="false" onclick="toggleFaq(this)">I miei dati sono al sicuro?</button><div class="faq-item__a">Usiamo la tua email solo per inviarti il risultato e comunicazioni pertinenti. Niente spam, puoi disiscriverti quando vuoi.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FINAL CTA ══════════ -->
+<section class="final">
+  <div class="container">
+    <h2>Il leak c'è comunque.<br>Tanto vale <span class="accent gold">sapere quanto vale</span></h2>
+    <p class="final__sub">2 minuti. Gratis. Il numero che potrebbe valere migliaia di euro al mese di revenue recuperata.</p>
+    <div class="final__cta">
+      <button class="btn-primary btn-arrow ml-open" aria-haspopup="dialog">Calcola il mio Revenue Leak</button>
+      <div class="hero__micro">🔒 Gratuito · 2 minuti · nessun accesso al Klaviyo</div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__logo">MAILIFT</div>
+    <div class="footer__copy">© 2026 Mailift Srl · Questo non è un prodotto Klaviyo. I risultati indicati sono basati su casi reali e possono variare.</div>
+  </div>
+</footer>
+
+<!-- ══════════ STICKY BAR ══════════ -->
+<div class="sticky" id="stickyBar">
+  <div class="sticky__inner">
+    <div class="sticky__text"><strong>Revenue Leak Calculator</strong>Scopri quanto perdi ogni mese</div>
+    <button class="btn-primary btn-arrow ml-open" aria-haspopup="dialog">Calcola</button>
+  </div>
+</div>
+
+<!-- ══════════ POP-UP 2 STEP (form nativo → Worker → GHL) ══════════ -->
+<div class="ml-modal-overlay" id="mlModal" role="dialog" aria-modal="true" aria-labelledby="mlModalTitle" aria-hidden="true">
+  <div class="ml-modal" tabindex="-1">
+    <button type="button" class="ml-modal__close" id="mlClose" aria-label="Chiudi">×</button>
+    <div class="ml-progress" aria-hidden="true"><i class="on"></i><i></i></div>
+
+    <!-- STEP 1 -->
+    <div class="ml-step" data-step="1">
+      <div class="ml-modal__eyebrow" id="mlStep1Eyebrow">Step 1 di 2</div>
+      <div class="ml-modal__title" id="mlModalTitle">Per chi richiedi l'analisi?</div>
+      <div class="ml-modal__sub">Scegli un'opzione per continuare</div>
+      <div class="ml-choices">
+        <button type="button" class="ml-choice ml-choice--primary" data-value="Per il mio brand Ecommerce">
+          <span class="ml-choice__tag">Consigliato</span>
+          <span class="ml-choice__t">Per il mio brand Ecommerce</span>
+          <span class="ml-choice__s">Sono il founder / gestisco il mio store</span>
+          <span class="ml-choice__arrow">→</span>
+        </button>
+        <button type="button" class="ml-choice ml-choice--secondary" data-value="Per i miei clienti">
+          <span class="ml-choice__t">Per i miei clienti</span>
+          <span class="ml-choice__s">Sono un'agenzia / freelance / consulente</span>
+          <span class="ml-choice__arrow">→</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP FATTURATO (solo variante B dell'A/B, solo ramo eCommerce) -->
+    <div class="ml-step" data-step="rev" hidden>
+      <button type="button" class="ml-back" data-back="1">← Indietro</button>
+      <div class="ml-modal__eyebrow" id="mlRevEyebrow">Step 2 di 3</div>
+      <div class="ml-modal__title">Quanto fattura il tuo store?</div>
+      <div class="ml-modal__sub">Ci serve per confrontarti col benchmark giusto — il calcolo non è attendibile senza</div>
+      <!-- ATTENZIONE: i data-value devono combaciare CARATTERE PER CARATTERE con le
+           picklistOptions del campo GHL "Quale è il tuo attuale fatturato Mensile? 1"
+           (id bW87MPPTFNr51QBtNZmG), altrimenti il valore RADIO viene scartato.
+           Usano l'en-dash "–" (U+2013) e "50k –  80k" ha un DOPPIO SPAZIO dopo il trattino.
+           Non riformattare questi attributi. -->
+      <div class="ml-choices">
+        <button type="button" class="ml-choice ml-rev" data-value="meno di 15k €/mese" data-qualified="0">
+          <span class="ml-choice__t">Meno di 15k € / mese</span><span class="ml-choice__arrow">→</span>
+        </button>
+        <button type="button" class="ml-choice ml-rev" data-value="15k – 25k €/mese" data-qualified="1">
+          <span class="ml-choice__t">15k – 25k € / mese</span><span class="ml-choice__arrow">→</span>
+        </button>
+        <button type="button" class="ml-choice ml-rev" data-value="25k – 50k €/mese" data-qualified="1">
+          <span class="ml-choice__t">25k – 50k € / mese</span><span class="ml-choice__arrow">→</span>
+        </button>
+        <button type="button" class="ml-choice ml-rev" data-value="50k –  80k €/mese" data-qualified="1">
+          <span class="ml-choice__t">50k – 80k € / mese</span><span class="ml-choice__arrow">→</span>
+        </button>
+        <button type="button" class="ml-choice ml-rev" data-value="oltre 80k €/mese" data-qualified="1">
+          <span class="ml-choice__t">Oltre 80k € / mese</span><span class="ml-choice__arrow">→</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="ml-step" data-step="2" hidden>
+      <button type="button" class="ml-back" id="mlBack">← Indietro</button>
+      <div class="ml-modal__eyebrow">Step 2 di 2</div>
+      <div class="ml-modal__title">Ci siamo quasi</div>
+      <div class="ml-modal__sub" id="mlEcho">Lascia i tuoi dati per ricevere il Revenue Leak</div>
+      <form id="mlForm" class="ml-form" novalidate>
+        <input name="full_name" type="text" placeholder="Nome e cognome" autocomplete="name" enterkeyhint="next">
+        <input name="email" type="email" required placeholder="La tua email" autocomplete="email" inputmode="email" enterkeyhint="go">
+        <input type="hidden" name="per_chi" id="mlPerChi">
+        <input type="hidden" name="fatturato" id="mlFatturato">
+        <input type="hidden" name="ab_variant" id="mlAbVariant">
+        <input type="hidden" name="utm_source" id="mlUtmSource">
+        <input type="hidden" name="utm_medium" id="mlUtmMedium">
+        <input type="hidden" name="utm_campaign" id="mlUtmCampaign">
+        <input type="hidden" name="utm_content" id="mlUtmContent">
+        <input type="hidden" name="utm_term" id="mlUtmTerm">
+        <input type="hidden" name="landing_url" id="mlLandingUrl">
+        <input type="hidden" name="referrer" id="mlReferrer">
+        <label class="ml-consent" id="mlConsentBox"><input type="checkbox" name="consent" id="mlConsent" required aria-describedby="mlErr"><span><span class="ml-consent__req">*</span> Acconsento a ricevere comunicazioni da Mailift, anche via email/SMS, secondo la <a href="https://mailift.com/privacy" target="_blank" rel="noopener">privacy policy</a>. <span class="ml-consent__req">(obbligatorio)</span></span></label>
+        <input class="ml-hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button type="submit" class="btn-primary btn-arrow">Calcola il mio Revenue Leak</button>
+        <p id="mlErr" class="ml-err" role="alert" aria-live="assertive"></p>
+      </form>
+      <div class="ml-modal__micro">🔒 Niente spam · nessun accesso al tuo Klaviyo · risultato immediato</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ——— Contatore animato Revenue Leak ——— */
+(function(){
+  var el=document.getElementById('counter'); if(!el) return;
+  var target=8500,dur=1800,start=null;
+  /* Separatore migliaia a mano invece di toLocaleString('it-IT'): alcuni webview
+     in-app (e i browser con ICU ridotto) ignorano il locale e stampano "8500",
+     che su un numero-gancio si legge come un valore diverso. */
+  function eur(n){return '€'+String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches){el.textContent=eur(target);return;}
+  function step(ts){if(!start)start=ts;var p=Math.min((ts-start)/dur,1);var e=1-Math.pow(1-p,3);el.textContent=eur(Math.round(target*e));if(p<1)requestAnimationFrame(step);}
+  if(!('IntersectionObserver' in window)){requestAnimationFrame(step);return;}
+  var io=new IntersectionObserver(function(x){if(x[0].isIntersecting){requestAnimationFrame(step);io.disconnect();}});
+  io.observe(el);
+})();
+
+/* ——— Sticky bar ———
+   IntersectionObserver sulla sentinella invece di un listener onscroll:
+   nessun lavoro a ogni frame di scroll (conta su webview mobile). */
+(function(){
+  var bar=document.getElementById('stickyBar');
+  /* Riferimento = la CTA dell'hero, non una sentinella a fine sezione: con la
+     sentinella la barra era già visibile al caricamento, quindi due CTA
+     contemporanee sullo schermo e 73px di contenuto coperti.
+     Listener passivo con throttle rAF invece di IntersectionObserver: una sola
+     lettura per frame (costo trascurabile) ma comportamento deterministico —
+     la consegna dei callback IO varia tra webview e ci serve affidabilità qui. */
+  var ancora=document.querySelector('.hero__cta');
+  if(!bar||!ancora) return;
+  var pending=false;
+  function valuta(){
+    pending=false;
+    var b=ancora.getBoundingClientRect();
+    // mostra la barra solo quando la CTA dell'hero è fuori schermo
+    bar.classList.toggle('visible', b.bottom<0 || b.top>window.innerHeight);
+  }
+  function onScroll(){if(!pending){pending=true;requestAnimationFrame(valuta);}}
+  window.addEventListener('scroll',onScroll,{passive:true});
+  window.addEventListener('resize',onScroll,{passive:true});
+  valuta();
+})();
+
+/* ——— FAQ ——— */
+function toggleFaq(btn){
+  var item=btn.parentElement,open=item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(function(i){
+    i.classList.remove('open');
+    var q=i.querySelector('.faq-item__q');if(q)q.setAttribute('aria-expanded','false');
+  });
+  if(!open){item.classList.add('open');btn.setAttribute('aria-expanded','true');}
+}
+
+/* ——— Pop-up 2 step + invio form → Worker → GHL ——— */
+(function(){
+  // ↓↓↓ CONFIG ↓↓↓
+  var PROXY = 'https://ghl-form-proxy.mailift.workers.dev';   // Worker live
+  var NEXT_ECOMMERCE = 'https://report.mailift.com/quiz';     // eCommerce → quiz (TUTTI, a prescindere dal fatturato)
+  var NEXT_CLIENTI   = 'https://mailift.com/landing';         // "Per i miei clienti"
+  var NEXT_SOTTO_SOGLIA = 'https://report.mailift.com/quiz';  // sotto soglia → ANCH'ESSI al quiz (mantenuto per revert rapido)
+
+  /* ——— A/B: SPLIT ATTUALMENTE SPENTO ———
+     A <10 lead/settimana un A/B test fa due danni insieme: dimezza una pozza di
+     apprendimento già affamata E non raggiungerà mai la significatività (servono
+     centinaia di conversioni per braccio). Quindi: UNA sola pagina servita, tutto
+     il volume su una variante.
+     👉 In GHL: ferma lo split test e servi solo questa pagina.
+
+     Il meccanismo resta qui per quando il volume lo permetterà. Lo split lo fa
+     GHL, non questo codice: crea DUE pagine, incolla questo stesso file in
+     entrambe e cambia SOLO la riga qui sotto:
+       'A' → controllo (per chi → dati, SENZA domanda fatturato)
+       'B' → variante  (per chi → fatturato → dati)
+     Il valore viaggia fino a GHL e diventa il tag `ab-a` / `ab-b` sul contatto.
+
+     Perché resta 'B' e non 'A' (che avrebbe uno step in meno, quindi più volume):
+     lo step fatturato è l'UNICO segnale ICP che arriva in GHL al momento
+     dell'opt-in. Chi abbandona il quiz non lascia altro. Toglierlo per un
+     guadagno marginale di volume ti lascerebbe senza il dato su cui dovrai
+     ottimizzare dopo. Per passare ad 'A': cambia la riga sotto. */
+  var VARIANTE = 'B';
+  // ↑↑↑ CONFIG ↑↑↑
+
+  var MOSTRA_FATTURATO = (VARIANTE === 'B');
+
+  function track(name,params){params=params||{};try{if(window.gtag)gtag('event',name,params);}catch(e){}try{if(window.fbq)fbq('trackCustom',name,params);}catch(e){}try{if(window.clarity){clarity('event',name);Object.keys(params).forEach(function(k){clarity('set',k,String(params[k]));});}}catch(e){}}
+
+  var modal=document.getElementById('mlModal'),dialog=modal.querySelector('.ml-modal'),closeBtn=document.getElementById('mlClose');
+  var steps=modal.querySelectorAll('.ml-step'),progress=modal.querySelector('.ml-progress');
+  var perChi=document.getElementById('mlPerChi'),echo=document.getElementById('mlEcho');
+  var fatturatoInp=document.getElementById('mlFatturato'),abInp=document.getElementById('mlAbVariant');
+  var revEyebrow=document.getElementById('mlRevEyebrow'),step1Eyebrow=document.getElementById('mlStep1Eyebrow');
+
+  /* La variante NON viene sorteggiata qui: la decide lo split test di GHL servendo
+     una delle due pagine. Qui la dichiariamo soltanto, così viaggia fino al CRM. */
+  var variant=VARIANTE;
+  abInp.value=variant;
+  try{if(window.clarity)clarity('set','ab_variant',variant);}catch(_){}
+
+  /* ——— Attribuzione (UTM) ———
+     GHL popola `attributionSource` SOLO col proprio tracciamento interno: inviandolo
+     via API viene ignorato in silenzio (verificato sul campo). Quindi ci portiamo
+     gli UTM a mano e il Worker li scrive su custom field dedicati.
+     First-touch: catturiamo al primo caricamento e teniamo in sessionStorage, così
+     l'attribuzione sopravvive a cambi di URL. I webview in-app (IG/FB) possono
+     bloccare lo storage → fallback sui parametri correnti. */
+  var attribution=(function(){
+    var p=new URLSearchParams(location.search);
+    var ora={
+      utm_source:p.get('utm_source')||'',
+      utm_medium:p.get('utm_medium')||'',
+      utm_campaign:p.get('utm_campaign')||p.get('utm_id')||'',
+      utm_content:p.get('utm_content')||'',
+      utm_term:p.get('utm_term')||'',
+      landing_url:location.href,
+      referrer:document.referrer||''
+    };
+    try{
+      var salvato=JSON.parse(sessionStorage.getItem('ml_attr')||'null');
+      if(salvato&&salvato.utm_source)return salvato;          // il primo touch vince
+      if(ora.utm_source||ora.utm_campaign)sessionStorage.setItem('ml_attr',JSON.stringify(ora));
+    }catch(_){}
+    return ora;
+  })();
+  var CAMPI_ATTR={mlUtmSource:'utm_source',mlUtmMedium:'utm_medium',mlUtmCampaign:'utm_campaign',
+    mlUtmContent:'utm_content',mlUtmTerm:'utm_term',mlLandingUrl:'landing_url',mlReferrer:'referrer'};
+  Object.keys(CAMPI_ATTR).forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.value=attribution[CAMPI_ATTR[id]]||'';
+  });
+
+  /* ——— Flow dinamico: la sequenza di step dipende da variante e ramo scelto ——— */
+  var flow=['1','2'],qualified=null;
+  function buildFlow(isEcom){
+    flow=(MOSTRA_FATTURATO&&isEcom)?['1','rev','2']:['1','2'];
+    progress.innerHTML=new Array(flow.length+1).join('<i></i>');
+    if(step1Eyebrow)step1Eyebrow.textContent='Step 1 di '+flow.length;
+    if(revEyebrow)revEyebrow.textContent='Step 2 di '+flow.length;
+    var step2=modal.querySelector('.ml-step[data-step="2"] .ml-modal__eyebrow');
+    if(step2)step2.textContent='Step '+flow.length+' di '+flow.length;
+  }
+  function goStep(id){
+    steps.forEach(function(s){s.hidden=(s.getAttribute('data-step')!==String(id));});
+    var idx=flow.indexOf(String(id));
+    progress.querySelectorAll('i').forEach(function(d,i){d.classList.toggle('on',i<=idx);});
+    // riporta in cima: cambiando step la modale può restare scrollata a metà
+    try{modal.scrollTop=0;}catch(_){}
+  }
+
+  var ultimoFocus=null;
+  window.openPopup=function(){
+    ultimoFocus=document.activeElement;
+    qualified=null;fatturatoInp.value='';perChi.value='';
+    buildFlow(true);goStep(1);
+    modal.classList.add('open');modal.setAttribute('aria-hidden','false');
+    document.body.classList.add('ml-noscroll');dialog.focus();
+    track('popup_open',{ab_variant:variant});
+  };
+  function closeModal(){
+    modal.classList.remove('open');modal.setAttribute('aria-hidden','true');
+    document.body.classList.remove('ml-noscroll');
+    try{if(ultimoFocus&&ultimoFocus.focus)ultimoFocus.focus();}catch(_){}
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.ml-open'),function(b){b.addEventListener('click',window.openPopup);});
+  closeBtn.addEventListener('click',closeModal);
+  modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});
+  document.addEventListener('keydown',function(e){
+    if(!modal.classList.contains('open'))return;
+    if(e.key==='Escape'){closeModal();return;}
+    /* focus trap: senza, con la tastiera si esce dalla modale e si finisce a
+       navigare la pagina sotto, che è ancora nel tab order */
+    if(e.key!=='Tab')return;
+    var f=modal.querySelectorAll('button:not([hidden]),input:not([type=hidden]),a[href]');
+    var vis=Array.prototype.filter.call(f,function(el){return el.offsetParent!==null;});
+    if(!vis.length)return;
+    var primo=vis[0],ultimo=vis[vis.length-1];
+    if(e.shiftKey&&document.activeElement===primo){e.preventDefault();ultimo.focus();}
+    else if(!e.shiftKey&&document.activeElement===ultimo){e.preventDefault();primo.focus();}
+  });
+
+  /* Step 1 — per chi */
+  Array.prototype.forEach.call(modal.querySelectorAll('.ml-step[data-step="1"] .ml-choice'),function(c){
+    c.addEventListener('click',function(){
+      var v=c.getAttribute('data-value');perChi.value=v;
+      var isEcom=(v!=='Per i miei clienti');
+      echo.textContent=isEcom?'Analisi per il tuo brand — lascia i tuoi dati':'Analisi per i tuoi clienti — lascia i tuoi dati';
+      buildFlow(isEcom);
+      track('popup_audience_selected',{audience:v,ab_variant:variant});
+      if(MOSTRA_FATTURATO&&isEcom){goStep('rev');}
+      else{goStep(2);var n=document.querySelector('#mlForm input[name=full_name]');if(n)n.focus();}
+    });
+  });
+
+  /* Step fatturato — cattura il dato (non esclude più nessuno dal quiz) */
+  Array.prototype.forEach.call(modal.querySelectorAll('.ml-rev'),function(c){
+    c.addEventListener('click',function(){
+      fatturatoInp.value=c.getAttribute('data-value');
+      qualified=(c.getAttribute('data-qualified')==='1');
+      track('popup_revenue_selected',{fatturato:fatturatoInp.value,qualified:qualified?1:0,ab_variant:variant});
+      try{if(window.clarity)clarity('set','fatturato',fatturatoInp.value);}catch(_){}
+      // Nessuna squalifica nel popup: TUTTI proseguono allo step dati a prescindere
+      // dal fatturato. Il dato resta come tag informativo in GHL; la qualifica vera
+      // (avviso + evento non-qualificato) avviene nel quiz.
+      goStep(2);
+      var n=document.querySelector('#mlForm input[name=full_name]');if(n)n.focus();
+    });
+  });
+
+  /* Indietro */
+  Array.prototype.forEach.call(modal.querySelectorAll('.ml-back'),function(b){
+    b.addEventListener('click',function(){
+      var target=b.getAttribute('data-back');
+      if(target){goStep(target);return;}
+      goStep(flow[flow.indexOf('2')-1]);   // dallo step dati torna al precedente del flow
+    });
+  });
+
+  var f=document.getElementById('mlForm'),err=document.getElementById('mlErr');if(!f)return;
+  var emailInp=f.querySelector('[name=email]'),consent=document.getElementById('mlConsent'),consentBox=document.getElementById('mlConsentBox');
+
+  function showErr(msg){err.textContent=msg;err.style.display='block';}
+  function clearErr(){err.style.display='none';err.textContent='';}
+
+  /* ——— Validazione custom ———
+     NON usiamo reportValidity(): nei webview in-app iOS (IG/FB) il bubble nativo
+     di una checkbox non viene mostrato → l'utente tocca il bottone e "non succede
+     nulla". Qui l'errore è sempre visibile nel DOM. */
+  function validate(){
+    clearErr();
+    emailInp.classList.remove('ml-invalid');consentBox.classList.remove('ml-consent--error','ml-shake');
+    if(!emailInp.value.trim()||!emailInp.checkValidity()){
+      emailInp.classList.add('ml-invalid');emailInp.setAttribute('aria-invalid','true');
+      showErr('Inserisci un indirizzo email valido.');
+      try{emailInp.focus();}catch(_){}
+      track('popup_validation_error',{field:'email',ab_variant:variant});
+      return false;
+    }
+    emailInp.setAttribute('aria-invalid','false');
+    if(!consent.checked){
+      consentBox.classList.add('ml-consent--error');
+      consent.setAttribute('aria-invalid','true');
+      showErr('Per continuare devi accettare la privacy policy.');
+      // riavvia l'animazione anche a click ripetuti
+      void consentBox.offsetWidth;consentBox.classList.add('ml-shake');
+      try{consentBox.scrollIntoView({block:'nearest',behavior:'smooth'});}catch(_){}
+      track('popup_validation_error',{field:'consent',ab_variant:variant});
+      return false;
+    }
+    consent.setAttribute('aria-invalid','false');
+    return true;
+  }
+  // l'errore sparisce appena l'utente corregge
+  consent.addEventListener('change',function(){if(consent.checked){consentBox.classList.remove('ml-consent--error','ml-shake');clearErr();}});
+  emailInp.addEventListener('input',function(){emailInp.classList.remove('ml-invalid');});
+
+  /* Prefill verso il quiz: l'inline script in <head> del quiz sposta questi
+     parametri in sessionStorage e RIPULISCE la query prima che Hyros/Pixel/GTAG
+     leggano location.href (le PII in URL sono vietate da Meta). Le chiavi
+     `email`/`name` sono quelle lette da src/lib/prefill.ts. */
+  function conPrefill(url,email,nome){
+    var q=[];
+    if(email)q.push('email='+encodeURIComponent(email));
+    if(nome)q.push('name='+encodeURIComponent(nome));
+    if(!q.length)return url;
+    return url+(url.indexOf('?')===-1?'?':'&')+q.join('&');
+  }
+
+  f.addEventListener('submit',async function(e){
+    e.preventDefault();
+    if(!perChi.value){goStep(1);return;}
+    if(!validate())return;
+    var btn=f.querySelector('button[type=submit]'),label=btn.textContent;btn.disabled=true;btn.textContent='Invio…';
+    var d=Object.fromEntries(new FormData(f).entries());
+    try{
+      var r=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+      if(!r.ok)throw new Error('proxy');
+      var isEcom=(d.per_chi!=='Per i miei clienti');
+      // In variante A non chiediamo il fatturato → nessuna squalifica possibile
+      var isQualified=isEcom&&(qualified===null?true:qualified);
+      // Analytics interni (GA4 + Clarity): per TUTTI, così il funnel resta completo
+      if(window.gtag)gtag('event','generate_lead',{audience:d.per_chi,fatturato:d.fatturato||'n/d',qualified:isQualified?1:0,ab_variant:variant});
+      if(window.clarity){clarity('event','popup_lead');clarity('set','audience',d.per_chi);clarity('set','qualified',String(isQualified));}
+      /* ——— Conversione LEAD a Meta: per TUTTI gli opt-in ———
+         Prima era ristretta ai soli qualificati. A <10 lead/settimana quel
+         segnale è troppo raro: l'ad set non esce mai dalla learning phase
+         (Meta ne chiede ~50/settimana PER AD SET) e ottimizza sul rumore.
+         Qui viene prima il volume.
+
+         La qualità NON si perde: viaggia nel `value` (qualificato=10, non=1).
+         Così, quando il volume reggerà, si passa a value optimization senza
+         toccare questo codice — basta cambiare il goal dell'ad set in Meta.
+
+         ⚠️ Il `Lead` si spara SOLO qui. Il quiz non deve più spararlo all'arrivo
+         (vedi Quiz.tsx): con il prefill attivo `hasPrefill()` è vero per ogni
+         opt-in, quindi ogni lead verrebbe contato due volte. */
+      if(window.fbq)fbq('track','Lead',{value:isQualified?10:1,currency:'EUR'});
+      // ROUTING: tutti gli ecommerce → quiz (a prescindere dal fatturato). Solo i "clienti/agenzie" vanno alla landing.
+      window.location.href = !isEcom
+        ? NEXT_CLIENTI
+        : conPrefill(NEXT_ECOMMERCE,d.email,d.full_name);
+    }catch(_){btn.disabled=false;btn.textContent=label;showErr('Ops, qualcosa è andato storto. Riprova tra un attimo.');}
+  });
+})();
+</script>
+
+</body>
+</html>

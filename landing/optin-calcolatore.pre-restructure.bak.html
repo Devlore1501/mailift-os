@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revenue Leak Calculator — Scopri quanta revenue email stai perdendo | Mailift</title>
+<meta name="description" content="Scopri in 2 minuti quanti € al mese lasci sul tavolo perché la tua email non rende come dovrebbe. Gratis, senza accesso al tuo Klaviyo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,800;1,700&display=swap" rel="stylesheet">
+
+<style>
+/* ===== DESIGN TOKENS (stile SLO) ===== */
+:root{
+  --navy-deep:#0F1825; --navy-mid:#121D2B; --navy-card:#1A2942; --navy-hover:#1F3354;
+  --gold:#FAB450; --gold-hover:#e8a23a; --gold-dim:rgba(250,180,80,0.12);
+  --gold-glow:rgba(250,180,80,0.35);
+  --text-white:#F0F0EB; --text-muted:#8A9BB0; --text-dim:#5C6F82;
+  --border:rgba(255,255,255,0.07); --border-gold:rgba(250,180,80,0.18);
+  --bad:#e05c5c; --warn:#f5a623; --good:#4db67a;
+  --pill:9999px; --radius:16px; --radius-sm:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Montserrat',sans-serif;background:var(--navy-deep);color:var(--text-white);line-height:1.6;-webkit-font-smoothing:antialiased}
+body.ml-noscroll{overflow:hidden}
+img{max-width:100%;display:block}
+a{text-decoration:none;color:inherit}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+.accent{font-family:'Playfair Display',serif;font-style:italic;font-weight:700}
+.gold{color:var(--gold)}
+.center{text-align:center}
+
+/* ===== BUTTONS ===== */
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--gold);color:#0F1825;font-family:'Montserrat',sans-serif;font-weight:800;font-size:17px;letter-spacing:.01em;padding:18px 44px;border-radius:var(--pill);border:none;cursor:pointer;box-shadow:0 4px 24px var(--gold-glow);transition:background .18s,transform .12s,box-shadow .18s;white-space:nowrap}
+.btn-primary:hover{background:var(--gold-hover);transform:translateY(-2px);box-shadow:0 8px 36px rgba(250,180,80,.55)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed}
+.btn-primary--lg{font-size:19px;padding:22px 52px}
+.btn-primary--full{width:100%;font-size:18px;padding:20px 32px}
+.btn-arrow::after{content:"→";font-size:1.1em}
+
+/* ===== TOPBAR ===== */
+.offer-bar{background:var(--gold);color:#0F1825;text-align:center;padding:11px 20px;font-weight:700;font-size:14px;position:sticky;top:0;z-index:1000}
+.offer-bar strong{font-weight:800}
+
+/* ===== HERO ===== */
+.hero{background:var(--navy-deep);padding:64px 0 56px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:700px;height:700px;background:radial-gradient(circle,rgba(250,180,80,.07) 0%,transparent 70%);pointer-events:none}
+.hero__eyebrow{display:inline-block;background:var(--gold-dim);border:1px solid var(--border-gold);color:var(--gold);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 16px;border-radius:var(--pill);margin-bottom:26px}
+.hero h1{font-family:'Montserrat',sans-serif;font-size:clamp(38px,6.2vw,74px);font-weight:900;letter-spacing:-.02em;line-height:1.08;max-width:820px;margin:0 auto 20px}
+.hero__sub{font-size:clamp(16px,2vw,20px);color:var(--text-muted);max-width:620px;margin:0 auto 36px;line-height:1.6}
+.hero__cta-wrapper{display:flex;flex-direction:column;align-items:center;gap:14px}
+.hero__micro{font-size:13px;color:var(--text-dim);display:flex;align-items:center;gap:6px}
+.hero__micro::before{content:"🔒";font-size:12px}
+
+/* Revenue Leak widget mockup */
+.widget-mockup{background:var(--navy-card);border:1px solid var(--border-gold);border-radius:20px;padding:28px 32px;max-width:480px;margin:52px auto 0;box-shadow:0 24px 80px rgba(0,0,0,.45);text-align:left;position:relative}
+.widget-mockup__tag{position:absolute;top:-14px;right:20px;background:var(--gold);color:#0F1825;font-size:11px;font-weight:800;padding:4px 12px;border-radius:var(--pill);letter-spacing:.04em}
+.widget-mockup__label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px}
+.widget-mockup__score{font-family:'Montserrat',sans-serif;font-size:64px;font-weight:900;font-style:italic;line-height:1;color:var(--bad);margin-bottom:4px;font-variant-numeric:tabular-nums}
+.widget-mockup__score-label{font-size:13px;color:var(--text-muted);margin-bottom:20px}
+.widget-mockup__bar{height:8px;background:var(--navy-mid);border-radius:var(--pill);overflow:hidden;margin-bottom:20px}
+.widget-mockup__bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--warn),var(--bad));border-radius:var(--pill);animation:fill 2.4s ease forwards .3s}
+@keyframes fill{to{width:74%}}
+.widget-mockup__items{display:flex;flex-direction:column;gap:10px}
+/* flex-wrap + min-width:0: senza, il valore in € non si restringe e sfonda la riga */
+.widget-item{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:10px 14px;background:var(--navy-mid);border-radius:var(--radius-sm);font-size:14px}
+.widget-item__name{color:var(--text-white);font-weight:600;min-width:0}
+.widget-item__val{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:900;font-style:italic;white-space:nowrap}
+.widget-item__val.red{color:var(--bad)} .widget-item__val.orange{color:var(--warn)} .widget-item__val.green{color:var(--good)}
+
+/* ===== SOCIAL PROOF ===== */
+.social-proof-bar{background:var(--navy-mid);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:20px 0}
+.social-proof-bar__inner{display:flex;align-items:center;justify-content:center;gap:12px;font-size:13px;font-weight:600;color:var(--text-muted);text-align:center;flex-wrap:wrap}
+.social-proof-bar__stat strong{color:var(--text-white);font-size:15px;font-weight:800}
+.sep{color:var(--text-dim);font-size:10px}
+
+/* ===== SECTIONS ===== */
+.section{padding:76px 0}
+.section--dark{background:var(--navy-mid)}
+.section--darker{background:var(--navy-deep)}
+.section__eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;display:block}
+.section__title{font-family:'Montserrat',sans-serif;font-size:clamp(28px,3.8vw,50px);font-weight:800;letter-spacing:-.02em;margin-bottom:16px;line-height:1.12}
+.section__lead{font-size:17px;color:var(--text-muted);max-width:600px;line-height:1.65}
+
+/* offer snippet */
+.offer-snippet{background:var(--navy-card);border:1px solid var(--border-gold);border-radius:var(--radius);padding:32px 36px;margin:48px auto;max-width:720px}
+.offer-snippet__title{font-family:'Montserrat',sans-serif;font-size:26px;color:var(--gold);margin-bottom:20px;letter-spacing:.03em}
+.offer-snippet__list{list-style:none;display:flex;flex-direction:column;gap:12px}
+/* NON usare display:flex qui: i nodi di testo e i <strong> diventerebbero flex item
+   separati, spezzando la frase in colonne affiancate (su schermi stretti diventa
+   illeggibile). Checkmark appeso con ::before assoluto, testo che scorre normale. */
+.offer-snippet__list li{position:relative;padding-left:26px;font-size:15px;color:var(--text-white);line-height:1.5}
+.offer-snippet__list li::before{content:"✓";position:absolute;left:0;top:0;color:var(--gold);font-weight:800;font-size:16px}
+
+/* target */
+.target-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:40px}
+.target-card{background:var(--navy-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+.target-card--yes{border-color:rgba(77,182,122,.3)} .target-card--no{border-color:rgba(224,92,92,.2)}
+.target-card__header{font-weight:800;font-size:14px;letter-spacing:.05em;text-transform:uppercase;margin-bottom:16px}
+.target-card--yes .target-card__header{color:var(--good)} .target-card--no .target-card__header{color:var(--bad)}
+.target-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+.target-list li{font-size:14px;color:var(--text-muted);display:flex;gap:8px;line-height:1.5}
+.target-card--yes .target-list li::before{content:"✓";color:var(--good);font-weight:800} .target-card--no .target-list li::before{content:"✗";color:var(--bad);font-weight:800}
+
+/* case study */
+.case-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:40px}
+.case-card{background:var(--navy-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.case-card__label{padding:10px 16px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.case-card--before .case-card__label{background:rgba(224,92,92,.15);color:var(--bad)} .case-card--after .case-card__label{background:rgba(77,182,122,.15);color:var(--good)}
+.case-card__img{width:100%;height:200px;background:var(--navy-mid);overflow:hidden}
+.case-card__img img{width:100%;height:100%;object-fit:cover}
+.case-card__stat{padding:14px 16px;font-size:15px;font-weight:700;color:var(--text-white);border-top:1px solid var(--border)}
+.case-card__stat span{font-size:13px;font-weight:400;color:var(--text-muted);display:block;margin-top:2px}
+
+/* problem */
+.problem-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:44px}
+.problem-stat{background:var(--navy-card);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;text-align:center}
+.problem-stat__number{font-family:'Montserrat',sans-serif;font-size:44px;font-weight:900;font-style:italic;color:var(--bad);line-height:1;margin-bottom:6px}
+.problem-stat__label{font-size:14px;color:var(--text-muted);line-height:1.5}
+
+/* mechanism */
+.mechanism-steps{display:flex;flex-direction:column;gap:20px;margin-top:44px;position:relative}
+.mechanism-steps::before{content:'';position:absolute;left:28px;top:0;bottom:0;width:1px;background:var(--border-gold)}
+.mechanism-step{display:flex;gap:24px;align-items:flex-start;position:relative}
+.mechanism-step__num{width:56px;height:56px;background:var(--navy-card);border:1px solid var(--border-gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-size:24px;color:var(--gold);flex-shrink:0;z-index:1}
+.mechanism-step__content{background:var(--navy-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;flex:1}
+.mechanism-step__title{font-weight:700;font-size:16px;color:var(--text-white);margin-bottom:6px}
+.mechanism-step__desc{font-size:14px;color:var(--text-muted);line-height:1.6}
+
+/* founder */
+.founder-card{background:var(--navy-card);border:1px solid var(--border);border-radius:20px;padding:40px;display:flex;gap:32px;align-items:flex-start;margin-top:44px}
+.founder-card__avatar{width:100px;height:100px;border-radius:50%;border:3px solid var(--border-gold);flex-shrink:0;overflow:hidden}
+.founder-card__avatar img{width:100%;height:100%;object-fit:cover}
+.founder-card__name{font-family:'Montserrat',sans-serif;font-size:28px;letter-spacing:.03em;margin-bottom:4px}
+.founder-card__role{font-size:13px;font-weight:700;color:var(--gold);letter-spacing:.04em;text-transform:uppercase;margin-bottom:16px}
+.founder-card__bio{font-size:15px;color:var(--text-muted);line-height:1.7}
+.founder-stats{display:flex;gap:28px;margin-top:20px;flex-wrap:wrap}
+.founder-stat__num{font-family:'Montserrat',sans-serif;font-size:30px;font-weight:900;font-style:italic;color:var(--gold);line-height:1}
+.founder-stat__label{font-size:12px;color:var(--text-muted);margin-top:2px}
+
+/* framework */
+.framework-phases{display:flex;flex-direction:column;gap:16px;margin-top:44px}
+.framework-phase{background:var(--navy-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px;display:flex;gap:20px;align-items:flex-start}
+.framework-phase__icon{font-size:28px;flex-shrink:0}
+.framework-phase__title{font-family:'Montserrat',sans-serif;font-size:22px;letter-spacing:.03em;margin-bottom:6px}
+.framework-phase__desc{font-size:14px;color:var(--text-muted);line-height:1.65}
+
+/* testimonials */
+.testimonial-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:44px}
+.testimonial-card{background:var(--navy-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+.testimonial-card__stars{color:var(--gold);font-size:14px;margin-bottom:12px;letter-spacing:2px}
+.testimonial-card__text{font-size:14px;color:var(--text-muted);line-height:1.7;margin-bottom:16px;font-style:italic}
+.testimonial-card__author{font-size:13px;font-weight:700;color:var(--text-white)}
+.testimonial-card__company{font-size:12px;color:var(--text-dim);margin-top:2px}
+
+/* comparison */
+.comparison{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:44px}
+.comparison__col{border-radius:var(--radius);overflow:hidden}
+.comparison__header{padding:16px 20px;font-weight:800;font-size:15px;text-align:center}
+.comparison__col--no .comparison__header{background:rgba(224,92,92,.12);color:var(--bad)} .comparison__col--yes .comparison__header{background:rgba(77,182,122,.12);color:var(--good)}
+.comparison__items{list-style:none;background:var(--navy-card);border:1px solid var(--border);border-top:none;display:flex;flex-direction:column}
+.comparison__items li{padding:14px 18px;font-size:14px;color:var(--text-muted);border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:flex-start;line-height:1.5}
+.comparison__items li:last-child{border-bottom:none}
+.comparison__col--no .comparison__items li::before{content:"✗";color:var(--bad);flex-shrink:0;font-weight:800} .comparison__col--yes .comparison__items li::before{content:"✓";color:var(--good);flex-shrink:0;font-weight:800}
+
+/* faq */
+.faq-list{display:flex;flex-direction:column;gap:8px;margin-top:44px}
+.faq-item{background:var(--navy-card);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.faq-item__question{width:100%;background:none;border:none;text-align:left;padding:20px 24px;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;color:var(--text-white);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.faq-item__question:hover{color:var(--gold)}
+.faq-item__question::after{content:"+";font-size:22px;color:var(--gold);flex-shrink:0;transition:transform .2s}
+.faq-item.open .faq-item__question::after{transform:rotate(45deg)}
+.faq-item.open .faq-item__question{color:var(--gold)}
+.faq-item__answer{display:none;padding:0 24px 20px;font-size:14px;color:var(--text-muted);line-height:1.75;border-top:1px solid var(--border);padding-top:16px}
+.faq-item.open .faq-item__answer{display:block}
+
+/* final cta */
+.final-cta{background:var(--navy-mid);border-top:1px solid var(--border-gold);padding:96px 0;text-align:center;position:relative;overflow:hidden}
+.final-cta::before{content:'';position:absolute;bottom:-200px;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(250,180,80,.08) 0%,transparent 70%);pointer-events:none}
+.final-cta__eyebrow{display:inline-block;background:var(--gold-dim);border:1px solid var(--border-gold);color:var(--gold);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:6px 16px;border-radius:var(--pill);margin-bottom:24px}
+.final-cta h2{font-family:'Montserrat',sans-serif;font-size:clamp(38px,6vw,68px);letter-spacing:.01em;margin-bottom:20px;max-width:700px;margin-left:auto;margin-right:auto}
+.final-cta__sub{font-size:16px;color:var(--text-muted);margin-bottom:40px;max-width:520px;margin-left:auto;margin-right:auto}
+
+/* sticky bar */
+.sticky-bar{position:fixed;bottom:0;left:0;right:0;background:var(--navy-mid);border-top:1px solid var(--border-gold);backdrop-filter:blur(16px);padding:14px 20px;z-index:999;transform:translateY(100%);transition:transform .3s ease}
+.sticky-bar.visible{transform:translateY(0)}
+.sticky-bar__inner{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.sticky-bar__text{font-size:14px;color:var(--text-muted);line-height:1.4}
+.sticky-bar__text strong{color:var(--text-white);font-weight:700;display:block;font-size:15px}
+
+/* footer */
+.footer{background:var(--navy-deep);border-top:1px solid var(--border);padding:32px 0;text-align:center}
+.footer__logo{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:900;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px}
+.footer__copy{font-size:12px;color:var(--text-dim)}
+
+/* ===== POP-UP 2 STEP ===== */
+.ml-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:9000;display:none;align-items:flex-start;justify-content:center;padding:22px 14px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.ml-modal-overlay.open{display:flex}
+.ml-modal{background:var(--navy-mid);border:1px solid var(--border-gold);border-radius:20px;padding:38px 34px 26px;max-width:480px;width:100%;margin:auto;position:relative;animation:popupIn .22s ease}
+@keyframes popupIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.ml-modal:focus{outline:none}
+/* area di tocco 44x44 (linea guida mobile): prima era alta 24px e si sbagliava il colpo */
+.ml-modal__close{position:absolute;top:6px;right:8px;background:none;border:none;color:var(--text-muted);font-size:24px;cursor:pointer;line-height:1;z-index:2;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
+.ml-modal__close:hover{color:var(--text-white)}
+.ml-progress{display:flex;gap:6px;justify-content:center;margin-bottom:18px}
+.ml-progress i{width:28px;height:4px;border-radius:3px;background:rgba(255,255,255,.14);transition:background .2s}
+.ml-progress i.on{background:var(--gold)}
+.ml-modal__eyebrow{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;text-align:center}
+.ml-modal__title{font-family:'Montserrat',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px;line-height:1.15;text-align:center}
+.ml-modal__sub{font-size:14px;color:var(--text-muted);margin-bottom:24px;line-height:1.6;text-align:center}
+.ml-step[hidden]{display:none}
+.ml-choices{display:flex;flex-direction:column;gap:12px}
+.ml-choice{position:relative;text-align:left;background:var(--navy-card);border:1px solid var(--border);border-radius:12px;padding:16px 46px 16px 16px;cursor:pointer;transition:border-color .12s,background .12s,transform .12s}
+.ml-choice:hover{border-color:var(--gold);background:var(--navy-hover);transform:translateY(-1px)}
+.ml-choice__t{display:block;font-size:16px;font-weight:700;color:var(--text-white)}
+.ml-choice__s{display:block;font-size:13px;color:var(--text-muted);margin-top:3px}
+.ml-choice__arrow{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--gold);font-size:20px;font-weight:700}
+.ml-choice--primary{border-color:var(--gold);background:var(--gold-dim)}
+.ml-choice--primary:hover{background:rgba(250,180,80,.16)}
+.ml-choice__tag{display:inline-block;background:var(--gold);color:#0F1825;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:var(--pill);margin-bottom:6px}
+.ml-choice--secondary .ml-choice__t{font-size:15px;color:var(--text-muted)}
+.ml-back{background:none;border:0;color:var(--text-muted);font-size:13px;cursor:pointer;padding:12px 8px 12px 0;margin-bottom:2px;min-height:44px;display:inline-flex;align-items:center}
+.ml-back:hover{color:var(--gold)}
+.ml-form{display:flex;flex-direction:column;gap:14px}
+.ml-form input[type=text],.ml-form input[type=email]{width:100%;background:var(--navy-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;font-family:'Montserrat',sans-serif;font-size:15px;color:var(--text-white);outline:none;transition:border-color .2s}
+.ml-form input::placeholder{color:var(--text-dim)}
+.ml-form input:focus{border-color:var(--gold)}
+.ml-consent{display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--text-dim);line-height:1.5;padding:10px;margin:-10px;border:1px solid transparent;border-radius:var(--radius-sm);transition:border-color .18s,background .18s}
+.ml-consent input{margin-top:3px;flex-shrink:0;accent-color:var(--gold);width:18px;height:18px}
+.ml-consent a{color:var(--gold)}
+.ml-consent__req{color:var(--gold);font-weight:700}
+/* stato errore: la checkbox privacy è obbligatoria ma il bubble nativo non
+   viene mostrato nei webview in-app iOS → evidenziamo noi, in modo esplicito */
+.ml-consent--error{border-color:var(--bad);background:rgba(226,90,90,.10)}
+.ml-consent--error .ml-consent__req{color:var(--bad)}
+.ml-consent--error input{outline:2px solid var(--bad);outline-offset:2px}
+@keyframes mlShake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-3px)}40%,60%{transform:translateX(3px)}}
+.ml-shake{animation:mlShake .4s}
+.ml-form input.ml-invalid{border-color:var(--bad)}
+.ml-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.ml-err{display:none;color:var(--bad);font-size:13px;text-align:center}
+.ml-modal__micro{text-align:center;font-size:12px;color:var(--text-dim);margin-top:14px;display:flex;align-items:center;justify-content:center;gap:5px}
+
+/* ===== RESPONSIVE ===== */
+/* nessuna immagine/media deve poter sfondare il contenitore */
+img,svg,video{max-width:100%;height:auto}
+
+@media(max-width:768px){
+  .section{padding:56px 0}
+  .target-grid,.case-grid,.testimonial-grid,.comparison{grid-template-columns:1fr}
+  .problem-stats{grid-template-columns:1fr 1fr}
+  .founder-card{flex-direction:column;align-items:center;text-align:center;padding:28px 24px}
+  .founder-stats{justify-content:center}
+  .sticky-bar__inner{flex-direction:column;gap:12px;min-width:0}
+  .sticky-bar__text{min-width:0}
+  .hero{padding:48px 0 44px}
+  .mechanism-steps::before{display:none}.mechanism-step{gap:16px}
+  .ml-modal{padding:32px 22px 22px}
+  /* I bottoni avevano white-space:nowrap + padding 44/52px: su schermi stretti
+     la larghezza MIN-CONTENT superava il viewport e sfondava la pagina
+     (a 320px: scrollWidth 423 vs 320). width:100% da solo non bastava, perché
+     min-content resta comunque maggiore del contenitore: serve far andare a capo. */
+  .btn-primary{white-space:normal;width:100%;max-width:100%;box-sizing:border-box;padding:16px 22px;font-size:16px;line-height:1.3}
+  .btn-primary--lg{font-size:17px;padding:18px 22px}
+  .btn-primary--full{font-size:17px;padding:18px 22px}
+  .sticky-bar{padding:12px 16px}
+}
+@media(max-width:480px){
+  .problem-stats{grid-template-columns:1fr}
+  .founder-stats{flex-direction:column;align-items:center}
+  .container{padding:0 16px}
+  /* i clamp partivano da 38px: su 320px un titolo da 38px mangia lo schermo */
+  .hero h1{font-size:clamp(27px,8.4vw,38px)}
+  .final-cta h2{font-size:clamp(27px,8.4vw,38px)}
+  .section__title{font-size:clamp(23px,7vw,34px)}
+  .hero__sub{font-size:15px}
+  .ml-modal{padding:26px 16px 18px}
+  .ml-modal__title{font-size:21px}
+  .ml-modal__sub{font-size:13px;margin-bottom:18px}
+  .ml-choice{padding:14px 38px 14px 14px}
+  .ml-choice__t{font-size:15px}
+  .sticky-bar__text{font-size:13px}
+  /* padding orizzontali fissi (32px e 36px per lato) che mangiavano lo spazio:
+     su 250px lasciavano 144px al titolo → una parola per riga */
+  .widget-mockup{padding:22px 16px}
+  .offer-snippet{padding:22px 16px;margin:32px auto}
+  .offer-snippet__title{font-size:20px;letter-spacing:0}
+  .offer-snippet__list li{font-size:14px;padding-left:22px}
+  /* il contatore era bloccato a 64px: "€8.500" sfondava il riquadro */
+  .widget-mockup__score{font-size:clamp(32px,12.5vw,64px)}
+  .widget-item{font-size:13px;padding:10px 12px}
+  .widget-item__val{font-size:14px}
+  /* screenshot dashboard larghi: object-fit:cover ritagliava il centro e li
+     rendeva illeggibili → mostriamo l'immagine intera */
+  .case-card__img{height:auto}
+  .case-card__img img{height:auto;object-fit:contain}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.widget-mockup__bar-fill{width:74%}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="offer-bar">🧮 Calcolatore gratuito · <strong>2 minuti</strong> · nessun accesso al tuo Klaviyo richiesto</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero__eyebrow">Per founder di eCommerce italiani su Shopify + Klaviyo</div>
+    <h1>La tua email fa meno del 25% del fatturato? Scopri quanti <span class="accent gold">€ al mese</span> stai perdendo — in 2 minuti</h1>
+    <p class="hero__sub">Confrontiamo i tuoi numeri con 150+ eCommerce italiani e ti diciamo dove stai perdendo — gratis, senza toccare il tuo Klaviyo.</p>
+
+    <div class="hero__cta-wrapper">
+      <button class="btn-primary btn-primary--lg btn-arrow ml-open">Calcola il mio Revenue Leak</button>
+      <div class="hero__micro">Gratuito · 2 minuti · nessun accesso al Klaviyo</div>
+    </div>
+
+    <!-- Revenue Leak widget mockup -->
+    <div class="widget-mockup" aria-hidden="true">
+      <div class="widget-mockup__tag">IL TUO REPORT</div>
+      <div class="widget-mockup__label">Revenue Leak stimato / mese</div>
+      <div class="widget-mockup__score" id="counter">€0</div>
+      <div class="widget-mockup__score-label">⚠️ Email ferma sotto il 10% del fatturato</div>
+      <div class="widget-mockup__bar"><div class="widget-mockup__bar-fill"></div></div>
+      <div class="widget-mockup__items">
+        <div class="widget-item"><span class="widget-item__name">Welcome Series</span><span class="widget-item__val orange">–€1.200/mese</span></div>
+        <div class="widget-item"><span class="widget-item__name">Abandoned Cart</span><span class="widget-item__val red">–€3.400/mese</span></div>
+        <div class="widget-item"><span class="widget-item__name">Post-Purchase</span><span class="widget-item__val red">–€2.700/mese</span></div>
+        <div class="widget-item"><span class="widget-item__name">Win-Back</span><span class="widget-item__val orange">–€1.200/mese</span></div>
+      </div>
+      <div style="font-size:12px;color:var(--text-dim);margin-top:14px;line-height:1.5">Valori medi di esempio. Il tuo numero reale può essere più alto o più basso — calcolalo ora.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF -->
+<div class="social-proof-bar">
+  <div class="social-proof-bar__inner">
+    <div><strong>150+</strong> account eCommerce analizzati</div>
+    <span class="sep">·</span>
+    <div><strong>+€5M</strong> di revenue email generata per brand italiani</div>
+  </div>
+  <div style="background:#ffffff;padding:24px 20px;margin-top:20px;">
+    <div style="max-width:900px;margin:0 auto;">
+      <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/us5X0gC74A4Hjpwvd83e/media/6a2fc86b0a683b64fe3d3987.png" alt="150+ brand eCommerce italiani" style="width:100%;display:block;" loading="lazy">
+    </div>
+  </div>
+</div>
+
+<!-- COSA SCOPRIRAI -->
+<div class="container">
+  <div class="offer-snippet">
+    <div class="offer-snippet__title">Cosa scoprirai con il Revenue Leak</div>
+    <ul class="offer-snippet__list">
+      <li>Quanti <strong>euro al mese</strong> lasci sul tavolo rispetto al benchmark del 25–40% da email</li>
+      <li>Quali <strong>flow</strong> ti stanno perdendo di più — il tuo punto di leak nascosto</li>
+      <li>Se il tuo <strong>Abandoned Cart</strong> recupera almeno il 15% dei carrelli — o sta bruciando revenue</li>
+      <li>Dove sei rispetto ai <strong>top eCommerce italiani</strong> dello stesso segmento</li>
+      <li>Un <strong>piano d'azione prioritizzato</strong>: cosa sistemare per primo per recuperare di più, prima</li>
+    </ul>
+  </div>
+</div>
+
+<!-- PER CHI È -->
+<section class="section section--dark">
+  <div class="container">
+    <span class="section__eyebrow">Qualifìcati</span>
+    <h2 class="section__title">Questo calcolatore è per te se...</h2>
+    <div class="target-grid">
+      <div class="target-card target-card--yes">
+        <div class="target-card__header">✓ Perfetto per te</div>
+        <ul class="target-list">
+          <li>Hai un eCommerce su Shopify con almeno €20k/mese di fatturato</li>
+          <li>Usi già Klaviyo (anche con flow attivi)</li>
+          <li>Vuoi capire perché l'email non converte quanto dovrebbe</li>
+          <li>Stai scalando con paid ads e vuoi ridurre la dipendenza</li>
+          <li>Sai di lasciare soldi sul tavolo, ma non sai esattamente dove</li>
+        </ul>
+      </div>
+      <div class="target-card target-card--no">
+        <div class="target-card__header">✗ Non fa per te</div>
+        <ul class="target-list">
+          <li>Non hai ancora un eCommerce attivo</li>
+          <li>Non usi Klaviyo come piattaforma email</li>
+          <li>Il tuo fatturato è sotto €5k/mese</li>
+          <li>Non sei disposto ad agire sui risultati</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE STUDY -->
+<section class="section section--darker">
+  <div class="container">
+    <span class="section__eyebrow">Risultati reali</span>
+    <h2 class="section__title">Prima e dopo aver chiuso il leak</h2>
+    <p class="section__lead">Risultati reali di eCommerce che hanno individuato e corretto i loro flow.</p>
+    <div class="case-grid">
+      <div class="case-card case-card--before">
+        <div class="case-card__label">Prima — Account tipo</div>
+        <div class="case-card__img"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/us5X0gC74A4Hjpwvd83e/media/6a2fc2cdb9af5312bc38362f.png" alt="Klaviyo prima" loading="lazy"></div>
+        <div class="case-card__stat">Revenue da flow: <strong>€1.240/mese</strong><span>Flow attivi ma non ottimizzati</span></div>
+      </div>
+      <div class="case-card case-card--after">
+        <div class="case-card__label">Dopo — 21 giorni</div>
+        <div class="case-card__img"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/us5X0gC74A4Hjpwvd83e/media/6a2fc2cd1b95dbb2c2e3de76.png" alt="Klaviyo dopo" loading="lazy"></div>
+        <div class="case-card__stat">Revenue da flow: <strong style="color:var(--good)">€3.410/mese · +174%</strong><span>3 fix implementati</span></div>
+      </div>
+    </div>
+    <div style="margin-top:20px;background:var(--navy-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+      <div style="padding:10px 16px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;background:rgba(77,182,122,.1);color:var(--good);">✓ Incremento registrato su un altro account</div>
+      <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/us5X0gC74A4Hjpwvd83e/media/e424c01c-4523-498c-97c0-6b14ddf85e0e.png" alt="Secondo incremento verificato" style="width:100%;display:block;" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEMA -->
+<section class="section section--dark">
+  <div class="container">
+    <span class="section__eyebrow">Il problema</span>
+    <h2 class="section__title">I flow Klaviyo tipici <span class="accent gold">perdono</span> tra €8k e €30k/mese</h2>
+    <p class="section__lead">Non per mancanza di traffico. Ma per errori specifici e correggibili nei flow automatici.</p>
+    <div class="problem-stats">
+      <div class="problem-stat"><div class="problem-stat__number">67%</div><div class="problem-stat__label">degli eCommerce non ha un Abandoned Cart ottimizzato</div></div>
+      <div class="problem-stat"><div class="problem-stat__number">€8.5k</div><div class="problem-stat__label">revenue media mensile persa per flow non ottimizzati</div></div>
+      <div class="problem-stat"><div class="problem-stat__number">2min</div><div class="problem-stat__label">il tempo per scoprire dove stai perdendo soldi</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- COME FUNZIONA -->
+<section class="section section--darker">
+  <div class="container">
+    <span class="section__eyebrow">Come funziona</span>
+    <h2 class="section__title">Il tuo Revenue Leak in <span class="accent gold">2 minuti</span></h2>
+    <div class="mechanism-steps">
+      <div class="mechanism-step"><div class="mechanism-step__num">1</div><div class="mechanism-step__content"><div class="mechanism-step__title">Rispondi a poche domande</div><div class="mechanism-step__desc">Fatturato, settore, stato dei tuoi flow. Nessun accesso al Klaviyo, nessuna installazione.</div></div></div>
+      <div class="mechanism-step"><div class="mechanism-step__num">2</div><div class="mechanism-step__content"><div class="mechanism-step__title">Calcoliamo il tuo Revenue Leak</div><div class="mechanism-step__desc">Confrontiamo i tuoi numeri col benchmark del 25–40% da email su 150+ account italiani.</div></div></div>
+      <div class="mechanism-step"><div class="mechanism-step__num">3</div><div class="mechanism-step__content"><div class="mechanism-step__title">Ricevi il numero e dove intervenire</div><div class="mechanism-step__desc">Quanti € lasci sul tavolo ogni mese e i flow su cui agire per primi.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOUNDER -->
+<section class="section section--dark">
+  <div class="container">
+    <span class="section__eyebrow">Chi c'è dietro</span>
+    <h2 class="section__title">Perché fidarsi di questa analisi</h2>
+    <div class="founder-card">
+      <div class="founder-card__avatar"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/us5X0gC74A4Hjpwvd83e/media/69884cb10a7fd176fb22f7df.png" alt="Lorenzo Baretta"></div>
+      <div>
+        <div class="founder-card__name">Lorenzo Baretta</div>
+        <div class="founder-card__role">Email Revenue Strategist · Founder Mailift</div>
+        <p class="founder-card__bio">Ho lavorato sull'email marketing eCommerce per 7 anni e ottimizzato flow Klaviyo per oltre 150 account — da €20k a €500k/mese. Ho visto gli stessi errori ripetersi ovunque. Questo calcolatore condensa quelle ore di analisi in un numero che ottieni in 2 minuti.</p>
+        <div class="founder-stats">
+          <div><div class="founder-stat__num">7+</div><div class="founder-stat__label">anni email marketing</div></div>
+          <div><div class="founder-stat__num">150+</div><div class="founder-stat__label">account analizzati</div></div>
+          <div><div class="founder-stat__num">€5M+</div><div class="founder-stat__label">revenue email generata</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section section--darker">
+  <div class="container">
+    <span class="section__eyebrow center" style="display:block">Testimonianze</span>
+    <h2 class="section__title center">Cosa dicono i founder</h2>
+    <div class="testimonial-grid">
+      <div class="testimonial-card"><div class="testimonial-card__stars">★★★★★</div><div class="testimonial-card__text">"Ho scoperto che il mio post-purchase non aveva nemmeno un upsell. In 3 settimane +€1.800/mese senza toccare gli ads."</div><div class="testimonial-card__author">Marco T.</div><div class="testimonial-card__company">eCommerce abbigliamento · €45k/mese</div></div>
+      <div class="testimonial-card"><div class="testimonial-card__stars">★★★★★</div><div class="testimonial-card__text">"Non credevo di lasciare così tanto sul tavolo. Ho implementato le prime 3 priorità e l'Abandoned Cart è passato da 8% a 14%."</div><div class="testimonial-card__author">Silvia R.</div><div class="testimonial-card__company">eCommerce beauty · €30k/mese</div></div>
+      <div class="testimonial-card"><div class="testimonial-card__stars">★★★★★</div><div class="testimonial-card__text">"Pensavo di avere i flow a posto. Il numero mi ha aperto gli occhi: Welcome Series completamente da rifare."</div><div class="testimonial-card__author">Davide M.</div><div class="testimonial-card__company">eCommerce food · €60k/mese</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section class="section section--dark">
+  <div class="container">
+    <span class="section__eyebrow">La scelta</span>
+    <h2 class="section__title">Non sapere <span class="accent gold">costa</span> di più</h2>
+    <div class="comparison">
+      <div class="comparison__col comparison__col--no">
+        <div class="comparison__header">✗ Se non lo calcoli</div>
+        <ul class="comparison__items">
+          <li>Continui a perdere €8k+ al mese senza saperlo</li>
+          <li>Non sai quali flow stanno bruciando revenue</li>
+          <li>Dipendi al 100% dagli ads per crescere</li>
+          <li>Il problema si accumula ogni mese</li>
+        </ul>
+      </div>
+      <div class="comparison__col comparison__col--yes">
+        <div class="comparison__header">✓ Con il Revenue Leak</div>
+        <ul class="comparison__items">
+          <li>Sai esattamente dove perdi e quanto</li>
+          <li>Il numero in 2 minuti, gratis</li>
+          <li>Sai su quali flow agire per primi</li>
+          <li>Una decisione basata sui dati, non a sensazione</li>
+        </ul>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:40px"><button class="btn-primary btn-primary--lg btn-arrow ml-open">Smetti di perdere revenue</button></div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section section--darker">
+  <div class="container">
+    <span class="section__eyebrow">FAQ</span>
+    <h2 class="section__title">Domande frequenti</h2>
+    <div class="faq-list">
+      <div class="faq-item"><button class="faq-item__question" onclick="toggleFaq(this)">Devo dare accesso al mio Klaviyo?</button><div class="faq-item__answer">No. Non chiediamo nessun accesso né API key. Rispondi solo a poche domande sul tuo business e calcoliamo la stima.</div></div>
+      <div class="faq-item"><button class="faq-item__question" onclick="toggleFaq(this)">Quanto ci vuole?</button><div class="faq-item__answer">Circa 2 minuti. Ricevi il tuo Revenue Leak stimato subito dopo.</div></div>
+      <div class="faq-item"><button class="faq-item__question" onclick="toggleFaq(this)">È davvero gratuito?</button><div class="faq-item__answer">Sì, 100% gratuito. Nessun pagamento, nessuna carta.</div></div>
+      <div class="faq-item"><button class="faq-item__question" onclick="toggleFaq(this)">Come calcolate il Revenue Leak?</button><div class="faq-item__answer">Confrontiamo i tuoi numeri con il benchmark del 25–40% di fatturato da email, basato su oltre 150 account eCommerce italiani analizzati.</div></div>
+      <div class="faq-item"><button class="faq-item__question" onclick="toggleFaq(this)">I miei dati sono al sicuro?</button><div class="faq-item__answer">Usiamo la tua email solo per inviarti il risultato e comunicazioni pertinenti. Niente spam, puoi disiscriverti quando vuoi.</div></div>
+      <div class="faq-item"><button class="faq-item__question" onclick="toggleFaq(this)">Posso farlo più avanti?</button><div class="faq-item__answer">Tecnicamente sì. Ma ogni mese che passa senza sapere dove perdi revenue è un mese di soldi che non tornano. È gratis e richiede 2 minuti — non c'è motivo di aspettare.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <div class="container">
+    <div class="final-cta__eyebrow">Inizia adesso</div>
+    <h2>Il leak c'è comunque.<br>Tanto vale <span class="accent gold">sapere quanto vale</span></h2>
+    <p class="final-cta__sub">2 minuti. Gratis. Il numero che potrebbe valere migliaia di euro al mese di revenue recuperata.</p>
+    <button class="btn-primary btn-primary--lg btn-arrow ml-open">Inizia ora — è gratis</button>
+    <div style="margin-top:16px;font-size:13px;color:var(--text-dim)">Gratuito · 2 minuti · nessun accesso al Klaviyo</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__logo">MAILIFT</div>
+    <div class="footer__copy">© 2026 Mailift Srl · Questo non è un prodotto Klaviyo o Anthropic. I risultati indicati sono basati su casi reali e possono variare.</div>
+  </div>
+</footer>
+
+<!-- STICKY BAR -->
+<div class="sticky-bar" id="stickyBar">
+  <div class="sticky-bar__inner">
+    <div class="sticky-bar__text"><strong>Revenue Leak Calculator</strong>Scopri la revenue che stai perdendo ogni mese — in 2 minuti</div>
+    <button class="btn-primary btn-arrow ml-open">Scopri il mio numero</button>
+  </div>
+</div>
+
+<!-- POP-UP 2 STEP (form nativo → Worker → GHL) -->
+<div class="ml-modal-overlay" id="mlModal" role="dialog" aria-modal="true" aria-labelledby="mlModalTitle" aria-hidden="true">
+  <div class="ml-modal" tabindex="-1">
+    <button type="button" class="ml-modal__close" id="mlClose" aria-label="Chiudi">×</button>
+    <div class="ml-progress" aria-hidden="true"><i class="on"></i><i></i></div>
+
+    <!-- STEP 1 -->
+    <div class="ml-step" data-step="1">
+      <div class="ml-modal__eyebrow" id="mlStep1Eyebrow">Step 1 di 2</div>
+      <div class="ml-modal__title" id="mlModalTitle">Per chi richiedi l'analisi?</div>
+      <div class="ml-modal__sub">Scegli un'opzione per continuare</div>
+      <div class="ml-choices">
+        <button type="button" class="ml-choice ml-choice--primary" data-value="Per il mio brand Ecommerce">
+          <span class="ml-choice__tag">Consigliato</span>
+          <span class="ml-choice__t">Per il mio brand Ecommerce</span>
+          <span class="ml-choice__s">Sono il founder / gestisco il mio store</span>
+          <span class="ml-choice__arrow">→</span>
+        </button>
+        <button type="button" class="ml-choice ml-choice--secondary" data-value="Per i miei clienti">
+          <span class="ml-choice__t">Per i miei clienti</span>
+          <span class="ml-choice__s">Sono un'agenzia / freelance / consulente</span>
+          <span class="ml-choice__arrow">→</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP FATTURATO (solo variante B dell'A/B, solo ramo eCommerce) -->
+    <div class="ml-step" data-step="rev" hidden>
+      <button type="button" class="ml-back" data-back="1">← Indietro</button>
+      <div class="ml-modal__eyebrow" id="mlRevEyebrow">Step 2 di 3</div>
+      <div class="ml-modal__title">Quanto fattura il tuo store?</div>
+      <div class="ml-modal__sub">Ci serve per confrontarti col benchmark giusto — il calcolo non è attendibile senza</div>
+      <!-- ATTENZIONE: i data-value devono combaciare CARATTERE PER CARATTERE con le
+           picklistOptions del campo GHL "Quale è il tuo attuale fatturato Mensile? 1"
+           (id bW87MPPTFNr51QBtNZmG), altrimenti il valore RADIO viene scartato.
+           Usano l'en-dash "–" (U+2013) e "50k –  80k" ha un DOPPIO SPAZIO dopo il trattino.
+           Non riformattare questi attributi. -->
+      <div class="ml-choices">
+        <button type="button" class="ml-choice ml-rev" data-value="meno di 15k €/mese" data-qualified="0">
+          <span class="ml-choice__t">Meno di 15k € / mese</span><span class="ml-choice__arrow">→</span>
+        </button>
+        <button type="button" class="ml-choice ml-rev" data-value="15k – 25k €/mese" data-qualified="1">
+          <span class="ml-choice__t">15k – 25k € / mese</span><span class="ml-choice__arrow">→</span>
+        </button>
+        <button type="button" class="ml-choice ml-rev" data-value="25k – 50k €/mese" data-qualified="1">
+          <span class="ml-choice__t">25k – 50k € / mese</span><span class="ml-choice__arrow">→</span>
+        </button>
+        <button type="button" class="ml-choice ml-rev" data-value="50k –  80k €/mese" data-qualified="1">
+          <span class="ml-choice__t">50k – 80k € / mese</span><span class="ml-choice__arrow">→</span>
+        </button>
+        <button type="button" class="ml-choice ml-rev" data-value="oltre 80k €/mese" data-qualified="1">
+          <span class="ml-choice__t">Oltre 80k € / mese</span><span class="ml-choice__arrow">→</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="ml-step" data-step="2" hidden>
+      <button type="button" class="ml-back" id="mlBack">← Indietro</button>
+      <div class="ml-modal__eyebrow">Step 2 di 2</div>
+      <div class="ml-modal__title">Ci siamo quasi</div>
+      <div class="ml-modal__sub" id="mlEcho">Lascia i tuoi dati per ricevere il Revenue Leak</div>
+      <form id="mlForm" class="ml-form" novalidate>
+        <input name="full_name" type="text" placeholder="Nome e cognome" autocomplete="name">
+        <input name="email" type="email" required placeholder="La tua email" autocomplete="email">
+        <input type="hidden" name="per_chi" id="mlPerChi">
+        <input type="hidden" name="fatturato" id="mlFatturato">
+        <input type="hidden" name="ab_variant" id="mlAbVariant">
+        <input type="hidden" name="utm_source" id="mlUtmSource">
+        <input type="hidden" name="utm_medium" id="mlUtmMedium">
+        <input type="hidden" name="utm_campaign" id="mlUtmCampaign">
+        <input type="hidden" name="utm_content" id="mlUtmContent">
+        <input type="hidden" name="utm_term" id="mlUtmTerm">
+        <input type="hidden" name="landing_url" id="mlLandingUrl">
+        <input type="hidden" name="referrer" id="mlReferrer">
+        <label class="ml-consent" id="mlConsentBox"><input type="checkbox" name="consent" id="mlConsent" required aria-describedby="mlErr"><span><span class="ml-consent__req">*</span> Acconsento a ricevere comunicazioni da Mailift, anche via email/SMS, secondo la <a href="https://mailift.com/privacy" target="_blank" rel="noopener">privacy policy</a>. <span class="ml-consent__req">(obbligatorio)</span></span></label>
+        <input class="ml-hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button type="submit" class="btn-primary btn-primary--full btn-arrow">Calcola il mio Revenue Leak</button>
+        <p id="mlErr" class="ml-err"></p>
+      </form>
+      <div class="ml-modal__micro">🔒 Niente spam · nessun accesso al tuo Klaviyo · risultato immediato</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ——— Contatore animato Revenue Leak ——— */
+(function(){
+  var el=document.getElementById('counter'); if(!el) return;
+  var target=8500,dur=2000,start=null;
+  if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){el.textContent='€'+target.toLocaleString('it-IT');return;}
+  function step(ts){if(!start)start=ts;var p=Math.min((ts-start)/dur,1);var e=1-Math.pow(1-p,3);el.textContent='€'+Math.round(target*e).toLocaleString('it-IT');if(p<1)requestAnimationFrame(step);}
+  var io=new IntersectionObserver(function(x){if(x[0].isIntersecting){requestAnimationFrame(step);io.disconnect();}});
+  io.observe(el);
+})();
+
+/* ——— Sticky bar ——— */
+(function(){var bar=document.getElementById('stickyBar');window.addEventListener('scroll',function(){if(window.scrollY>500)bar.classList.add('visible');else bar.classList.remove('visible');},{passive:true});})();
+
+/* ——— FAQ ——— */
+function toggleFaq(btn){var item=btn.parentElement;var open=item.classList.contains('open');document.querySelectorAll('.faq-item.open').forEach(function(i){i.classList.remove('open');});if(!open)item.classList.add('open');}
+
+/* ——— Pop-up 2 step + invio form → Worker → GHL ——— */
+(function(){
+  // ↓↓↓ CONFIG ↓↓↓
+  var PROXY = 'https://ghl-form-proxy.mailift.workers.dev';   // Worker live
+  var NEXT_ECOMMERCE = 'https://report.mailift.com/quiz';     // eCommerce → quiz (TUTTI, a prescindere dal fatturato)
+  var NEXT_CLIENTI   = 'https://mailift.com/landing';         // "Per i miei clienti"
+  var NEXT_SOTTO_SOGLIA = 'https://report.mailift.com/quiz';  // sotto soglia → ANCH'ESSI al quiz (mantenuto per revert rapido)
+
+  /* ——— A/B: lo split lo fa GHL, non questo codice ———
+     Crea DUE pagine nello split test di GHL e incolla questo stesso file in entrambe,
+     cambiando SOLO la riga qui sotto:
+       'A' → pagina di controllo  (per chi → dati, senza domanda fatturato)
+       'B' → pagina variante      (per chi → fatturato → dati)
+     Il valore viaggia fino a GHL e diventa il tag `ab-a` / `ab-b` sul contatto:
+     è così che conti le conversioni per variante (vedi nota sotto). */
+  var VARIANTE = 'B';
+  // ↑↑↑ CONFIG ↑↑↑
+
+  var MOSTRA_FATTURATO = (VARIANTE === 'B');
+
+  function track(name,params){params=params||{};try{if(window.gtag)gtag('event',name,params);}catch(e){}try{if(window.fbq)fbq('trackCustom',name,params);}catch(e){}try{if(window.clarity){clarity('event',name);Object.keys(params).forEach(function(k){clarity('set',k,String(params[k]));});}}catch(e){}}
+
+  var modal=document.getElementById('mlModal'),dialog=modal.querySelector('.ml-modal'),closeBtn=document.getElementById('mlClose');
+  var steps=modal.querySelectorAll('.ml-step'),progress=modal.querySelector('.ml-progress');
+  var perChi=document.getElementById('mlPerChi'),echo=document.getElementById('mlEcho');
+  var fatturatoInp=document.getElementById('mlFatturato'),abInp=document.getElementById('mlAbVariant');
+  var revEyebrow=document.getElementById('mlRevEyebrow'),step1Eyebrow=document.getElementById('mlStep1Eyebrow');
+
+  /* La variante NON viene sorteggiata qui: la decide lo split test di GHL servendo
+     una delle due pagine. Qui la dichiariamo soltanto, così viaggia fino al CRM. */
+  var variant=VARIANTE;
+  abInp.value=variant;
+  try{if(window.clarity)clarity('set','ab_variant',variant);}catch(_){}
+
+  /* ——— Attribuzione (UTM) ———
+     GHL popola `attributionSource` SOLO col proprio tracciamento interno: inviandolo
+     via API viene ignorato in silenzio (verificato sul campo). Quindi ci portiamo
+     gli UTM a mano e il Worker li scrive su custom field dedicati.
+     First-touch: catturiamo al primo caricamento e teniamo in sessionStorage, così
+     l'attribuzione sopravvive a cambi di URL. I webview in-app (IG/FB) possono
+     bloccare lo storage → fallback sui parametri correnti. */
+  var attribution=(function(){
+    var p=new URLSearchParams(location.search);
+    var ora={
+      utm_source:p.get('utm_source')||'',
+      utm_medium:p.get('utm_medium')||'',
+      utm_campaign:p.get('utm_campaign')||p.get('utm_id')||'',
+      utm_content:p.get('utm_content')||'',
+      utm_term:p.get('utm_term')||'',
+      landing_url:location.href,
+      referrer:document.referrer||''
+    };
+    try{
+      var salvato=JSON.parse(sessionStorage.getItem('ml_attr')||'null');
+      if(salvato&&salvato.utm_source)return salvato;          // il primo touch vince
+      if(ora.utm_source||ora.utm_campaign)sessionStorage.setItem('ml_attr',JSON.stringify(ora));
+    }catch(_){}
+    return ora;
+  })();
+  var CAMPI_ATTR={mlUtmSource:'utm_source',mlUtmMedium:'utm_medium',mlUtmCampaign:'utm_campaign',
+    mlUtmContent:'utm_content',mlUtmTerm:'utm_term',mlLandingUrl:'landing_url',mlReferrer:'referrer'};
+  Object.keys(CAMPI_ATTR).forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.value=attribution[CAMPI_ATTR[id]]||'';
+  });
+
+  /* ——— Flow dinamico: la sequenza di step dipende da variante e ramo scelto ——— */
+  var flow=['1','2'],qualified=null;
+  function buildFlow(isEcom){
+    flow=(MOSTRA_FATTURATO&&isEcom)?['1','rev','2']:['1','2'];
+    progress.innerHTML=new Array(flow.length+1).join('<i></i>');
+    if(step1Eyebrow)step1Eyebrow.textContent='Step 1 di '+flow.length;
+    if(revEyebrow)revEyebrow.textContent='Step 2 di '+flow.length;
+    var step2=modal.querySelector('.ml-step[data-step="2"] .ml-modal__eyebrow');
+    if(step2)step2.textContent='Step '+flow.length+' di '+flow.length;
+  }
+  function goStep(id){
+    steps.forEach(function(s){s.hidden=(s.getAttribute('data-step')!==String(id));});
+    var idx=flow.indexOf(String(id));
+    progress.querySelectorAll('i').forEach(function(d,i){d.classList.toggle('on',i<=idx);});
+  }
+
+  window.openPopup=function(){
+    qualified=null;fatturatoInp.value='';perChi.value='';
+    buildFlow(true);goStep(1);
+    modal.classList.add('open');modal.setAttribute('aria-hidden','false');
+    document.body.classList.add('ml-noscroll');dialog.focus();
+    track('popup_open',{ab_variant:variant});
+  };
+  function closeModal(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.classList.remove('ml-noscroll');}
+
+  Array.prototype.forEach.call(document.querySelectorAll('.ml-open'),function(b){b.addEventListener('click',window.openPopup);});
+  closeBtn.addEventListener('click',closeModal);
+  modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&modal.classList.contains('open'))closeModal();});
+
+  /* Step 1 — per chi */
+  Array.prototype.forEach.call(modal.querySelectorAll('.ml-step[data-step="1"] .ml-choice'),function(c){
+    c.addEventListener('click',function(){
+      var v=c.getAttribute('data-value');perChi.value=v;
+      var isEcom=(v!=='Per i miei clienti');
+      echo.textContent=isEcom?'Analisi per il tuo brand — lascia i tuoi dati':'Analisi per i tuoi clienti — lascia i tuoi dati';
+      buildFlow(isEcom);
+      track('popup_audience_selected',{audience:v,ab_variant:variant});
+      if(MOSTRA_FATTURATO&&isEcom){goStep('rev');}
+      else{goStep(2);var n=document.querySelector('#mlForm input[name=full_name]');if(n)n.focus();}
+    });
+  });
+
+  /* Step fatturato — cattura il dato (non esclude più nessuno dal quiz) */
+  Array.prototype.forEach.call(modal.querySelectorAll('.ml-rev'),function(c){
+    c.addEventListener('click',function(){
+      fatturatoInp.value=c.getAttribute('data-value');
+      qualified=(c.getAttribute('data-qualified')==='1');
+      track('popup_revenue_selected',{fatturato:fatturatoInp.value,qualified:qualified?1:0,ab_variant:variant});
+      try{if(window.clarity)clarity('set','fatturato',fatturatoInp.value);}catch(_){}
+      // Nessuna squalifica nel popup: TUTTI proseguono allo step dati a prescindere
+      // dal fatturato. Il dato resta come tag informativo in GHL; la qualifica vera
+      // (avviso + evento non-qualificato) avviene nel quiz.
+      goStep(2);
+      var n=document.querySelector('#mlForm input[name=full_name]');if(n)n.focus();
+    });
+  });
+
+  /* Indietro */
+  Array.prototype.forEach.call(modal.querySelectorAll('.ml-back'),function(b){
+    b.addEventListener('click',function(){
+      var target=b.getAttribute('data-back');
+      if(target){goStep(target);return;}
+      goStep(flow[flow.indexOf('2')-1]);   // dallo step dati torna al precedente del flow
+    });
+  });
+
+  var f=document.getElementById('mlForm'),err=document.getElementById('mlErr');if(!f)return;
+  var emailInp=f.querySelector('[name=email]'),consent=document.getElementById('mlConsent'),consentBox=document.getElementById('mlConsentBox');
+
+  function showErr(msg){err.textContent=msg;err.style.display='block';}
+  function clearErr(){err.style.display='none';err.textContent='';}
+
+  /* ——— Validazione custom ———
+     NON usiamo reportValidity(): nei webview in-app iOS (IG/FB) il bubble nativo
+     di una checkbox non viene mostrato → l'utente tocca il bottone e "non succede
+     nulla". Qui l'errore è sempre visibile nel DOM. */
+  function validate(){
+    clearErr();
+    emailInp.classList.remove('ml-invalid');consentBox.classList.remove('ml-consent--error','ml-shake');
+    if(!emailInp.value.trim()||!emailInp.checkValidity()){
+      emailInp.classList.add('ml-invalid');emailInp.setAttribute('aria-invalid','true');
+      showErr('Inserisci un indirizzo email valido.');
+      try{emailInp.focus();}catch(_){}
+      track('popup_validation_error',{field:'email',ab_variant:variant});
+      return false;
+    }
+    emailInp.setAttribute('aria-invalid','false');
+    if(!consent.checked){
+      consentBox.classList.add('ml-consent--error');
+      consent.setAttribute('aria-invalid','true');
+      showErr('Per continuare devi accettare la privacy policy.');
+      // riavvia l'animazione anche a click ripetuti
+      void consentBox.offsetWidth;consentBox.classList.add('ml-shake');
+      try{consentBox.scrollIntoView({block:'nearest',behavior:'smooth'});}catch(_){}
+      track('popup_validation_error',{field:'consent',ab_variant:variant});
+      return false;
+    }
+    consent.setAttribute('aria-invalid','false');
+    return true;
+  }
+  // l'errore sparisce appena l'utente corregge
+  consent.addEventListener('change',function(){if(consent.checked){consentBox.classList.remove('ml-consent--error','ml-shake');clearErr();}});
+  emailInp.addEventListener('input',function(){emailInp.classList.remove('ml-invalid');});
+
+  f.addEventListener('submit',async function(e){
+    e.preventDefault();
+    if(!perChi.value){goStep(1);return;}
+    if(!validate())return;
+    var btn=f.querySelector('button[type=submit]'),label=btn.textContent;btn.disabled=true;btn.textContent='Invio…';
+    var d=Object.fromEntries(new FormData(f).entries());
+    try{
+      var r=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+      if(!r.ok)throw new Error('proxy');
+      var isEcom=(d.per_chi!=='Per i miei clienti');
+      // In variante A non chiediamo il fatturato → nessuna squalifica possibile
+      var isQualified=isEcom&&(qualified===null?true:qualified);
+      // Analytics interni (GA4 + Clarity): per TUTTI, così il funnel resta completo
+      if(window.gtag)gtag('event','generate_lead',{audience:d.per_chi,fatturato:d.fatturato||'n/d',qualified:isQualified?1:0,ab_variant:variant});
+      if(window.clarity){clarity('event','popup_lead');clarity('set','audience',d.per_chi);clarity('set','qualified',String(isQualified));}
+      // Conversione LEAD a Meta: SOLO lead qualificati (ecommerce E sopra soglia)
+      // → Meta ottimizza su chi può davvero diventare cliente, non su agenzie o store sotto i 15k
+      if(isQualified&&window.fbq)fbq('track','Lead');
+      // ROUTING: tutti gli ecommerce → quiz (a prescindere dal fatturato). Solo i "clienti/agenzie" vanno alla landing.
+      window.location.href = !isEcom ? NEXT_CLIENTI : NEXT_ECOMMERCE;
+    }catch(_){btn.disabled=false;btn.textContent=label;showErr('Ops, qualcosa è andato storto. Riprova tra un attimo.');}
+  });
+})();
+</script>
+
+</body>
+</html>
