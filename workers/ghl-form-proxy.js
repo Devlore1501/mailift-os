@@ -119,7 +119,10 @@ async function inviaCapi(env, req, d, qualificato) {
       }),
     },
   );
-  if (!r.ok) console.log('CAPI ko', r.status, (await r.text()).slice(0, 300));
+  // Log SEMPRE, non solo in errore: senza, un CAPI che non parte e' invisibile
+  // in `wrangler tail` e non si distingue da uno che ha funzionato.
+  const risposta = (await r.text()).slice(0, 300);
+  console.log(r.ok ? 'CAPI ok' : 'CAPI ko', r.status, 'event_id:', d.event_id || '(assente)', risposta);
 }
 
 export default {
@@ -178,7 +181,19 @@ export default {
     // non lo aspetta. L'utente viene rediretto al quiz senza un millisecondo in
     // più, e il CAPI non può comunque far fallire l'opt-in.
     if (ctx && typeof ctx.waitUntil === 'function') {
-      ctx.waitUntil(inviaCapi(env, req, d, qualificato).catch(() => {}));
+      // Il catch resta — il CAPI non deve MAI far fallire l'opt-in — ma ora
+      // l'errore viene stampato: prima veniva inghiottito e in `wrangler tail`
+      // un CAPI esploso era indistinguibile da uno riuscito.
+      ctx.waitUntil(
+        inviaCapi(env, req, d, qualificato).catch((e) =>
+          console.log('CAPI eccezione:', (e && e.message) || String(e)),
+        ),
+      );
+    } else {
+      console.log('CAPI saltato: ctx.waitUntil non disponibile');
+    }
+    if (!env.META_PIXEL_ID || !env.META_CAPI_TOKEN) {
+      console.log('CAPI non configurato: META_PIXEL_ID o META_CAPI_TOKEN mancanti');
     }
 
     const payload = {
