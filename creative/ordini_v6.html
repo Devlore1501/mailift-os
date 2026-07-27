@@ -1,0 +1,96 @@
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#fff}
+  .creative{
+    width:1080px;height:1080px;position:relative;overflow:hidden;
+    background:#0F1825;
+    font-family:'Montserrat',sans-serif;color:#F0F0EB;
+    padding:64px 64px 56px;display:flex;flex-direction:column;
+  }
+  /* alone caldo in alto: dà profondità senza sembrare un rendering 3D */
+  .creative::before{
+    content:'';position:absolute;top:-340px;left:50%;transform:translateX(-50%);
+    width:900px;height:900px;pointer-events:none;
+    background:radial-gradient(circle,rgba(250,180,80,.10) 0%,transparent 68%);
+  }
+  .in{position:relative;z-index:1;display:flex;flex-direction:column;height:100%}
+
+  .eyebrow{
+    align-self:flex-start;background:rgba(250,180,80,.10);
+    border:1px solid rgba(250,180,80,.35);color:#FAB450;
+    font-size:21px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;
+    padding:11px 22px;border-radius:999px;margin-bottom:44px;
+  }
+
+  h1{font-size:76px;font-weight:900;line-height:1.06;letter-spacing:-.028em}
+  h1 .g{color:#FAB450}
+  h1 .q{
+    font-family:Georgia,serif;font-style:italic;font-weight:700;color:#FAB450;
+  }
+
+  .barre{margin-top:auto;display:flex;flex-direction:column;gap:26px}
+  .riga{display:flex;align-items:center;gap:22px}
+  .etichetta{width:250px;flex-shrink:0;font-size:23px;font-weight:700;color:#93A4B8;line-height:1.25}
+  .etichetta b{display:block;color:#F0F0EB;font-size:25px;font-weight:800}
+  .barra{flex:1;height:62px;border-radius:10px;position:relative;display:flex;align-items:center}
+  .barra.ok{background:linear-gradient(90deg,#FAB450,#e8a23a)}
+  .barra.ko{background:#1F2E45;border:1px solid rgba(255,255,255,.09)}
+  .cifra{
+    position:absolute;right:24px;font-size:38px;font-weight:900;font-style:italic;
+    font-variant-numeric:tabular-nums;letter-spacing:-.02em;
+  }
+  .barra.ok .cifra{color:#0F1825}
+  .barra.ko .cifra{color:#8A9BB0}
+
+  .gap{
+    margin-top:34px;padding:26px 30px;border-radius:16px;
+    background:rgba(224,92,92,.10);border:1px solid rgba(232,106,106,.34);
+    display:flex;align-items:baseline;gap:18px;
+  }
+  .gap .lbl{font-size:25px;font-weight:700;color:#F0F0EB}
+  .gap .val{font-size:52px;font-weight:900;font-style:italic;color:#e86a6a;
+            font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin-left:auto}
+
+  .piede{margin-top:38px;display:flex;align-items:center;gap:24px}
+  .cta{
+    background:#FAB450;color:#0F1825;font-size:31px;font-weight:900;
+    padding:24px 44px;border-radius:999px;white-space:nowrap;
+  }
+  .fonte{font-size:20px;color:#93A4B8;line-height:1.4}
+  .logo{
+    margin-left:auto;font-size:27px;font-weight:900;color:#FAB450;
+    letter-spacing:.20em;text-transform:uppercase;
+  }
+</style>
+
+<div class="creative">
+ <div class="in">
+  <div class="eyebrow">eCommerce italiani · 25k+ / mese</div>
+
+  <h1>A <span class="g">€60.000/mese</span><br>l'email dovrebbe<br>farne <span class="g">€18.000</span>.<br><span class="q">La tua quanto fa?</span></h1>
+
+  <div class="barre">
+    <div class="riga">
+      <div class="etichetta"><b>Benchmark</b>top 20% italiani</div>
+      <div class="barra ok"><span class="cifra">€18.000</span></div>
+    </div>
+    <div class="riga">
+      <div class="etichetta"><b>Media reale</b>150+ account analizzati</div>
+      <div class="barra ko" style="max-width:34%"><span class="cifra">€6.100</span></div>
+    </div>
+  </div>
+
+  <div class="gap">
+    <span class="lbl">Differenza, ogni mese</span>
+    <span class="val">€11.900</span>
+  </div>
+
+  <div class="piede">
+    <div class="cta">Calcola il tuo →</div>
+    <div class="fonte">2 minuti<br>senza accesso a Klaviyo</div>
+    <div class="logo">mailift</div>
+  </div>
+ </div>
+</div>
