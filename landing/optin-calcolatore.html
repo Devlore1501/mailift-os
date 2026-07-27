@@ -823,6 +823,9 @@ button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color
         <input type="hidden" name="utm_term" id="mlUtmTerm">
         <input type="hidden" name="landing_url" id="mlLandingUrl">
         <input type="hidden" name="referrer" id="mlReferrer">
+        <!-- Segnali per la Conversions API lato Worker: senza questi il match
+             di Meta si regge solo sull'email e l'attribuzione si degrada. -->
+        <input type="hidden" name="fbclid" id="mlFbclid">
         <label class="ml-consent" id="mlConsentBox"><input type="checkbox" name="consent" id="mlConsent" required aria-describedby="mlErr"><span><span class="ml-consent__req">*</span> Acconsento a ricevere comunicazioni da Mailift, anche via email/SMS, secondo la <a href="https://mailift.com/privacy" target="_blank" rel="noopener">privacy policy</a>. <span class="ml-consent__req">(obbligatorio)</span></span></label>
         <input class="ml-hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
         <button type="submit" class="btn-primary btn-arrow">Calcola il mio Revenue Leak</button>
@@ -921,6 +924,18 @@ function toggleFaq(btn){
 
   function track(name,params){params=params||{};try{if(window.gtag)gtag('event',name,params);}catch(e){}try{if(window.fbq)fbq('trackCustom',name,params);}catch(e){}try{if(window.clarity){clarity('event',name);Object.keys(params).forEach(function(k){clarity('set',k,String(params[k]));});}}catch(e){}}
 
+  function leggiCookie(nome){
+    var m=document.cookie.match('(^|;\\s*)'+nome.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'=([^;]*)');
+    return m?decodeURIComponent(m[2]):'';
+  }
+  /* Id univoco condiviso fra pixel browser e Conversions API: è la chiave con
+     cui Meta deduplica. randomUUID non esiste nei webview più vecchi, quindi
+     c'è un ripiego — l'unicità basta, non serve un UUID a norma. */
+  function nuovoEventId(){
+    try{ if(window.crypto&&crypto.randomUUID) return crypto.randomUUID(); }catch(_){}
+    return 'ml-'+Date.now()+'-'+Math.random().toString(16).slice(2,10);
+  }
+
   var modal=document.getElementById('mlModal'),dialog=modal.querySelector('.ml-modal'),closeBtn=document.getElementById('mlClose');
   var steps=modal.querySelectorAll('.ml-step'),progress=modal.querySelector('.ml-progress');
   var perChi=document.getElementById('mlPerChi'),echo=document.getElementById('mlEcho');
@@ -949,7 +964,11 @@ function toggleFaq(btn){
       utm_content:p.get('utm_content')||'',
       utm_term:p.get('utm_term')||'',
       landing_url:location.href,
-      referrer:document.referrer||''
+      referrer:document.referrer||'',
+      /* fbclid catturato col first-touch come gli UTM: se l'utente naviga e
+         torna, l'URL non ce l'ha più, ma il click resta quello. Serve al Worker
+         per ricostruire `_fbc` quando il webview in-app non scrive il cookie. */
+      fbclid:p.get('fbclid')||''
     };
     try{
       var salvato=JSON.parse(sessionStorage.getItem('ml_attr')||'null');
@@ -959,7 +978,8 @@ function toggleFaq(btn){
     return ora;
   })();
   var CAMPI_ATTR={mlUtmSource:'utm_source',mlUtmMedium:'utm_medium',mlUtmCampaign:'utm_campaign',
-    mlUtmContent:'utm_content',mlUtmTerm:'utm_term',mlLandingUrl:'landing_url',mlReferrer:'referrer'};
+    mlUtmContent:'utm_content',mlUtmTerm:'utm_term',mlLandingUrl:'landing_url',mlReferrer:'referrer',
+    mlFbclid:'fbclid'};
   Object.keys(CAMPI_ATTR).forEach(function(id){
     var el=document.getElementById(id);
     if(el)el.value=attribution[CAMPI_ATTR[id]]||'';
@@ -1108,6 +1128,13 @@ function toggleFaq(btn){
     if(!validate())return;
     var btn=f.querySelector('button[type=submit]'),label=btn.textContent;btn.disabled=true;btn.textContent='Invio…';
     var d=Object.fromEntries(new FormData(f).entries());
+    /* Segnali per la Conversions API. Il Worker li usa per far riconoscere a
+       Meta la stessa persona: senza `_fbp`/`_fbc` il match si regge solo
+       sull'email e l'attribuzione peggiora. `_fbc` spesso manca nei webview
+       in-app — lì il Worker lo ricostruisce dal fbclid. */
+    d.event_id=nuovoEventId();
+    d.fbp=leggiCookie('_fbp');
+    d.fbc=leggiCookie('_fbc');
     try{
       var r=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
       if(!r.ok)throw new Error('proxy');
@@ -1130,7 +1157,9 @@ function toggleFaq(btn){
          ⚠️ Il `Lead` si spara SOLO qui. Il quiz non deve più spararlo all'arrivo
          (vedi Quiz.tsx): con il prefill attivo `hasPrefill()` è vero per ogni
          opt-in, quindi ogni lead verrebbe contato due volte. */
-      if(window.fbq)fbq('track','Lead',{value:isQualified?10:1,currency:'EUR'});
+      // eventID identico a quello mandato al Worker: Meta deduplica browser+CAPI.
+      // Se il pixel viene bloccato (ad blocker, ITP, webview), resta l'evento server.
+      if(window.fbq)fbq('track','Lead',{value:isQualified?10:1,currency:'EUR'},{eventID:d.event_id});
       // ROUTING: tutti gli ecommerce → quiz (a prescindere dal fatturato). Solo i "clienti/agenzie" vanno alla landing.
       window.location.href = !isEcom
         ? NEXT_CLIENTI
