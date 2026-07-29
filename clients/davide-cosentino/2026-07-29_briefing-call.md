@@ -50,9 +50,11 @@ E: *"altri collaboratori stanno interpellando altre possibili soluzioni... è un
 |---|---|
 | Piattaforma | PrestaShop |
 | ESP | MagNews (costo non noto neanche a Davide) |
-| Fatturato mensile | €20k–50k a seconda della stagionalità (picchi fino a €100k) |
-| Ad spend | €40–50k/mese storici, ridotti per ROAS scarso |
+| Fatturato mensile | **€60k–100k** (dato discovery 25/11, il più affidabile) — media ~€80k → ~€960k/anno |
+| Ad spend | €40–50k/mese **al picco storico**, poi ridotti per ROAS scarso |
 | ROAS attuale / target | 2,5–3 vs 5–6 necessari |
+| ⚠️ Incoerenza | €45k di spend a ROAS 2,75 farebbero ~€124k/mese di revenue da ads — sopra il fatturato totale. O Google sovra-attribuisce, o spend e revenue sono di periodi diversi. **Da chiarire in call.** |
+| ❓ Numero mancante | **Margine lordo %** — decide se il caso email regge. Mai chiesto. |
 | Traffico | ~70k visite/mese (picco 130k) |
 | AOV | €120–130 |
 | Lista email | ~25k attivi (12 mesi); cancella gli inattivi >1 anno |
