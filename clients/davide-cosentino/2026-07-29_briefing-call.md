@@ -2,7 +2,26 @@
 
 **Data briefing:** 2026-07-29
 **Ultimo contatto registrato:** 2025-11-28 (proposta) → **gap di 8 mesi**
-**Stato:** Prospect in stallo, mai chiuso né perso formalmente
+**Stato:** Prospect riaperto — si è ri-prenotato da solo
+
+## ⏱ Logistica call
+
+| | |
+|---|---|
+| **Quando** | Oggi 29/07/2026, **17:00–17:30** (solo 30 minuti) |
+| **Dove** | https://meet.google.com/jfq-ptms-roi |
+| **Titolo** | "Davide Cosentino - Mailift <> Consulenza strategica" |
+| **Calendario** | info@mailift.com (non il personale) |
+| **Telefono** | 348 702 8808 |
+| **Prenotata** | 24/07/2026 09:16 — **da lui**, via booking link go.mailift.com |
+| **Stato invito** | Accettato da entrambi |
+
+**Due implicazioni operative:**
+- **Ha preso lui lo slot dal link.** Non è un appuntamento strappato: si è mosso da solo. L'intento è alto, ma il motivo è ignoto — vale la prima domanda della call.
+- **Sono 30 minuti, non 45.** La presentazione di novembre non ci sta. Questa call serve a scandagliare cosa è cambiato e a fissare il secondo appuntamento per l'offerta, non a chiudere.
+
+> ⚠️ La conferma dell'invito è arrivata da `direzionecommerciale@clientiinpiu.it`, non dal suo indirizzo NTC.
+> Non è chiaro se sia un alias, chi gli gestisce l'agenda, o un secondo cappello che ha addosso. Da chiarire in call, senza darlo per scontato.
 
 ---
 
