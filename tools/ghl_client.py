@@ -15,6 +15,10 @@ Funzioni esposte:
 - add_note(contact_id, body)                   → dict
 - add_tags(contact_id, tags)                   → dict
 - remove_tag(contact_id, tag)                  → dict
+- list_conversations(contact_id)               → list[dict]
+- get_conversation_messages(conversation_id)   → list[dict]
+- get_thread_for_contact(query)                → list[dict] (cronologico)
+- print_thread(query)                          → stampa il thread leggibile
 
 Usato da workflows/discovery_call_processing.md (post-call: find/create lead,
 classifica HOT/WARM/COLD via tag, aggiunge note briefing).
@@ -348,6 +352,87 @@ def remove_tag(contact_id: str, tag: str) -> dict:
     )
 
 
+# ─── Conversations (SMS / Email / WhatsApp) ──────────────────────────────────
+
+
+def list_conversations(contact_id: str, limit: int = 20) -> list[dict]:
+    """Lista le conversazioni di un contatto (tutti i canali). Read-only."""
+    data = _request(
+        "GET",
+        "/conversations/search",
+        params={"locationId": LOCATION_ID, "contactId": contact_id, "limit": limit},
+    )
+    return data.get("conversations", [])
+
+
+def get_conversation_messages(conversation_id: str, limit: int = 100) -> list[dict]:
+    """Ritorna i messaggi di una conversazione, dal più recente. Read-only.
+
+    Ogni messaggio espone almeno: id, type, messageType (es. TYPE_SMS),
+    direction ("inbound"/"outbound"), body, dateAdded, status.
+    """
+    data = _request(
+        "GET",
+        f"/conversations/{conversation_id}/messages",
+        params={"limit": limit},
+    )
+    messages = data.get("messages", {})
+    # L'API annida i messaggi sotto messages.messages
+    if isinstance(messages, dict):
+        return messages.get("messages", [])
+    return messages or []
+
+
+def get_thread_for_contact(query: str, limit: int = 100) -> list[dict]:
+    """Trova un contatto (email, nome o telefono) e ritorna i messaggi in ordine
+    cronologico, con il canale annotato. Read-only.
+
+    `query` viene passato al search libero di GHL, che matcha email, nome e
+    numero di telefono.
+    """
+    contacts = search_contacts_by_name(query, limit=5)
+    if not contacts:
+        raise GHLError(f"nessun contatto trovato per '{query}'")
+
+    contact = contacts[0]
+    thread: list[dict] = []
+    for conv in list_conversations(contact["id"]):
+        for msg in get_conversation_messages(conv["id"], limit=limit):
+            msg["_conversationId"] = conv["id"]
+            thread.append(msg)
+
+    thread.sort(key=lambda m: m.get("dateAdded", ""))
+    return thread
+
+
+def print_thread(query: str) -> None:
+    """Stampa a video il thread di un contatto, leggibile. Read-only."""
+    contacts = search_contacts_by_name(query, limit=5)
+    if not contacts:
+        print(f"[ghl] nessun contatto trovato per '{query}'")
+        return
+
+    c = contacts[0]
+    print(
+        f"[ghl] {c.get('firstName', '')} {c.get('lastName', '')} "
+        f"<{c.get('email', '')}> {c.get('phone', '')}"
+    )
+    print(f"[ghl] tags: {', '.join(c.get('tags', [])) or '—'}")
+    print("─" * 70)
+
+    for msg in get_thread_for_contact(query):
+        direction = msg.get("direction", "?")
+        arrow = "→ NOI" if direction == "outbound" else "← LUI"
+        when = msg.get("dateAdded", "?")[:16].replace("T", " ")
+        channel = msg.get("messageType", msg.get("type", "?"))
+        body = (msg.get("body") or "").strip() or "(vuoto)"
+        print(f"\n[{when}] {arrow}  ({channel})")
+        print(f"  {body}")
+
+    print("\n" + "─" * 70)
+    print("[ghl] fine thread")
+
+
 # ─── CLI smoke test (read-only) ──────────────────────────────────────────────
 
 
@@ -378,12 +463,17 @@ def _smoke_test() -> None:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "test":
-        try:
+    cmd = sys.argv[1] if len(sys.argv) > 1 else None
+    try:
+        if cmd == "test":
             _smoke_test()
-        except GHLError as exc:
-            print(f"[ghl] ❌ errore: {exc}", file=sys.stderr)
-            sys.exit(1)
-    else:
-        print("Usage: python tools/ghl_client.py test")
-        sys.exit(2)
+        elif cmd == "conversations" and len(sys.argv) > 2:
+            print_thread(" ".join(sys.argv[2:]))
+        else:
+            print("Usage:")
+            print("  python tools/ghl_client.py test")
+            print("  python tools/ghl_client.py conversations <email|nome|telefono>")
+            sys.exit(2)
+    except GHLError as exc:
+        print(f"[ghl] ❌ errore: {exc}", file=sys.stderr)
+        sys.exit(1)
