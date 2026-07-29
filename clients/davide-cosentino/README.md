@@ -15,7 +15,8 @@ Proposta: setup €5.500 + Klaviyo ~€800/mese. Piano 5-pillar confermato.
 Review interna programmata per 04/12/2025 — mai arrivato il feedback.
 
 ## Ultime decisioni
-_Ultima call: [2025-11-28](calls/2025-11-28_proposta-strategia-email-davide-cosentino.md)_
+_Ultima call: [2025-11-28](calls/2025-11-28_proposta-strategia-email-davide-cosentino.md) — [trascrizione integrale](calls/2025-11-28_proposta-strategia-email-davide-cosentino_TRANSCRIPT.md)_
+_Briefing riapertura: [2026-07-29](2026-07-29_briefing-call.md)_
 
 - Proposta accettata in principio, da validare internamente con staff
 - Follow-up call 04/12 ore 16:00 (mai avvenuto)
