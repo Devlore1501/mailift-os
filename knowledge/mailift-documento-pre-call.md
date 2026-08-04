@@ -1,253 +1,376 @@
-# MAILIFT — DOCUMENTO PRE-CALL
-*Template da inviare al prospect dopo che ha fissato la call · v1.0*
+# MAILIFT — DOCUMENTO PRE-CALL (Master Document)
+*Template client-facing · v2.0 · struttura Matt Larsen (1000x Leads)*
 
-> **Fonte metodologica:** Reverse Selling + pre-call qualification
-> (`knowledge/mailift-knowledge-base.md` §11), routing a 3 corsie e floor di
-> prezzo da `knowledge/mailift-listino-pricing.md` §7 e §6.
-> **Non** deriva da un metodo esterno documentato: se in futuro adottiamo un
-> framework di terze parti, aggiornare questa nota invece di lasciarla implicita.
+## Fonti e limiti (leggere prima)
+
+Questo documento segue il **Master Document Framework di Matt Larsen** — le 8
+sezioni che lui usa sia per l'Intro Offer Presentation sia per la Recurring
+Service Presentation — e i **7 criteri dell'intro offer**, presi dalle sue
+pagine originali nel Notion di Lorenzo (`matt larsen` → *Layout Intro Offer
+Presentation*, *Layout Recurring Service Presentation*, *Determine Your Intro
+Offer*).
+
+Il **Pre-Call Flow** (Parte 3) riprende la sequenza già adattata in Notion:
+*Mailift — Piano di Sviluppo → Sequenze Sales — Pre-Call, Post-Call,
+Follow-up 12 Settimane*.
+
+⚠️ **Non verificato sull'originale:** i doc Gamma di Larsen
+(*Pre-Call Flow Guide*, *Master Document Framework*) non sono apribili —
+`gamma.app` è bloccato dalla policy di rete della sessione (403 su CONNECT) e
+i doc non sono nell'account Gamma di Lorenzo. Quando riesci ad aprirli,
+confronta le sezioni 3 e 4 di questo file e correggi.
+
+Contenuti Mailift da: `knowledge/mailift-knowledge-base.md`,
+`knowledge/mailift-listino-pricing.md`.
 
 ---
 
 ## PARTE 1 — COME SI USA (interno, non inviare)
 
-**Quando si invia:** entro 10 minuti dalla prenotazione dello stage
-*"Fissata call analisi"*. Prima si invia, più alto il completamento dei dati.
+**Cos'è.** Un unico documento (da costruire in **Gamma**) che il prospect
+riceve **prima** della call. Nel metodo Larsen non è un promemoria: è la
+presentazione dell'offerta. Chi arriva in call l'ha già letta, quindi la call
+non serve a spiegare cosa fai — serve a chiudere.
 
-**Come si invia:** WhatsApp (messaggio breve + PDF o link Notion/Gamma) +
-copia via email. Mai solo email.
+**Quando si invia.** Allegato all'**Email 0**, entro 10 minuti dalla
+prenotazione (stage GHL *"Fissata call analisi"*). Poi lo si ri-linka
+nell'email delle 24h.
 
-**A chi si invia:** solo corsia A e corsia B alta (Shopify, 15k€+/mese).
-Sotto quella soglia la vendita resta asincrona: niente call, niente documento.
+**A chi.** Corsia A (25k€+/mese, Shopify) e corsia B alta. Sotto, la vendita
+resta asincrona: one-pager + link di pagamento, niente call
+(`mailift-listino-pricing.md` §1 e §7).
 
-**Perché esiste** — tre lavori, in ordine di importanza:
-1. **Pre-frame di chiusura.** Dichiara in anticipo che a fine call si decide.
-   Toglie il "ci penso" come uscita di default.
-2. **Qualificazione.** Chi non compila i dati e non risponde alle 3 domande si
-   auto-squalifica *prima* di bruciarti 45 minuti. Un no-show sul documento è
-   un'informazione, non una perdita.
-3. **Sposta la call da education a closing.** Se i numeri arrivano prima, in
-   call non si raccolgono dati: si legge il leak e si decide.
+**Due versioni, stessa struttura.** Larsen usa lo stesso layout per l'intro
+offer e per il servizio ricorrente:
+- **Versione Intro Offer** → Setup 2.000€ o Rebuild 1.500–2.000€. È quella
+  che si manda pre-call nella maggior parte dei casi.
+- **Versione Recurring** → Retainer 2.000€/mese. Si manda dopo che l'intro
+  offer è stato consegnato, non prima.
 
-**Regole di compilazione:**
-- Sostituisci tutti i `[SEGNAPOSTO]`. Un documento con placeholder residui
-  vale meno di nessun documento.
-- Personalizza **almeno un punto** con quello che hai visto sul loro sito
-  (dal mini-dossier di `workflows/lead_research.md`): popup assente, ESP
-  rilevato, numero di lingue. È il segnale che non è un template.
-- Il blocco "Ordine di grandezza dell'investimento" è **opzionale**: attivalo
-  quando il lead arriva da traffico freddo o non ha mai dichiarato budget.
-  Disattivalo se il budget è già emerso in WhatsApp.
-- **Mai** mettere il listino completo. Solo il punto di partenza.
+**Le due cose da non sbagliare:**
+1. **La sezione Offer non si improvvisa in call.** Se il prezzo esce solo a
+   voce, il documento non ha fatto il suo lavoro.
+2. **La sezione Esempi/Prova è il vero motore.** Larsen è esplicito: la prova
+   è quello che azzera il rischio reputazionale. Un documento senza numeri di
+   clienti reali converte meno, punto.
 
-**Regola di follow-up:** se 24h prima della call non sono arrivati né dati né
-risposte, manda un solo messaggio: *"Non mi sono arrivati i numeri — li porti
-in call o preferisci spostare a quando li hai sottomano?"*. Se non risponde,
-sposta. Non fare la call al buio: è così che si finisce in education mode.
+**Segnaposto obbligatori** — `[BRAND]`, `[NOME]`, `[DATA]`, `[ORA]`, più i
+numeri dell'audit. Un documento con placeholder residui vale meno di nessun
+documento.
 
----
-
-## PARTE 2 — DOCUMENTO DA INVIARE
-
-# Prima della nostra call — [BRAND]
-
-**Quando:** [GIORNO] [DATA] alle [ORA] (Italia)
-**Durata:** 40 minuti, orologio alla mano
-**Dove:** [LINK MEET/ZOOM]
-**Con:** Lorenzo Baretta — Mailift
+⚠️ **Da approvare prima del primo invio:** la garanzia nella sezione 4
+(*Rischio finanziario — la fee*). Sotto trovi la formulazione consigliata, ma
+è un impegno contrattuale: decidila tu, non darla per buona perché è scritta
+qui.
 
 ---
 
-## Perché ti mando questo documento
+## PARTE 2 — IL DOCUMENTO (8 sezioni, da costruire in Gamma)
 
-Perché la call che abbiamo fissato non è una presentazione dell'agenzia.
-È un'analisi dei tuoi numeri.
-
-Per farla servono i tuoi numeri. Se arrivano prima, i 40 minuti li passiamo a
-capire quanto stai lasciando sul tavolo e cosa fare — invece che a raccogliere
-dati che potevi mandarmi in due minuti.
-
-Leggere questo documento ti prende 4 minuti. Preparare i dati, circa 15.
+> Struttura Larsen: Introduction → About Us → What → Why → How →
+> Examples/Proof → Offer → How To Get Started.
 
 ---
 
-## Cosa succede in call
+### 1. Introduzione
 
-| Minuti | Cosa facciamo |
+# [BRAND] — quanto vale l'email che non stai mandando
+
+Ciao [NOME],
+
+questo documento è quello di cui parleremo [GIORNO] alle [ORA]. Leggerlo ti
+prende 6 minuti e ti risparmia i primi 20 minuti della call.
+
+Dentro trovi: cosa facciamo, perché funziona sugli eCommerce come il tuo,
+come lavoriamo nei primi 90 giorni, i risultati di chi è partito prima di te,
+quanto costa e come si comincia.
+
+In call non ti presento l'agenzia: apriamo il tuo Klaviyo e guardiamo i tuoi
+numeri. Questo documento serve perché tu ci arrivi sapendo già con chi stai
+parlando.
+
+---
+
+### 2. Chi siamo
+
+Mailift. Founder: **Lorenzo Baretta**, 5+ anni nell'ecosistema eCommerce,
+specializzazione esclusiva **Shopify + Klaviyo**. Oltre **1M€ di revenue**
+generata per i clienti via email marketing.
+
+Non facciamo ads, non facciamo social, non facciamo siti. Facciamo il backend
+email di eCommerce DTC — solo quello, da anni.
+
+Non siamo un'agenzia di email marketing a ore: siamo un **Email Profit
+System**, un metodo con una promessa misurabile e una scadenza.
+
+> **+30% di revenue in 90 giorni, senza aumentare la spesa in ads.**
+
+---
+
+### 3. Cosa (What)
+
+**Il servizio in una riga:** [SCEGLI UNA VERSIONE]
+
+- **Versione Setup** — *Email Foundation Setup*: costruiamo da zero
+  l'infrastruttura email del tuo store. Deliverability (DNS, DKIM, SPF,
+  DMARC) + 5 flussi core (Welcome, Carrello, Browse, Checkout, Post-Purchase,
+  Winback) + pop-up di raccolta. **Consegna in 2 settimane.**
+- **Versione Rebuild** — hai già le email ma rendono meno di quanto
+  dovrebbero: rifacciamo flussi, segmenti e template partendo dal teardown
+  dei tuoi numeri attuali contro il benchmark del settore.
+
+**Cosa ti ritrovi in mano alla fine** (deliverable, non promesse):
+- [N] flussi automatici attivi e testati dentro il tuo Klaviyo
+- [N] template email approvati nel tuo tone of voice
+- pop-up di raccolta live sul sito, con i segmenti collegati
+- infrastruttura di deliverability verificata
+- [SE MULTILINGUA] tutto replicato su [N] lingue, con revisione madrelingua
+  di subject, CTA e headline
+
+È un servizio **standardizzato**: stesso processo, stessi deliverable, stesse
+tempistiche per tutti. Non è lavoro su misura fatto a braccio — è per questo
+che sappiamo quanto dura e quanto costa prima di cominciare.
+
+---
+
+### 4. Perché (Why)
+
+**Il dato che regge tutto:** in un eCommerce sano l'email vale il **25–40%
+del fatturato**. Sotto quella soglia non hai un problema di traffico: hai
+revenue già pagata — clienti che hai acquistato spendendo in ads — che non
+stai incassando.
+
+**I tuoi numeri** *(compilare dall'audit prima di inviare)*:
+
+| | Oggi | Benchmark | Gap |
+|---|---|---|---|
+| % fatturato da email | [X]% | 25–40% | **[Y] punti** |
+| Revenue email/mese | [€A] | [€B] | **[€B–A]/mese** |
+
+**Cosa costa aspettare:** [€B–A] al mese. Non è un costo che si vede in
+contabilità — ed è esattamente per questo che resta lì per anni.
+
+**Perché il ritorno è sproporzionato** *(l'esempio va rifatto con i numeri di
+[BRAND])*:
+- L'intervento iniziale costa **[€2.000]**, una tantum.
+- Il gap che abbiamo misurato è **[€13.600]/mese**.
+- Anche recuperandone solo la metà, sono **[€6.800]/mese**.
+- Su 12 mesi: **[€81.600]**. Su 24: **[€163.200]**.
+- I flussi restano tuoi e continuano a lavorare anche se domani smettiamo di
+  collaborare.
+
+Per ogni euro investito nel setup, l'ordine di grandezza del ritorno nei
+primi due anni è **decine di volte tanto** — e non richiede un euro in più di
+ad spend, perché lavora sul traffico che stai già pagando.
+
+**Cosa rischi (e perché l'abbiamo tolto di mezzo)**
+
+| Il rischio | Come lo eliminiamo |
 |---|---|
-| 0–5 | Contesto: dove sei oggi, dove vuoi essere fra 90 giorni |
-| 5–15 | I tuoi numeri email a confronto con il benchmark del tuo settore |
-| 15–25 | Dove sta la revenue che stai perdendo, e da cosa dipende |
-| 25–35 | Cosa faremmo nei primi 90 giorni, in che ordine, con quali tempi |
-| 35–40 | Se ha senso lavorare insieme: modalità, tempi, investimento |
-
-**A fine call usciamo con una decisione.** Le opzioni sono tre: partiamo, non
-partiamo, oppure ti serve confrontarti con [SOCIO/CFO/PARTNER] e fissiamo lì
-la data della risposta. Tutte e tre vanno benissimo. Quella che non uso è il
-"ti faccio sapere" senza data.
+| **La fee** | [GARANZIA — DA APPROVARE. Formulazione consigliata: "Se a 90 giorni dalla messa online dei flussi la revenue email non supera la baseline misurata nell'audit, continuiamo a lavorare senza fee finché non succede."] |
+| **Che sbagliamo qualcosa** | Lavoriamo dentro il tuo Klaviyo, senza migrazioni. I flussi nuovi vanno live in parallelo ai tuoi, non al posto loro. Le campagne che mandi oggi non le tocchiamo finché non decidi tu. |
+| **Il tempo del tuo team** | Una call di onboarding, gli accessi, e basta. Copy, grafiche, segmenti, QA: tutto nostro. Al tuo team chiediamo solo l'approvazione. |
+| **La reputazione del brand** | Nelle prime 4 settimane nessuna email parte senza la tua approvazione. Tone of voice e template si approvano prima, non dopo. |
+| **Che non funzioni e basta** | Si spengono i flussi in un click e torni esattamente a com'eri: nessuna modifica distruttiva, tutte le versioni precedenti restano salvate. La baseline è scritta nero su bianco, quindi a 90 giorni non si discute di sensazioni — si guardano due numeri. |
 
 ---
 
-## Cosa questa call non è
+### 5. Come (How) — i primi 90 giorni
 
-- **Non è una consulenza gratuita mascherata.** Se dall'analisi risulta che il
-  tuo problema non è l'email — ma il prodotto, il margine o l'acquisizione —
-  te lo dico e ti indico dove guardare. Non ti vendo un servizio che non ti
-  serve.
-- **Non lavoriamo con tutti.** Se non sei su Shopify, se non hai una lista da
-  monetizzare o se cerchi il prezzo più basso sul mercato, non siamo la scelta
-  giusta e te lo dico in call senza girarci intorno.
-- **Non è una call di preventivo.** Il prezzo esce solo dopo che abbiamo visto
-  i numeri, perché dipende da quanti mercati e lingue gestisci e da cosa c'è
-  già in piedi.
+| Quando | Cosa succede | Cosa vedi tu |
+|---|---|---|
+| **Settimana 0** | Onboarding: accessi, brand kit, baseline scritta nel contratto | Una call da 45 minuti |
+| **Settimane 1–2** | Deliverability + costruzione dei [N] flussi core + pop-up | I flussi live, uno alla volta, ognuno approvato da te |
+| **Settimane 3–4** | Segmentazione, primi test, pulizia lista | Prime revenue attribuite ai flussi nuovi |
+| **Mese 2** | [SE RETAINER] Calendario campagne: ~10/mese, con PED condiviso | Report mensile con revenue attribuita netta |
+| **Mese 3** | Ottimizzazione su dati reali: subject, timing, offerte | Confronto con la baseline: il numero che conta |
 
----
+**Chi ci lavora:** un Account Manager dedicato che segue l'esecuzione
+quotidiana, un grafico per i template, Lorenzo sulla strategia e sui numeri.
+Un solo punto di contatto, non un gruppo di sei persone.
 
-## Cosa mi serve da te (15 minuti di lavoro)
-
-Prendili da Klaviyo e Shopify e mandameli su WhatsApp — anche solo screenshot.
-
-**Dal tuo eCommerce (Shopify → Analytics, ultimi 90 giorni)**
-- [ ] Fatturato mensile medio degli ultimi 3 mesi
-- [ ] AOV (scontrino medio)
-- [ ] Mercati e lingue in cui vendi
-- [ ] Spesa pubblicitaria mensile e ROAS attuale
-
-**Dal tuo email marketing (Klaviyo → Analytics → Attribution)**
-- [ ] % di fatturato attribuita all'email negli ultimi 90 giorni
-- [ ] Dimensione lista totale e quanti contatti sono attivi negli ultimi 90 giorni
-- [ ] Quali flussi automatici sono attivi oggi (screenshot della schermata Flows)
-- [ ] Quante campagne mandi al mese
-- [ ] Tasso di iscrizione del popup, se ne hai uno attivo
-
-**Sul processo**
-- [ ] Chi si occupa oggi delle email: tu, una persona interna, un'agenzia, nessuno
-- [ ] Cosa hai già provato e perché non ha funzionato
-
-Se qualche dato non ce l'hai, scrivi "non lo so": è comunque
-un'informazione utile. Non rimandare la call per questo.
-
-**Opzionale ma consigliato:** un accesso in sola lettura a Klaviyo
-([EMAIL ACCESSO]). Con quello arrivo in call con l'analisi già fatta e
-guadagniamo 15 minuti — che spendiamo sul piano invece che sulla diagnosi.
+**Come misuriamo:** revenue Klaviyo **netta** — esclusi ordini manuali,
+rimborsi e cancellati. Non contiamo come nostro quello che non lo è.
 
 ---
 
-## Tre domande a cui rispondermi prima
+### 6. Esempi e prova
 
-Due righe a testa su WhatsApp, non serve altro.
+> ⚠️ Da compilare con dati reali di [CLIENTE] — mai numeri inventati o
+> "tipici". Se un caso non è documentabile, non va nel documento.
 
+**[CLIENTE 1] — [settore]**
+Situazione di partenza: [X]% del fatturato dalle email, [problema specifico].
+Cosa abbiamo fatto: [intervento in una riga].
+Dopo [N] mesi: **[Y]% del fatturato**, [€Z] di revenue email al mese.
+
+**[CLIENTE 2] — [settore]**
+[Stessa struttura, angolo diverso: es. margine recuperato smettendo di
+scontare, o ripetuto d'acquisto.]
+
+**Nel complesso:** oltre **1M€** di revenue generata per i clienti Mailift
+via email marketing.
+
+[SCREENSHOT KLAVIYO / GRAFICO — la schermata vale più del paragrafo]
+
+---
+
+### 7. L'offerta
+
+**[VERSIONE INTRO OFFER]**
+
+| | |
+|---|---|
+| **Cosa** | [Email Foundation Setup / Rebuild] — [N] flussi, pop-up, deliverability, template |
+| **Quanto dura** | 2 settimane dalla consegna degli accessi |
+| **Investimento** | **[2.000]€** una tantum [+ 600€ per ogni lingua aggiuntiva] |
+| **Garanzia** | [Come da sezione 4 — riportare identica] |
+| **Cosa serve da te** | Accessi, brand kit, un'approvazione per ogni flusso |
+
+**[VERSIONE RECURRING — da usare dopo il setup, o in call se il fit è chiaro]**
+
+| | |
+|---|---|
+| **Cosa** | Gestione continuativa: ~10 campagne/mese, ottimizzazione flussi, report mensile |
+| **Investimento** | **[2.000]€/mese** [+ 300–400€ per lingua aggiuntiva] |
+| **Impegno** | [Durata minima / preavviso di disdetta — DA DEFINIRE] |
+
+**[OPZIONE PERFORMANCE — solo per prospect scettici o "ho già provato con
+un'agenzia"]**
+Fee ridotto **[1.200–1.500]€/mese** + **[10–15]%** sulla revenue email
+**incrementale** sopra la baseline dell'audit. La baseline è la media degli
+ultimi 3 mesi, fissata prima di partire e scritta nel contratto: paghi una
+percentuale solo su quello che aggiungiamo noi, mai sul tuo pregresso.
+
+---
+
+### 8. Come si comincia
+
+1. **[GIORNO] alle [ORA]** — la call. 30 minuti: guardiamo insieme il tuo
+   Klaviyo, ti mostro dove sta il gap e in che ordine lo chiuderei.
+2. **Alla fine della call decidiamo.** Tre risposte possibili, tutte
+   accettabili: partiamo, non partiamo, oppure ne parli con [SOCIO/CFO] e
+   fissiamo lì la data della risposta. L'unica che non uso è il "ti faccio
+   sapere" senza data.
+3. **Se partiamo:** contratto e accessi entro 48 ore, onboarding entro
+   [N] giorni, flussi live dalla seconda settimana.
+
+**Prima della call, due cose da te:**
+
+**a) Accesso view-only al tuo Klaviyo** → [ISTRUZIONI/LINK]
+Sono 2 minuti e cambiano la call: con l'accesso arrivo con l'audit già fatto
+e i 30 minuti li passiamo sul piano, non sulla diagnosi. Se preferisci di no,
+nessun problema: lavoro su quello che si vede da fuori.
+
+**b) Tre risposte, due righe a testa** (rispondi pure a questa email o su
+WhatsApp):
 1. Se fra 90 giorni l'email fosse il tuo secondo canale di profitto, cosa
-   cambierebbe concretamente nel tuo business?
-2. Cos'hai già provato sull'email, e cosa secondo te non ha funzionato?
-3. Se in call scopriamo che stai lasciando sul tavolo una cifra significativa
-   ogni mese, sei nella posizione di partire entro [N] settimane — o ci sono
-   vincoli (budget, stagionalità, riassetti interni) che devo sapere adesso?
+   cambierebbe concretamente per [BRAND]?
+2. Cos'hai già provato sull'email e cosa secondo te non ha funzionato?
+3. Se in call il gap risulta significativo, sei nella posizione di partire
+   entro [N] settimane — o ci sono vincoli (budget, stagionalità, riassetti)
+   che è meglio sapere adesso?
 
-La terza è la più importante. Se la risposta è "non adesso", nessun problema:
-spostiamo la call a quando ha senso, invece di farla due volte.
+La terza è la più importante. Se la risposta è "non adesso", spostiamo la
+call a quando ha senso invece di farla due volte.
 
----
+**Chi deve esserci:** chi decide sul budget. Se la decisione è condivisa,
+portalo in call — è la differenza tra chiudere in 30 minuti e trascinare la
+cosa tre settimane.
 
-## Chi deve esserci
+Ci vediamo [GIORNO] alle [ORA] — [LINK CALL]
 
-Chi decide sul budget. Se la decisione è condivisa con [SOCIO/CFO/PARTNER],
-portalo in call: è la differenza tra chiudere in 40 minuti e trascinare la
-cosa per tre settimane.
-
-Se non può esserci, dimmelo ora e spostiamo — non è un problema, lo diventa
-solo se lo scopriamo alla fine.
-
----
-
-## Come lavoriamo (così non lo scopri in call)
-
-Mailift lavora solo su **Shopify + Klaviyo**, solo sul backend email di
-eCommerce DTC. Non facciamo ads, non facciamo social, non facciamo siti.
-
-La tesi è una sola: in un eCommerce sano l'email vale il **25–40% del
-fatturato**. Sotto quella soglia non hai un problema di traffico, hai
-revenue già pagata che non stai incassando. Il nostro lavoro è recuperarla:
-**+30% di revenue in 90 giorni senza aumentare la spesa in ads.**
-
-[PERSONALIZZAZIONE — una riga su cosa hai visto sul loro sito. Esempi:
-"Sul vostro sito non ho trovato un popup di raccolta: è la prima cosa che
-guarderemo insieme." / "Vendete in 4 lingue ma i flussi sembrano solo in
-italiano: se è così, è il primo blocco di revenue da sbloccare."]
-
-<!-- BLOCCO OPZIONALE — attivare solo per lead da traffico freddo o senza
-     budget dichiarato. Cancellare le due righe qui sotto se non serve. -->
-**Ordine di grandezza dell'investimento.** Perché nessuno perda tempo: i
-nostri percorsi partono da **2.000€** per l'intervento iniziale e da
-**2.000€/mese** per la gestione continuativa, con variazioni in base a mercati
-e lingue. Se questo ordine di grandezza è fuori portata oggi, dimmelo adesso:
-ti mando comunque un paio di indicazioni utili e ci risentiamo più avanti.
-
----
-
-## Due regole pratiche
-
-- **Puntualità.** 40 minuti significa 40 minuti: dopo ho un'altra call.
-- **Se non puoi esserci**, avvisami con 24 ore di anticipo e sposto senza
-  problemi. Un buco a calendario è l'unica cosa che mi crea un danno reale.
-
----
-
-Ci vediamo [GIORNO] alle [ORA].
-
-**Lorenzo Baretta**
-Founder — Mailift
+**Lorenzo Baretta** · Founder, Mailift
 [TELEFONO] · [EMAIL]
 
 ---
 
-## PARTE 3 — MESSAGGI DI ACCOMPAGNAMENTO
+## PARTE 3 — PRE-CALL FLOW (i messaggi che portano il documento)
 
-### WhatsApp (subito dopo la prenotazione)
+Ripresi dalla sequenza già in Notion. **Obiettivo: no-show sotto il 20%** e
+prospect che arriva pre-sold.
+*Il principio: ogni giorno tra prenotazione e call è un giorno in cui il
+prospect si raffredda.*
 
-> Ciao [NOME], confermata la call di [GIORNO] alle [ORA] 👍
+### Email 0 — appena prenota (entro 10 minuti)
+
+> **Oggetto:** Confermato — la tua call audit del [data]
 >
-> Ti mando un documento da leggere prima: dentro c'è cosa facciamo nei 40
-> minuti e i pochi numeri che mi servono da te (15 minuti di lavoro, li
-> prendi da Klaviyo e Shopify).
->
-> Se me li mandi prima, in call non perdiamo tempo a raccoglierli e li
-> usiamo per capire quanto stai lasciando sul tavolo.
->
-> [PDF / LINK]
-
-### Email (copia di sicurezza, stesso giorno)
-
-**Oggetto:** Prima della call di [GIORNO] — i numeri che mi servono
-
 > Ciao [NOME],
 >
-> in allegato il documento che ti anticipavo su WhatsApp: agenda della call,
-> i dati che mi servono da te e tre domande a cui rispondermi prima.
+> call confermata per [data e ora]. Link: [link call]
 >
-> Il senso è semplice: se i numeri arrivano prima, i 40 minuti li spendiamo a
-> decidere cosa fare, non a raccogliere dati.
+> **Ti allego il documento che useremo:** dentro c'è come lavoriamo, i
+> risultati di chi è partito prima di te, quanto costa e come si comincia.
+> 6 minuti di lettura. → [LINK GAMMA]
 >
-> A [GIORNO],
+> Come funziona la call: in 30 minuti ti mostro cosa ho trovato nel tuo
+> Klaviyo — i flussi che mancano, quelli che perdono soldi, e quanto vale
+> colmare il gap in euro. Niente slide di vendita: solo i tuoi numeri.
+>
+> **Per rendere l'audit più preciso mi serve una cosa (2 minuti):** accesso
+> view-only al tuo Klaviyo, così: [istruzioni/link]. Se preferisci non farlo,
+> nessun problema — lavorerò su quello che è visibile da fuori.
+>
+> A [giorno],
+> Lorenzo — Mailift
+>
+> PS. Se ti serve spostare la call: [link riprogrammazione]. Meglio spostarla
+> che perderla.
+
+### Email 1 — 24 ore prima
+
+> **Oggetto:** Domani ci vediamo — e questo è quello che vedrai
+>
+> Ciao [NOME],
+>
+> domani alle [ora] vediamo insieme il tuo audit.
+>
+> Nel frattempo, questo è il tipo di lavoro che ne esce: [CLIENTE], [settore],
+> era al [X]% di fatturato dalle email. Dopo [Y] mesi: [Z]%. È il percorso che
+> vorrei mostrarti anche per [BRAND].
+>
+> [Link caso studio / schermata]
+>
+> Se non l'hai ancora aperto, il documento è qui: [LINK GAMMA] — soprattutto
+> le ultime due sezioni, offerta e come si comincia.
+>
+> A domani,
 > Lorenzo
 
-### Promemoria 24h prima (solo se non ha mandato nulla)
+### Reminder — 1-2 ore prima
 
-> [NOME], domani alle [ORA] ci sentiamo. Non mi sono arrivati i numeri —
-> li porti in call o preferisci spostare a quando li hai sottomano?
+> **Oggetto:** Tra poco: la tua call audit ([ora])
+>
+> Ciao [NOME], ci vediamo tra poco: [link call]. Ho i tuoi numeri pronti.
+> A dopo — Lorenzo
+
+**WhatsApp:** "Ciao [NOME], Lorenzo di Mailift — ci vediamo alle [ora] per
+l'audit del tuo Klaviyo. Link: [link]. A dopo!"
+
+### Se non manda dati né risposte (24h prima)
+
+> [NOME], domani alle [ora] ci sentiamo. Non mi è arrivato l'accesso a
+> Klaviyo — lo attivi prima o preferisci spostare a quando hai due minuti?
+
+### No-show
+
+**Il pre-call flow non riparte.** Una sola email dopo 1 ora:
+
+> Ci siamo persi — tutto ok? Ecco il link per riprenotare: [link]. Tengo i
+> tuoi dati pronti ancora per qualche giorno.
 
 ---
 
-## PARTE 4 — VARIANTE CORSIA B (8–25k€/mese, vendita asincrona)
+## PARTE 4 — CHECKLIST PRIMA DI OGNI INVIO
 
-Per la corsia B **non si manda questo documento**: la vendita è asincrona
-(sequenza WhatsApp + one-pager + link di pagamento, max una call da 15 minuti,
-`knowledge/mailift-listino-pricing.md` §1).
-
-Se serve comunque un pre-frame prima dei 15 minuti, usa solo tre blocchi di
-questo documento, in un unico messaggio:
-1. la durata reale (15 minuti, non 40);
-2. i tre dati minimi — fatturato mensile, dimensione lista, flussi attivi;
-3. la frase di chiusura: *"In 15 minuti ti dico se il setup ha senso per te.
-   Se sì, ti mando il link e parti; se no, te lo dico e non ci perdiamo altro
-   tempo."*
+- [ ] Tutti i `[SEGNAPOSTO]` sostituiti (soprattutto nella tabella del gap)
+- [ ] Almeno un elemento personalizzato su [BRAND] preso dal mini-dossier
+      (`workflows/lead_research.md`) — popup, ESP rilevato, numero di lingue
+- [ ] Sezione 6 con **numeri reali** di clienti reali, mai stime
+- [ ] Sezione 7: scelta la versione giusta (intro offer vs recurring) — non
+      entrambe nello stesso documento
+- [ ] Garanzia della sezione 4 identica a quella della sezione 7
+- [ ] Prezzo mai sotto il floor: markup minimo 3,5× sul costo diretto
+      (`mailift-listino-pricing.md` §6)
+- [ ] Documento sotto le 8 sezioni: se serve una nona, va tolta un'altra
