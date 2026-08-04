@@ -287,78 +287,23 @@ Ci vediamo [GIORNO] alle [ORA] — [LINK CALL]
 
 ## PARTE 3 — PRE-CALL FLOW (i messaggi che portano il documento)
 
-Ripresi dalla sequenza già in Notion. **Obiettivo: no-show sotto il 20%** e
-prospect che arriva pre-sold.
-*Il principio: ogni giorno tra prenotazione e call è un giorno in cui il
-prospect si raffredda.*
+**La sequenza completa sta in
+[mailift-sequenza-pre-call.md](mailift-sequenza-pre-call.md)** — sei
+touchpoint dalla prenotazione alla call, tradotti dal *Pre-Call Flow Guide*
+originale di Larsen, più le domande del form di prenotazione.
 
-### Email 0 — appena prenota (entro 10 minuti)
+Quello che conta per questo documento: il Master Document viene consegnato
+**due volte** nella sequenza, ed è il primo asset che il prospect vede.
 
-> **Oggetto:** Confermato — la tua call audit del [data]
->
-> Ciao [NOME],
->
-> call confermata per [data e ora]. Link: [link call]
->
-> **Ti allego il documento che useremo:** dentro c'è come lavoriamo, i
-> risultati di chi è partito prima di te, quanto costa e come si comincia.
-> 6 minuti di lettura. → [LINK GAMMA]
->
-> Come funziona la call: in 30 minuti ti mostro cosa ho trovato nel tuo
-> Klaviyo — i flussi che mancano, quelli che perdono soldi, e quanto vale
-> colmare il gap in euro. Niente slide di vendita: solo i tuoi numeri.
->
-> **Per rendere l'audit più preciso mi serve una cosa (2 minuti):** accesso
-> view-only al tuo Klaviyo, così: [istruzioni/link]. Se preferisci non farlo,
-> nessun problema — lavorerò su quello che è visibile da fuori.
->
-> A [giorno],
-> Lorenzo — Mailift
->
-> PS. Se ti serve spostare la call: [link riprogrammazione]. Meglio spostarla
-> che perderla.
+| Quando | Dove compare il documento |
+|---|---|
+| Subito dopo la prenotazione | **Redirect URL** della pagina di booking — il prospect ci finisce sopra automaticamente |
+| Subito dopo (WhatsApp) | Link nel primo messaggio |
+| +3 minuti (email) | Link principale dell'email di conferma, con la richiesta esplicita di leggerlo prima della call |
+| −24 ore | Ri-linkato, indicando le ultime due sezioni (offerta e come si comincia) |
 
-### Email 1 — 24 ore prima
-
-> **Oggetto:** Domani ci vediamo — e questo è quello che vedrai
->
-> Ciao [NOME],
->
-> domani alle [ora] vediamo insieme il tuo audit.
->
-> Nel frattempo, questo è il tipo di lavoro che ne esce: [CLIENTE], [settore],
-> era al [X]% di fatturato dalle email. Dopo [Y] mesi: [Z]%. È il percorso che
-> vorrei mostrarti anche per [BRAND].
->
-> [Link caso studio / schermata]
->
-> Se non l'hai ancora aperto, il documento è qui: [LINK GAMMA] — soprattutto
-> le ultime due sezioni, offerta e come si comincia.
->
-> A domani,
-> Lorenzo
-
-### Reminder — 1-2 ore prima
-
-> **Oggetto:** Tra poco: la tua call audit ([ora])
->
-> Ciao [NOME], ci vediamo tra poco: [link call]. Ho i tuoi numeri pronti.
-> A dopo — Lorenzo
-
-**WhatsApp:** "Ciao [NOME], Lorenzo di Mailift — ci vediamo alle [ora] per
-l'audit del tuo Klaviyo. Link: [link]. A dopo!"
-
-### Se non manda dati né risposte (24h prima)
-
-> [NOME], domani alle [ora] ci sentiamo. Non mi è arrivato l'accesso a
-> Klaviyo — lo attivi prima o preferisci spostare a quando hai due minuti?
-
-### No-show
-
-**Il pre-call flow non riparte.** Una sola email dopo 1 ora:
-
-> Ci siamo persi — tutto ok? Ecco il link per riprenotare: [link]. Tengo i
-> tuoi dati pronti ancora per qualche giorno.
+Se il documento non è ancora pronto in Gamma, la sequenza non va attivata: è
+l'asset che regge i primi tre touchpoint.
 
 ---
 
