@@ -95,7 +95,14 @@ Struttura a 8 beat, che è quella che tiene la retention fino alla CTA:
 
 Il modello completo con esempi, le regole per gli hook e le regole per le caption è in `references/script-templates.md`.
 
-**Prima di considerare uno script pronto**, passalo dall'ottimizzazione: su ogni frase chiediti *"se tolgo questa, il messaggio si capisce lo stesso?"*. Se sì, esce. Uno script per un reel non è una lettera né un discorso: è un insieme di frasi brevi, fluide e mirate. Il processo completo è in `references/piano-editoriale.md`. Questo non significa dire meno cose o togliere il tono di voce di Lorenzo: significa togliere le intro inutili e le frasi che ripetono concetti già detti.
+**Prima di considerare uno script pronto**, passalo dall'ottimizzazione: su ogni frase chiediti *"se tolgo questa, il messaggio si capisce lo stesso?"*. Se sì, esce. Uno script per un reel non è una lettera né un discorso: è un insieme di frasi brevi, fluide e mirate. Questo non significa dire meno cose o togliere il tono di voce di Lorenzo: significa togliere le intro inutili e le frasi che ripetono concetti già detti.
+
+Il **processo per scrivere** (definire il nucleo → bozza disordinata → snellire → rileggere ad alta voce), i **quattro principi di qualità** e il metodo per lavorare dalle reference sono in `references/processo-scripting.md`. Due cose da tenere sempre presenti da lì:
+
+- **Un contenuto = un'idea.** Definisci il nucleo in una frase *prima* di scrivere. Se ci sono due nuclei, non arriva nessuno dei due.
+- **I concetti appesi sono il nemico numero uno**: elenchi ed etichette tecnicamente corrette ma che non dicono niente ("segmentazione avanzata", "strategia strutturata"). Il test: ogni punto, da solo, dice qualcosa di preciso a chi ascolta? Se è un'etichetta, va riscritto in concreto.
+
+**L'hook si sceglie per ultimo**, a meno di partire da una reference: serve avere chiarezza sul contenuto per sceglierne uno che il contenuto poi mantiene.
 
 ## Gli hook — dove si vince o si perde
 
