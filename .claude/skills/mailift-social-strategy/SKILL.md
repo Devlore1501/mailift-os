@@ -59,17 +59,29 @@ Tre strati che si sommano (dettaglio in `references/framework-contenuti.md`):
 
 Sulla distribuzione, per un'agenzia piccola l'ordine giusto è controintuitivo: **diretto (DM/engagement) e collaborazioni (podcast guesting, partner-agenzie non concorrenti, teardown di brand noti) danno accesso concentrato subito**; l'algoritmo compone nel tempo. Chi parte dall'algoritmo aspetta 12 mesi per qualcosa che le collaborazioni davano in 4 settimane.
 
-## Formati per stadio
+## Obiettivo del contenuto: attrazione, consapevolezza, vendita
 
-| Stadio | Formati |
-|---|---|
-| TOF | educational semplice · hot take · ranking/tier list · my story · reaction a dati e notizie |
-| MOF | step-by-step · teardown di un brand reale · split screen explainer · "i 5 errori che vedo sempre" · QnA |
-| BOF | before/after reali · obiezioni smontate · audit live · dietro le quinte del lavoro |
+Questo è un asse **diverso** da quello della consapevolezza del pubblico, e i due non vanno confusi.
 
-Green screen, yap, screen recording sono **modalità di ripresa**, non formati: si applicano a qualsiasi stadio.
+- **Attrazione** — porta movimento. È **pratico e risolutivo**: si salva, si applica, dà un piccolo risultato. Nasce da un **micro-argomento**.
+- **Consapevolezza** — avvicina al servizio. **Non è risolutivo per scelta**: indica la direzione e lascia il gap del "sì, ma come lo faccio io?". Nasce da un **macro-argomento**, perché un tema grande non si chiude in un reel.
+- **Vendita** — diretta o indiretta.
 
-Quando Lorenzo vuole aprire molti formati insieme, spingi per **tre soli** (uno per stadio) per almeno 30 giorni. More → Better → New, in quest'ordine: aprire dieci fronti significa farli tutti male e non capire cosa funziona.
+Attenzione all'errore facile: *broad non significa attrazione*. Un contenuto broad può essere di consapevolezza (macro, non risolutivo), e un contenuto tecnico può essere di attrazione (micro, risolutivo). Esempio: "le 3 email del welcome flow" è **attrazione** anche se è MOF; "non hai un business, hai un affitto" è **consapevolezza** anche se è broad.
+
+Il metodo completo (esercizio macro → micro già compilato per Mailift, checklist per tipo, libreria formati, percentuali e pianificazione mensile) è in `references/piano-editoriale.md`. Consultalo ogni volta che serve costruire o rivedere un piano editoriale.
+
+**Frequenza:** minimo 3 uscite a settimana, ideale 4-5. Sotto le 3 non si raccolgono dati; sopra le 2 al giorno crolla la qualità.
+
+**Mix per obiettivo:** serve movimento → 70-80% attrazione. Servono richieste → 40% attrazione / 40% consapevolezza / 20% vendita.
+
+## Formati
+
+I formati che rendono di più per Lorenzo, in ordine di rapporto resa/sforzo: **supporto visivo e schema** (numeri e flussi si spiegano disegnandoli), **metafore e oggetti** (il secchio bucato, l'affitto: rendono concreti i temi astratti come margine e LTV), **vieni e commenta** (genera lead misurabili con la parola chiave), **dinamicità delle scene**, **naturale**. Dettaglio e note in `references/piano-editoriale.md`.
+
+Green screen, yap, screen recording sono **modalità di ripresa**, non formati: si applicano a qualsiasi contenuto.
+
+Quando Lorenzo vuole aprire molti formati insieme, spingi per **pochi e ricorrenti** per almeno 30 giorni. More → Better → New, in quest'ordine: i format fissi salvano la costanza, che è la variabile che decide tutto.
 
 ## Scrivere uno script video
 
@@ -82,6 +94,8 @@ Struttura a 8 beat, che è quella che tiene la retention fino alla CTA:
 - Se devi tagliare, accorcia **Body 2**. Mai Hook, Promise o CTA.
 
 Il modello completo con esempi, le regole per gli hook e le regole per le caption è in `references/script-templates.md`.
+
+**Prima di considerare uno script pronto**, passalo dall'ottimizzazione: su ogni frase chiediti *"se tolgo questa, il messaggio si capisce lo stesso?"*. Se sì, esce. Uno script per un reel non è una lettera né un discorso: è un insieme di frasi brevi, fluide e mirate. Il processo completo è in `references/piano-editoriale.md`. Questo non significa dire meno cose o togliere il tono di voce di Lorenzo: significa togliere le intro inutili e le frasi che ripetono concetti già detti.
 
 ## Gli hook — dove si vince o si perde
 
