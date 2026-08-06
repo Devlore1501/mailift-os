@@ -1,5 +1,7 @@
 # Calendario Contenuti — 30 giorni / 12 video
 
+> ⚠️ **SUPERATO da `piano-editoriale-mese1.md`.** Questo piano usa un mix 50/30/20, troppo sbilanciato sulla consapevolezza per una partenza da zero. Il piano attuale è a 16 contenuti con mix 75/25. Gli script referenziati qui restano validi e riutilizzati nel nuovo piano.
+
 *v1.0 · 2026-08-05 · Owner: Lorenzo Baretta*
 
 > 3 video a settimana per 4 settimane. Ritmo fisso, arco narrativo dal problema grande al conto preciso.
