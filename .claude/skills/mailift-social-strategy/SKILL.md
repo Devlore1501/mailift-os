@@ -96,6 +96,8 @@ Un hook forte **accusa, minaccia o contraddice**. Non introduce e non informa. N
 
 Una statistica non è un hook a meno che non sia *il suo* numero.
 
+Quando servono strutture di partenza, `references/banca-hook.md` contiene una libreria di template organizzati per leva psicologica (curiosità, storytelling, provocazione, educational, autorevolezza, liste, domande, miti, errori), ognuno mappato sullo stadio del funnel e già compilato con le variabili Mailift. Contiene anche l'elenco dei pattern **da evitare** con questo buyer: gli hook in stile guru ("cheat code", "tattiche non etiche", "il top 0,1% non vuole che tu lo sappia") gli confermano che sei uno di quelli da cui è scappato.
+
 ## Le CTA
 
 Preferisci **parola-chiave in commento o DM** (INBOX, SEGMENTI, WELCOME, CARRELLO...) rispetto al generico "seguimi": genera lead misurabili e ti dice quale dolore è più vivo. Il link in bio al questionario tienilo per i contenuti pilastro, non su tutto.
