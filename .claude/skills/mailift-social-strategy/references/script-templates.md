@@ -2,6 +2,10 @@
 
 Modelli operativi con esempi reali già validati.
 
+Due famiglie di struttura, con meccaniche di retention opposte:
+- **Script narrativo a 8 beat** — tiene con la curiosità (open loop). Per contenuti da 30-60 secondi che sviluppano un'idea.
+- **Formati a raffica** — tengono con la densità. Per contenuti da 15-30 secondi fatti di unità indipendenti. Vedi la sezione dedicata più sotto.
+
 ---
 
 ## Lo script a 8 beat
@@ -36,6 +40,68 @@ Perché funziona: ogni open loop promette qualcosa di meglio più avanti, quindi
 > **LOOP 2** — "E la terza non la fa quasi nessuno, ma vale più delle altre due…"
 > **BODY 3** — "Nella prima email, chiedi di risponderti. Una domanda vera. Per Gmail una risposta è il segnale più forte che esista: quella persona ti vuole. E da lì ti tratta diversamente."
 > **CTA** — "Se sei sotto il trenta per cento di aperture, il problema è quasi sempre qui, non nel copy. Commenta INBOX e ti mando la checklist."
+
+---
+
+## Formati a raffica (15-30 secondi)
+
+Struttura completamente diversa: **Frame → 3-5 unità → chiusura**. Niente open loop, niente sviluppo narrativo.
+
+**Perché funzionano.** La retention non arriva dalla curiosità ma dalla **densità**: ogni 3 secondi c'è un'unità di valore completa. Chi entra a metà capisce lo stesso, e il cervello non ha mai il tempo di chiedersi dove stai andando. Sono anche i contenuti più salvati in assoluto, perché sono liste.
+
+**Le regole non negoziabili**
+- **Ogni riga regge da sola.** Se una unità ha bisogno del contesto delle altre per essere capita, esce.
+- **3-5 unità.** Sotto le tre non sembra una lista, sopra le cinque a quella velocità non si ricorda niente.
+- **Ritmo visivo obbligatorio.** Questi formati collassano se girati come volto fermo: diventano una filastrocca. Serve un cambio a ogni riga — testo a schermo che scatta, taglio di inquadratura, riga che si scrive sulla lavagna. Il ritmo visivo *è* il formato.
+- **Il frame iniziale annuncia il numero** ("cinque cose", "quattro errori"): dà al cervello un contatore e una promessa di fine.
+
+### I cinque pattern
+
+**1. Swap list — "Smetti X / Inizia Y"**
+> "Cinque cose da smettere di fare se vuoi tenerti il margine."
+> Smetti di comprare clienti nuovi ogni mese. Inizia a far tornare quelli che hai già.
+> Smetti di guardare il ROAS. Inizia a guardare quanto vale un cliente in un anno.
+> Smetti di scontare per vendere. Inizia a dare un motivo che non sia il prezzo.
+> Smetti di sparire dopo l'ordine. Inizia a esserci nei trenta giorni dopo.
+> "Salvatelo. Ti serve più di quanto pensi."
+
+**2. If / then — "Se vuoi X, fai Y"**
+> "Se vuoi che il tuo ecommerce guadagni davvero, quattro cose."
+> Se vuoi abbassare il costo di acquisizione, non toccare le ads. Fai tornare chi ha già comprato.
+> Se vuoi vendere senza sconti, parla a chi ti conosce già.
+> Se vuoi smettere di dipendere da una piattaforma, costruisci un canale che è tuo.
+> Se vuoi capire dove perdi, guarda cosa succede dopo la vendita, non prima.
+> "Nessuna di queste costa un euro in più di pubblicità."
+
+**3. Non è X, è Y** — il pattern del riposizionamento diagnostico. A schermo: la parola sbagliata barrata, quella giusta che appare.
+> "Non hai un problema di traffico."
+> Non è che ti mancano i clienti. È che non tornano.
+> Non è che il prodotto non piace. È che si dimenticano di te.
+> Non è che le ads non funzionano. È che ricompri sempre le stesse persone.
+> Non è un problema di quanto vendi. È di quanto ti resta.
+
+**4. Rapid fire errori** — funziona perché il buyer teme di sbagliare senza saperlo. Chiudi chiedendo il conteggio: genera commenti qualificati.
+> "Quattro cose che stai facendo adesso e che ti costano margine ogni mese."
+> Mandi la stessa identica cosa a chi ha speso duemila euro e a chi non ha mai comprato niente.
+> Sconti a gente che avrebbe comprato comunque a prezzo pieno.
+> Sparisci nel momento esatto in cui il cliente si fida di più.
+> Aumenti il budget invece di sistemare la parte che perde i clienti.
+> "Quante ne stai facendo? Scrivi il numero nei commenti."
+
+**5. "Ogni volta che…"** — accumula il senso di perdita ripetuta. A schermo: un contatore che sale.
+> "Ogni volta che fai una di queste cose stai bruciando soldi. E non te ne accorgi."
+> Ogni volta che paghi per un cliente e poi lo lasci andare, hai comprato una vendita sola.
+> Ogni volta che sconti a chi ti ama già, stai regalando margine.
+> Ogni volta che alzi il budget su un business che perde clienti dietro, moltiplichi il problema.
+> "Non ti serve spendere di più. Ti serve smettere di sprecare."
+
+### Quando usarli
+
+Sono ideali per il **broad**: ogni unità nomina un risultato o un errore in parole del cliente, senza gergo. Funzionano anche in attrazione, perché una lista si salva e si applica.
+
+Non usarli per la consapevolezza profonda o lo storytelling: lì serve lo sviluppo narrativo, e la raffica lo impedisce.
+
+**CTA adatte:** "salvatelo", "quante ne stai facendo?", "scrivi il numero". Leggere, perché a questo stadio il pubblico non è pronto per il questionario.
 
 ---
 

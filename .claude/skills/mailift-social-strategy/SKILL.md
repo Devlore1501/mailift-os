@@ -93,6 +93,8 @@ Struttura a 8 beat, che è quella che tiene la retention fino alla CTA:
 - **30 secondi ≈ 90 parole.** Gli open loop si comprimono in connettori di 4-8 parole ("E può fare di peggio…").
 - Se devi tagliare, accorcia **Body 2**. Mai Hook, Promise o CTA.
 
+Esiste una **seconda famiglia di struttura**, opposta come meccanica: i **formati a raffica** (15-30 sec). Frame → 3-5 unità indipendenti → chiusura. Non tengono con la curiosità ma con la densità: ogni riga è un'unità di valore completa che regge da sola. Sono i più salvati, ideali per il broad, e richiedono ritmo visivo a ogni riga o collassano. I cinque pattern (smetti/inizia · se vuoi X fai Y · non è X è Y · rapid fire errori · ogni volta che…) sono in `references/script-templates.md`.
+
 Il modello completo con esempi, le regole per gli hook e le regole per le caption è in `references/script-templates.md`.
 
 **Prima di considerare uno script pronto**, passalo dall'ottimizzazione: su ogni frase chiediti *"se tolgo questa, il messaggio si capisce lo stesso?"*. Se sì, esce. Uno script per un reel non è una lettera né un discorso: è un insieme di frasi brevi, fluide e mirate. Questo non significa dire meno cose o togliere il tono di voce di Lorenzo: significa togliere le intro inutili e le frasi che ripetono concetti già detti.
