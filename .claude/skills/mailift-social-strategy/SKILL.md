@@ -97,6 +97,8 @@ Esiste una **seconda famiglia di struttura**, opposta come meccanica: i **format
 
 Il modello completo con esempi, le regole per gli hook e le regole per le caption è in `references/script-templates.md`.
 
+Le due famiglie qui sopra regolano il **ritmo**. Una terza libreria, `references/strutture-narrative.md`, regola il **contenitore**: undici strutture (cinque educative — 3 livelli · 2 persone · meglio e peggio · azione→risultato · lo sapevi che — e sei di storytelling — percorso dell'eroe · chi sono · la lezione · il grande obiettivo · dal dubbio alla vittoria · la svolta), ognuna con quando usarla, l'adattamento all'ICP e le trappole. **Le educative vanno sui quick win** (hanno forma parallela, quindi si salvano), **le narrative sullo slot non-quick-win**. Consultala ogni volta che si scrivono più script insieme: il difetto più probabile di un piano non è la qualità del singolo script ma il fatto che abbiano tutti la stessa curva. Mai lo stesso contenitore in due uscite consecutive.
+
 **Prima di considerare uno script pronto**, passalo dall'ottimizzazione: su ogni frase chiediti *"se tolgo questa, il messaggio si capisce lo stesso?"*. Se sì, esce. Uno script per un reel non è una lettera né un discorso: è un insieme di frasi brevi, fluide e mirate. Questo non significa dire meno cose o togliere il tono di voce di Lorenzo: significa togliere le intro inutili e le frasi che ripetono concetti già detti.
 
 Il **processo per scrivere** (definire il nucleo → bozza disordinata → snellire → rileggere ad alta voce), i **quattro principi di qualità** e il metodo per lavorare dalle reference sono in `references/processo-scripting.md`. Due cose da tenere sempre presenti da lì:
