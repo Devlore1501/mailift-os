@@ -153,13 +153,36 @@ Flag utili:
    - crea la self_supplier_invoice con `e_invoice=true`, sezionale `a`, payment status `reversed`.
 5. Scrive `.tmp/autofatture_report.json` con id, numero documento, totale per ogni gruppo.
 
-## ⚠ Cosa devi fare TU dopo lo script
-Il workflow **non invia nulla al SDI**. Lascia tutte le autofatture in stato `not_sent`,
-modificabili dalla UI di Fatture in Cloud. Per ognuna:
-1. Vai su FiC > Fatture e Documenti > Autofatture
-2. Apri la fattura, controlla l'aliquota, il fornitore, l'importo
-3. **Compila i DatiFattureCollegate** se vuoi (Attributi avanzati > 2.1.6) — opzionale
-4. Clicca "Verifica formale" → "Firma e invia"
+## ⚠ Invio al SDI — passaggio separato e deliberato
+`run_autofatture.py` **non invia nulla al SDI**: lascia tutte le autofatture in stato
+`not_sent`, modificabili. Il controllo umano va fatto QUI, perché dopo l'invio l'unico
+rimedio è una nota di variazione. Rivedi aliquota, fornitore, importo, indirizzo.
+
+Poi hai due strade equivalenti:
+
+**A. UI di Fatture in Cloud** — FiC > Fatture e Documenti > Autofatture, per ognuna
+"Verifica formale" → "Firma e invia".
+
+**B. In batch da CLI** ([tools/send_autofatture_sdi.py](../tools/send_autofatture_sdi.py),
+aggiunto 2026-08-22):
+```
+python tools/send_autofatture_sdi.py --date 2026-08-22             # SOLO verifica formale
+python tools/send_autofatture_sdi.py --date 2026-08-22 --confirm   # verifica + invio
+python tools/send_autofatture_sdi.py --date 2026-08-22 --status    # stato SDI del batch
+```
+Senza `--confirm` fa solo la verifica formale (read-only) e si ferma; i documenti che non
+la superano non vengono mai inviati; quelli già inviati vengono saltati.
+
+Endpoint usati (non erano documentati in questo workflow):
+- `GET  /c/{company}/issued_documents/{id}/e_invoice/xml_verify` → verifica formale
+- `POST /c/{company}/issued_documents/{id}/e_invoice/send` (body `{"data":{}}`) → firma e invia
+- `GET  /c/{company}/issued_documents/{id}/e_invoice/xml` → XML SDI generato (risposta **non JSON**:
+  va letta con `requests.get(...).text`, non con `_request()`)
+- `GET  /c/{company}/issued_documents/{id}/e_invoice/error_reason` → motivo dello scarto
+
+Progressione degli stati: `not_sent` → `pending`/`processing` → `sent` → `delivered` (o
+`rejected`). L'esito definitivo arriva entro qualche ora: **ricontrolla sempre con `--status`**
+il giorno dopo, uno scarto SDI non notificato resta un adempimento non assolto.
 
 ## Edge case noti
 - **PDF scansionati**: il parser usa `pdfplumber`, non OCR. Se il PDF è un'immagine
