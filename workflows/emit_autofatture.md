@@ -359,6 +359,47 @@ Per creare una `self_supplier_invoice` valida via API serve il payload completo:
     da `c/`. Il prefisso va MANTENUTO quando si scambia per il token (rimuoverlo causa
     `error decoding the token`).
 
+## Lezioni sessione 2026-08-22 (estratto luglio 2026)
+
+### 1. Il classificatore SALTA fornitori ricorrenti di importo piccolo
+Nel primo dry-run di luglio mancavano **Myleadfox (16,67)** e **Digital Media LLC (20,00)**,
+entrambi già autofatturati nei mesi precedenti (21/a, 30/a e 32/a, 50/a). Il modello li aveva
+scartati perché ambigui/di importo basso.
+**Fix applicato**: sezione "FORNITORI RICORRENTI GIA' AUTOFATTURATI" nel `SYSTEM_PROMPT` di
+`classify_transactions.py` con la lista dei fornitori noti + la regola "l'obbligo di autofattura
+non ha soglia di importo".
+**Regola operativa**: dopo ogni dry-run, riconcilia SEMPRE i movimenti in uscita del CSV con il
+piano e verifica che ogni esclusione sia motivata (fornitore IT, giroconto, stipendio, F24).
+
+### 2. Le P.IVA estere venivano allucinate dal classificatore
+Su tre run diversi Revolut Payments UAB ha ricevuto tre P.IVA diverse (LT100013740611 su 17/a,
+LT100013710611 su 38/a, LT100013613010 su 51/a): **tutte e tre INVALID su VIES**. Su 35/a a
+Dropbox era finita `IE3668997OH`, che su VIES risulta essere **Google Cloud EMEA Limited**.
+Causa: in `create_self_supplier_invoice` l'entity usava `af.supplier_vat_number or supplier.vat_number`,
+cioè il valore inventato dall'AI vinceva su quello in anagrafica.
+**Fix applicato** in `fic_client.py`:
+- nuova funzione `vies_check(vat)` → `True` / `False` / `None` (non verificabile) via
+  `https://ec.europa.eu/taxation_customs/vies/rest-api/ms/{cc}/vat/{num}`
+- l'entity ora preferisce la P.IVA in anagrafica FiC e, se VIES risponde INVALID, **la svuota**
+  (SDI accetta la P.IVA estera vuota — vedi nota 11 — mentre una P.IVA sbagliata rende il
+  documento errato). Stessa validazione anche in `find_or_create_supplier`.
+- il prompt del classificatore ora vieta esplicitamente di indovinare la P.IVA.
+
+P.IVA verificate VALID su VIES (usabili con fiducia): Apple `IE9700053D`, Meta `IE9692928F`,
+Dropbox `IE9852817J`. Da trovare sulla fattura vera: Revolut Payments UAB, Hostinger International.
+
+### 3. Verifica via email scraping non disponibile
+Il token Gmail dell'account **personal** è scaduto (`invalid_grant`) e la maggior parte delle
+ricevute SaaS arriva lì. Rifare `python tools/gmail_oauth_setup.py --account personal` per
+riabilitare il pre-check sulle fatture reali.
+
+### 4. Ambiguità aperte da chiudere sulla fattura vera
+- **Lovable**: in anagrafica FiC è "Lovable Labs Incorporated" con country **Svezia** ma indirizzo
+  **Dover, Delaware (US)**. Trattamento storico incoerente: 10/a US 0%, 25/a Svezia 0%, 33/a e
+  61/a Svezia 22% RC. Se l'emittente reale è l'entità US → va vat_id=10.
+- **Paddle.com Market Ltd (GB)**: 15/a del 2025 usava vat_id=0 (22%), la regola attuale post-Brexit
+  lo tratta come extra-UE → vat_id=10 (65/a). Allineare la scelta con il commercialista.
+
 ## Suppliers duplicati - cosa fare
 Se ti accorgi che FiC ha duplicati (succede se il matching fallisce), usa
 [tools/cleanup_suppliers.py](tools/cleanup_suppliers.py): ne contiene una lista hard-coded

@@ -86,6 +86,12 @@ PRODUCTS_HEADERS = [
     "Prodotto", "Tipo", "N° Vendite", "Revenue Totale (€)", "% Revenue",
 ]
 
+CREATIVE_HEADERS = [
+    "Data", "Campagna", "AdSet", "Annuncio", "Status",
+    "Spend (€)", "Impression", "Click", "CTR (%)", "CPC (€)", "CPM (€)",
+    "Acquisti", "Revenue (€)", "ROAS",
+]
+
 
 def get_gsheets_client() -> gspread.Client:
     if not TOKEN_FILE.exists():
@@ -117,7 +123,8 @@ def ensure_sheets(gc: gspread.Client) -> tuple[Any, Any, Any]:
     daily_ws = get_or_create("Daily Metrics", DAILY_HEADERS)
     orders_ws = get_or_create("Orders Log", ORDERS_HEADERS)
     products_ws = get_or_create("Prodotti", PRODUCTS_HEADERS)
-    return daily_ws, orders_ws, products_ws
+    creative_ws = get_or_create("Creative", CREATIVE_HEADERS)
+    return daily_ws, orders_ws, products_ws, creative_ws
 
 
 def get_existing_dates(ws: Any) -> set[str]:
@@ -167,7 +174,7 @@ def sync(start_date: str, end_date: str, fb_data: dict[str, dict] | None = None)
     # 3. Google Sheets
     print("  → Scrittura su Google Sheets...")
     gc = get_gsheets_client()
-    daily_ws, orders_ws, products_ws = ensure_sheets(gc)
+    daily_ws, orders_ws, products_ws, creative_ws = ensure_sheets(gc)
 
     existing_dates = get_existing_dates(daily_ws)
     existing_order_ids = get_existing_order_ids(orders_ws)
@@ -230,6 +237,75 @@ def sync(start_date: str, end_date: str, fb_data: dict[str, dict] | None = None)
         print(f"     ✓ {len(orders_new_rows)} nuove righe in 'Orders Log'")
     else:
         print("     ✓ 'Orders Log' già aggiornato")
+
+    # ── Tab "Creative" (una riga per ad per giorno) ──
+    existing_creative_keys = set()
+    try:
+        creative_rows_existing = creative_ws.get_all_values()[1:]
+        for r in creative_rows_existing:
+            if len(r) >= 4 and r[0] and r[3]:
+                existing_creative_keys.add(f"{r[0]}|{r[3]}")  # data|ad_name
+    except Exception:
+        pass
+
+    ACCESS_TOKEN = os.environ.get("FB_ACCESS_TOKEN", "")
+    AD_ACCOUNT_ID = os.environ.get("FB_AD_ACCOUNT_ID", "")
+    API_VERSION = "v21.0"
+
+    creative_new_rows = []
+    for d in dates:
+        params = {
+            "access_token": ACCESS_TOKEN,
+            "level": "ad",
+            "time_range": f'{{"since":"{d}","until":"{d}"}}',
+            "fields": "ad_name,adset_name,campaign_name,spend,impressions,clicks,ctr,cpc,cpm,actions,action_values,purchase_roas",
+            "limit": 200,
+        }
+        resp = requests.get(
+            f"https://graph.facebook.com/{API_VERSION}/{AD_ACCOUNT_ID}/insights",
+            params=params,
+        ).json()
+
+        purchase_keys = ("purchase", "offsite_conversion.fb_pixel_purchase", "omni_purchase")
+
+        def _val(lst, keys):
+            for a in (lst or []):
+                if a["action_type"] in keys:
+                    return float(a["value"])
+            return 0
+
+        for ad in resp.get("data", []):
+            key = f"{d}|{ad.get('ad_name','')}"
+            if key in existing_creative_keys:
+                continue
+            spend = float(ad.get("spend", 0))
+            purchases = _val(ad.get("actions", []), purchase_keys)
+            revenue = _val(ad.get("action_values", []), purchase_keys)
+            roas_list = ad.get("purchase_roas", [])
+            roas = float(roas_list[0]["value"]) if roas_list else ""
+            creative_new_rows.append([
+                d,
+                ad.get("campaign_name", ""),
+                ad.get("adset_name", ""),
+                ad.get("ad_name", ""),
+                "",  # Status (non disponibile via insights)
+                round(spend, 2),
+                int(ad.get("impressions", 0)),
+                int(ad.get("clicks", 0)),
+                round(float(ad.get("ctr", 0)), 2),
+                round(float(ad.get("cpc", 0) or 0), 2),
+                round(float(ad.get("cpm", 0) or 0), 2),
+                int(purchases),
+                round(revenue, 2),
+                round(roas, 2) if roas != "" else "",
+            ])
+            existing_creative_keys.add(key)
+
+    if creative_new_rows:
+        creative_ws.append_rows(creative_new_rows, value_input_option="USER_ENTERED")
+        print(f"     ✓ {len(creative_new_rows)} nuove righe in 'Creative'")
+    else:
+        print("     ✓ 'Creative' già aggiornato")
 
     # ── Tab "Prodotti" (riscrive tutto) ──
     product_stats: dict[str, dict] = {}

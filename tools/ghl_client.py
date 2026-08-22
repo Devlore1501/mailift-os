@@ -9,6 +9,7 @@ Variabili .env richieste:
 
 Funzioni esposte:
 - search_contacts_by_email(email)              → list[dict]
+- search_contacts_by_phone(phone)              → list[dict]
 - find_or_create_contact(email, first, last,
     company, source, phone, tags)              → dict (contact)
 - get_contact(contact_id)                      → dict
@@ -116,6 +117,21 @@ def search_contacts_by_email(email: str, limit: int = 5) -> list[dict]:
     return data.get("contacts", [])
 
 
+def search_contacts_by_phone(phone: str, limit: int = 5) -> list[dict]:
+    """Cerca contatti per telefono. Read-only.
+
+    Stesso endpoint di ricerca libera di search_contacts_by_email — matcha
+    anche il telefono, ma qui filtriamo lato client per evitare falsi
+    positivi su substring match del provider.
+    """
+    data = _request(
+        "GET",
+        "/contacts/",
+        params={"locationId": LOCATION_ID, "query": phone, "limit": limit},
+    )
+    return data.get("contacts", [])
+
+
 def get_contact(contact_id: str) -> dict:
     """Ritorna il contatto completo. Read-only."""
     return _request("GET", f"/contacts/{contact_id}").get("contact", {})
@@ -160,10 +176,56 @@ def search_contacts_by_name(query: str, limit: int = 5) -> list[dict]:
     return data.get("contacts", [])
 
 
+def search_contacts_by_tags(
+    include_tags: list[str], exclude_tags: list[str] | None = None, limit: int = 100
+) -> list[dict]:
+    """Cerca contatti che hanno TUTTI gli include_tags e NESSUNO degli exclude_tags.
+    Read-only. Usa POST /contacts/search con filtri su 'tags' (contains/not_contains).
+    Pagina automaticamente con searchAfter finché non esaurisce i risultati o raggiunge `limit`.
+    """
+    filters = [{"field": "tags", "operator": "contains", "value": tag} for tag in include_tags]
+    filters += [
+        {"field": "tags", "operator": "not_contains", "value": tag} for tag in (exclude_tags or [])
+    ]
+
+    contacts: list[dict] = []
+    search_after = None
+    while len(contacts) < limit:
+        payload: dict[str, Any] = {
+            "locationId": LOCATION_ID,
+            "pageLimit": min(100, limit - len(contacts)),
+            "filters": filters,
+        }
+        if search_after:
+            payload["searchAfter"] = search_after
+        data = _request("POST", "/contacts/search", json=payload)
+        page = data.get("contacts", [])
+        if not page:
+            break
+        contacts.extend(page)
+        search_after = page[-1].get("searchAfter")
+        if not search_after or len(page) < payload["pageLimit"]:
+            break
+    return contacts
+
+
 def update_contact(contact_id: str, **fields) -> dict:
     """Aggiorna campi di un contatto esistente. Side-effect."""
     payload = {k: v for k, v in fields.items() if v}
     return _request("PUT", f"/contacts/{contact_id}", json=payload).get("contact", {})
+
+
+def update_custom_field(contact_id: str, field_id: str, value: str) -> dict:
+    """Scrive il valore di un singolo custom field su un contatto. Side-effect.
+
+    Non tocca gli altri custom field del contatto: l'API GHL fa merge per id
+    quando si passa `customFields` in PUT /contacts/{id}.
+    """
+    return _request(
+        "PUT",
+        f"/contacts/{contact_id}",
+        json={"customFields": [{"id": field_id, "value": value}]},
+    ).get("contact", {})
 
 
 def find_or_create_contact(
@@ -175,12 +237,19 @@ def find_or_create_contact(
     source: str = "discovery_call",
     tags: list[str] | None = None,
 ) -> tuple[dict, bool]:
-    """Cerca per email (o nome+azienda se email mancante); se non trovato lo crea.
+    """Cerca per email, poi telefono, poi nome+azienda; se non trovato lo crea.
     Ritorna (contact, was_created)."""
     if email:
         existing = search_contacts_by_email(email)
         for contact in existing:
             if (contact.get("email") or "").lower() == email.lower():
+                return contact, False
+    elif phone:
+        existing = search_contacts_by_phone(phone)
+        normalized = "".join(ch for ch in phone if ch.isdigit())
+        for contact in existing:
+            contact_phone = "".join(ch for ch in (contact.get("phone") or "") if ch.isdigit())
+            if contact_phone and contact_phone[-9:] == normalized[-9:]:
                 return contact, False
     else:
         # fallback: cerca per nome o azienda
@@ -282,6 +351,101 @@ def list_tasks(contact_id: str) -> list[dict]:
     return _request("GET", f"/contacts/{contact_id}/tasks").get("tasks", [])
 
 
+# ─── Custom Fields ─────────────────────────────────────────────────────────
+
+
+def list_custom_fields() -> list[dict]:
+    """Lista tutti i custom field definiti sulla location. Read-only.
+
+    Nota: ritorna solo i campi, non le cartelle. Ogni campo porta il proprio
+    `parentId`: per il nome della cartella serve una GET sul singolo id
+    (vedi get_custom_field).
+    """
+    data = _request("GET", f"/locations/{LOCATION_ID}/customFields")
+    return data.get("customFields", [])
+
+
+def get_custom_field(field_id: str) -> dict:
+    """Ritorna una singola definizione — campo o cartella. Read-only."""
+    return _request("GET", f"/locations/{LOCATION_ID}/customFields/{field_id}").get(
+        "customField", {}
+    )
+
+
+def update_custom_field_definition(field_id: str, **payload) -> dict:
+    """Aggiorna la DEFINIZIONE di un campo (nome, opzioni, posizione). Side-effect.
+
+    Diverso da update_custom_field, che scrive il *valore* su un contatto.
+
+    Attenzione, due vincoli GHL non aggirabili:
+    - `fieldKey` e `dataType` NON sono modificabili dopo la creazione. Per
+      cambiarli serve creare un campo nuovo e migrare i valori.
+    - modificare le `picklistOptions` NON aggiorna il form/survey che alimenta
+      il campo: va rifatto da UI, altrimenti i nuovi invii ricreano valori
+      orfani rispetto alle opzioni.
+
+    Rimuovere un'opzione non cancella i valori già scritti sui contatti: restano
+    lì, semplicemente fuori picklist. Per questo l'ordine sicuro è
+    aggiungi opzione → migra valori → rimuovi opzione vecchia.
+    """
+    return _request(
+        "PUT", f"/locations/{LOCATION_ID}/customFields/{field_id}", json=payload
+    ).get("customField", {})
+
+
+def create_custom_field(
+    name: str,
+    data_type: str = "TEXT",
+    picklist_options: list[str] | None = None,
+    placeholder: str = "",
+) -> dict:
+    """Crea un nuovo custom field sulla location. Side-effect.
+
+    data_type: TEXT | LARGE_TEXT | NUMERICAL | RADIO | SINGLE_OPTIONS |
+               MULTIPLE_OPTIONS | CHECKBOX | DATE | FILE_UPLOAD
+
+    Il `fieldKey` viene derivato dal nome e non sarà più modificabile: scegli
+    un nome definitivo, non uno provvisorio.
+    """
+    payload: dict[str, Any] = {"name": name, "dataType": data_type, "model": "contact"}
+    if picklist_options:
+        payload["options"] = picklist_options
+    if placeholder:
+        payload["placeholder"] = placeholder
+    return _request("POST", f"/locations/{LOCATION_ID}/customFields", json=payload).get(
+        "customField", {}
+    )
+
+
+def delete_custom_field(field_id: str) -> dict:
+    """Cancella un custom field. Side-effect DISTRUTTIVO e non reversibile.
+
+    Cancella anche tutti i valori scritti su tutti i contatti. Usare solo su
+    campi verificati a zero valori (python tools/ghl_fields_audit.py) e senza
+    riferimenti in form, workflow o blueprint Make.
+    """
+    return _request("DELETE", f"/locations/{LOCATION_ID}/customFields/{field_id}")
+
+
+# ─── Conversations / Messages ──────────────────────────────────────────────
+
+
+def get_conversations_for_contact(contact_id: str) -> list[dict]:
+    """Lista le conversazioni (thread email/SMS/WhatsApp) di un contatto. Read-only."""
+    data = _request(
+        "GET",
+        "/conversations/search",
+        params={"locationId": LOCATION_ID, "contactId": contact_id},
+    )
+    return data.get("conversations", [])
+
+
+def get_messages_for_conversation(conversation_id: str) -> list[dict]:
+    """Lista i messaggi di una conversazione. Read-only."""
+    data = _request("GET", f"/conversations/{conversation_id}/messages")
+    return data.get("messages", {}).get("messages", [])
+
+
 # ─── Notes ───────────────────────────────────────────────────────────────────
 
 
@@ -297,6 +461,13 @@ def add_note(contact_id: str, body: str) -> dict:
 def list_notes(contact_id: str) -> list[dict]:
     """Lista le note di un contatto. Read-only."""
     return _request("GET", f"/contacts/{contact_id}/notes").get("notes", [])
+
+
+def update_note(contact_id: str, note_id: str, body: str) -> dict:
+    """Aggiorna il testo di una nota esistente. Side-effect."""
+    return _request(
+        "PUT", f"/contacts/{contact_id}/notes/{note_id}", json={"body": body}
+    ).get("note", {})
 
 
 # ─── Automations (Workflows/Flussi) ──────────────────────────────────────────

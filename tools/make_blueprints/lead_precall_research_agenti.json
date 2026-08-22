@@ -1,0 +1,3115 @@
+{
+ "name": "Mailift — Lead pre-call research AGENTI (agenti AI Make)",
+ "flow": [
+  {
+   "id": 1,
+   "module": "gateway:CustomWebHook",
+   "version": 1,
+   "parameters": {
+    "hook": 3478963,
+    "maxResults": 1
+   },
+   "mapper": {},
+   "metadata": {
+    "designer": {
+     "x": 0,
+     "y": 300,
+     "name": "GHL -> lead da ricercare"
+    },
+    "restore": {
+     "parameters": {
+      "hook": {
+       "data": {
+        "editable": "true"
+       },
+       "label": "ghl scrape"
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "hook",
+      "type": "hook:gateway-webhook",
+      "label": "Webhook",
+      "required": true
+     },
+     {
+      "name": "maxResults",
+      "type": "number",
+      "label": "Maximum number of results"
+     }
+    ],
+    "interface": [
+     {
+      "name": "Altro che hai bisogno di dirci?",
+      "type": "text"
+     },
+     {
+      "name": "UTM Source",
+      "type": "text"
+     },
+     {
+      "name": "In quale settore operi?",
+      "type": "text"
+     },
+     {
+      "name": "Lead Management",
+      "type": "text"
+     },
+     {
+      "name": "Quanto sei soddisfatto del tuo attuale EMAIL MARKETING e dei risultati che porta?",
+      "type": "text"
+     },
+     {
+      "name": "Se sei in linea con i requisiti puoi accedere ad  una consulenza strategica per la spiegazione del report.",
+      "type": "text"
+     },
+     {
+      "name": "Sei un...",
+      "type": "text"
+     },
+     {
+      "name": "link report email",
+      "type": "text"
+     },
+     {
+      "name": "A quanto ammontano attualmente i tuoi ricavi attribuibili all'Email Marketing?",
+      "type": "text"
+     },
+     {
+      "name": "Annuncio (nome)",
+      "type": "text"
+     },
+     {
+      "name": "Chi è attualmente responsabile del tuo EMAIL MARKETING?",
+      "type": "text"
+     },
+     {
+      "name": "Adset (nome)",
+      "type": "text"
+     },
+     {
+      "name": "Message Sent By Bot",
+      "type": "text"
+     },
+     {
+      "name": "Checkbox 5f7o",
+      "type": "text"
+     },
+     {
+      "name": "Campagna (nome)",
+      "type": "text"
+     },
+     {
+      "name": "Stato setting",
+      "type": "text"
+     },
+     {
+      "name": "Lead Automation",
+      "type": "text"
+     },
+     {
+      "name": "Ragione sociale",
+      "type": "text"
+     },
+     {
+      "name": "Frequenza di invio email",
+      "type": "text"
+     },
+     {
+      "name": "Motivazione",
+      "type": "text"
+     },
+     {
+      "name": "Sei già seguit* da un'agenzia in questo momento?",
+      "type": "text"
+     },
+     {
+      "name": "Budget ads mensile",
+      "type": "text"
+     },
+     {
+      "name": "Topic for call",
+      "type": "text"
+     },
+     {
+      "name": "Nome",
+      "type": "text"
+     },
+     {
+      "name": "Dimensione lista email ",
+      "type": "text"
+     },
+     {
+      "name": "logo cliente",
+      "type": "text"
+     },
+     {
+      "name": "Landing URL",
+      "type": "text"
+     },
+     {
+      "name": "N# Di Contatti",
+      "type": "text"
+     },
+     {
+      "name": "Seleziona la descrizione che ti descrive meglio 👇 ",
+      "type": "text"
+     },
+     {
+      "name": "Quale è la grandezza della tua lista?",
+      "type": "text"
+     },
+     {
+      "name": "Per quale motivo hai scelto di scaricare il calcolatore?",
+      "type": "text"
+     },
+     {
+      "name": "Partita iva",
+      "type": "text"
+     },
+     {
+      "name": "Qual è il budget che hai a disposizione per la realizzazione del tuo obiettivo? ",
+      "type": "text"
+     },
+     {
+      "name": "Di cosa si occupa la tua attività nello specifico? Condividi il tuo sito web se possibile.",
+      "type": "text"
+     },
+     {
+      "name": "GPT Assistant Response Message",
+      "type": "text"
+     },
+     {
+      "name": "Quale è il tuo attuale fatturato Mensile? 1",
+      "type": "text"
+     },
+     {
+      "name": "Fatturato ecommerce 1",
+      "type": "text"
+     },
+     {
+      "name": "Motivazione report",
+      "type": "text"
+     },
+     {
+      "name": "Il tuo sito Web?",
+      "type": "text"
+     },
+     {
+      "name": "Type Of Transaction",
+      "type": "text"
+     },
+     {
+      "name": "Txt_Fatturato ecommerce",
+      "type": "text"
+     },
+     {
+      "name": "Flussi automatici esistenti",
+      "type": "text"
+     },
+     {
+      "name": "Spunti di apertura",
+      "type": "text"
+     },
+     {
+      "name": "Codice SDI",
+      "type": "text"
+     },
+     {
+      "name": "UTM Medium",
+      "type": "text"
+     },
+     {
+      "name": "Qual è il tuo obiettivo al momento? Descrivi in maniera specifica.",
+      "type": "text"
+     },
+     {
+      "name": "In quale settore sei?",
+      "type": "text"
+     },
+     {
+      "name": "Classificazione",
+      "type": "text"
+     },
+     {
+      "name": "Fatturato da email in % 1",
+      "type": "text"
+     },
+     {
+      "name": "icebreak cc",
+      "type": "text"
+     },
+     {
+      "name": "Azione Consigliata",
+      "type": "text"
+     },
+     {
+      "name": "Specifica se Altro...",
+      "type": "text"
+     },
+     {
+      "name": "Cognome",
+      "type": "text"
+     },
+     {
+      "name": "Prendiamo seriamente il nostro lavoro e dedichiamo del tempo per questa consulenza, se non ti presenti e sarai puntuale non potrai più prenotare questa consulenza!",
+      "type": "text"
+     },
+     {
+      "name": "I nostri servizi attualmente disponibili vanno da 2000€ a 5000€ mese con setup fee e garanzia di risultato dopo attenta selezione e approvazione. Accetti?",
+      "type": "text"
+     },
+     {
+      "name": "contact_id",
+      "type": "text"
+     },
+     {
+      "name": "first_name",
+      "type": "text"
+     },
+     {
+      "name": "last_name",
+      "type": "text"
+     },
+     {
+      "name": "full_name",
+      "type": "text"
+     },
+     {
+      "name": "email",
+      "type": "text"
+     },
+     {
+      "name": "tags",
+      "type": "text"
+     },
+     {
+      "name": "country",
+      "type": "text"
+     },
+     {
+      "name": "date_created",
+      "type": "text"
+     },
+     {
+      "name": "contact_source",
+      "type": "text"
+     },
+     {
+      "name": "full_address",
+      "type": "text"
+     },
+     {
+      "name": "contact_type",
+      "type": "text"
+     },
+     {
+      "name": "location",
+      "spec": [
+       {
+        "name": "name",
+        "type": "text"
+       },
+       {
+        "name": "address",
+        "type": "text"
+       },
+       {
+        "name": "city",
+        "type": "text"
+       },
+       {
+        "name": "state",
+        "type": "text"
+       },
+       {
+        "name": "country",
+        "type": "text"
+       },
+       {
+        "name": "postalCode",
+        "type": "text"
+       },
+       {
+        "name": "fullAddress",
+        "type": "text"
+       },
+       {
+        "name": "id",
+        "type": "text"
+       }
+      ],
+      "type": "collection"
+     },
+     {
+      "name": "workflow",
+      "spec": [
+       {
+        "name": "id",
+        "type": "text"
+       },
+       {
+        "name": "name",
+        "type": "text"
+       }
+      ],
+      "type": "collection"
+     },
+     {
+      "name": "triggerData",
+      "spec": [],
+      "type": "collection"
+     },
+     {
+      "name": "customData",
+      "spec": [],
+      "type": "collection"
+     }
+    ]
+   }
+  },
+  {
+   "id": 15,
+   "module": "ai-local-agent:RunLocalAIAgent",
+   "version": 0,
+   "parameters": {
+    "makeConnectionId": null
+   },
+   "mapper": {
+    "defaultModel": "claude-haiku-4-5",
+    "promptCaching": "none",
+    "reasoningEffort": "low",
+    "systemPrompt": "Ti do i dati di un lead eCommerce presi dal CRM. Individua il SITO WEB dell'azienda del lead. Guarda il campo sito se compilato, altrimenti cerca un dominio citato in qualunque altro campo (descrizione attivita', note libere, motivazione, classificazione, spunti di apertura). Come ultima risorsa usa il dominio dell'email, ma SOLO se non e' un provider generico (gmail, libero, hotmail, outlook, yahoo, icloud, virgilio, alice, tin). Metti nel campo sito_url l'URL completo che inizia con https://. Se non riesci a determinarlo, scrivi NESSUNO.",
+    "message": "Nome: {{1.full_name}}\nRagione sociale: {{1.`Ragione sociale`}}\nPartita IVA dichiarata: {{1.`Partita iva`}}\nEmail: {{1.email}}\nSito dichiarato: {{1.`Il tuo sito Web?`}}\nSei un: {{1.`Sei un...`}}\nSettore: {{1.`In quale settore sei?`}} {{1.`In quale settore operi?`}}\nFatturato mensile: {{1.`Quale è il tuo attuale fatturato Mensile? 1`}}\nFatturato eCommerce: {{1.`Fatturato ecommerce 1`}}\nDimensione lista email: {{1.`Dimensione lista email `}} {{1.`Quale è la grandezza della tua lista?`}}\nQuota di fatturato da email: {{1.`Fatturato da email in % 1`}}\nRicavi attuali da email: {{1.`A quanto ammontano attualmente i tuoi ricavi attribuibili all'Email Marketing?`}}\nFrequenza di invio: {{1.`Frequenza di invio email`}}\nFlussi automatici esistenti: {{1.`Flussi automatici esistenti`}}\nChi gestisce l'email marketing: {{1.`Chi è attualmente responsabile del tuo EMAIL MARKETING?`}}\nSoddisfazione email marketing: {{1.`Quanto sei soddisfatto del tuo attuale EMAIL MARKETING e dei risultati che porta?`}}\nGia' seguito da un'agenzia: {{1.`Sei già seguit* da un'agenzia in questo momento?`}}\nBudget ads mensile: {{1.`Budget ads mensile`}}\nObiettivo dichiarato: {{1.`Qual è il tuo obiettivo al momento? Descrivi in maniera specifica.`}}\nDescrizione attivita': {{1.`Di cosa si occupa la tua attività nello specifico? Condividi il tuo sito web se possibile.`}}\nPerche' ha scaricato il calcolatore: {{1.`Per quale motivo hai scelto di scaricare il calcolatore?`}}\nNote libere: {{1.`Altro che hai bisogno di dirci?`}}\nCitta' / indirizzo: {{1.full_address}}\nSorgente: {{1.contact_source}} | campagna: {{1.`Campagna (nome)`}}\n\nGIA' PRESENTE SUL CRM (da automazioni precedenti)\nClassificazione: {{1.`Classificazione`}}\nMotivazione: {{1.`Motivazione`}}\nAzione consigliata: {{1.`Azione Consigliata`}}\nSpunti di apertura precedenti: {{1.`Spunti di apertura`}}\nReport email inviato: {{1.`link report email`}}",
+    "files": [],
+    "threadId": "",
+    "modelConfig": {
+     "recursionLimit": "300",
+     "iterationsFromHistoryCount": "10"
+    },
+    "timeout": "",
+    "outputType": "make-schema",
+    "outputSchema": [
+     {
+      "name": "sito_url",
+      "label": "URL del sito",
+      "help": "URL completo con https://, oppure NESSUNO",
+      "type": "text",
+      "default": "",
+      "required": false,
+      "multiline": false
+     }
+    ]
+   },
+   "metadata": {
+    "designer": {
+     "x": 300,
+     "y": 300,
+     "name": "Agente: trova il sito"
+    },
+    "restore": {
+     "parameters": {
+      "makeConnectionId": {
+       "label": "Anthropic Claude",
+       "data": {
+        "scoped": "true",
+        "connection": "anthropic-claude"
+       }
+      }
+     },
+     "expect": {
+      "defaultModel": {
+       "mode": "chose",
+       "label": "Claude Haiku 4.5"
+      },
+      "promptCaching": {
+       "mode": "chose",
+       "label": "Off"
+      },
+      "reasoningEffort": {
+       "mode": "chose",
+       "label": "Low"
+      },
+      "files": {
+       "mode": "chose"
+      },
+      "outputType": {
+       "label": "Data structure"
+      },
+      "outputSchema": {
+       "items": [
+        null
+       ]
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "makeConnectionId",
+      "type": "account:ai-provider,openai-gpt-3,anthropic-claude,gemini-ai-q9zyjp,ai-agent-foundry-openai,ai-agent-foundry-non-openai,mistral-ai,cohere,groq,ai-agent-xai,amazon-bedrock,ai-agent-openai-compatible",
+      "label": "Connection",
+      "required": true
+     }
+    ],
+    "expect": [
+     {
+      "name": "defaultModel",
+      "type": "select",
+      "label": "Model",
+      "required": true
+     },
+     {
+      "name": "promptCaching",
+      "type": "select",
+      "label": "Prompt caching",
+      "validate": {
+       "enum": [
+        "none",
+        "5m",
+        "1h"
+       ]
+      }
+     },
+     {
+      "name": "reasoningEffort",
+      "type": "select",
+      "label": "Reasoning effort",
+      "validate": {
+       "enum": [
+        "low",
+        "medium",
+        "high"
+       ]
+      }
+     },
+     {
+      "name": "systemPrompt",
+      "type": "text",
+      "label": "Instructions"
+     },
+     {
+      "name": "message",
+      "type": "text",
+      "label": "Input",
+      "required": true
+     },
+     {
+      "name": "files",
+      "type": "array",
+      "label": "Input files",
+      "spec": [
+       {
+        "name": "fileName",
+        "type": "filename",
+        "label": "File name",
+        "semantic": "file:name"
+       },
+       {
+        "name": "data",
+        "type": "buffer",
+        "label": "Data",
+        "semantic": "file:data"
+       }
+      ]
+     },
+     {
+      "name": "threadId",
+      "type": "text",
+      "label": "Conversation ID",
+      "validate": {
+       "max": 256
+      }
+     },
+     {
+      "name": "modelConfig",
+      "type": "collection",
+      "label": "Model configuration",
+      "spec": [
+       {
+        "name": "tokenLimit",
+        "type": "hidden",
+        "label": "Max output tokens"
+       },
+       {
+        "name": "recursionLimit",
+        "type": "hidden",
+        "label": "Steps per agent call"
+       },
+       {
+        "name": "iterationsFromHistoryCount",
+        "type": "number",
+        "label": "Maximum conversation history"
+       }
+      ]
+     },
+     {
+      "name": "timeout",
+      "type": "number",
+      "label": "Step timeout",
+      "validate": {
+       "min": 120,
+       "max": 600
+      }
+     },
+     {
+      "name": "outputType",
+      "type": "select",
+      "label": "Response format",
+      "required": true,
+      "validate": {
+       "enum": [
+        "text",
+        "make-schema",
+        "udt-schema"
+       ]
+      }
+     },
+     {
+      "name": "outputSchema",
+      "type": "udtspec",
+      "label": "Response structure",
+      "required": true,
+      "spec": [
+       {
+        "name": "name",
+        "label": "Name",
+        "placeholder": "Enter name",
+        "type": "text",
+        "required": true
+       },
+       {
+        "name": "label",
+        "label": "Label",
+        "type": "text"
+       },
+       {
+        "name": "help",
+        "label": "Description",
+        "type": "text",
+        "placeholder": "Enter description"
+       },
+       {
+        "name": "type",
+        "label": "Type",
+        "type": "udttype",
+        "required": true
+       }
+      ]
+     }
+    ],
+    "advanced": true
+   },
+   "tools": []
+  },
+  {
+   "id": 2,
+   "module": "http:MakeRequest",
+   "version": 4,
+   "parameters": {
+    "tlsType": "",
+    "authenticationType": "noAuth"
+   },
+   "filter": {
+    "name": "contact_id presente",
+    "conditions": [
+     [
+      {
+       "a": "{{1.contact_id}}",
+       "o": "exist"
+      }
+     ]
+    ]
+   },
+   "mapper": {
+    "url": "{{15.jsonResponse.sito_url}}",
+    "method": "get",
+    "headers": [
+     {
+      "name": "User-Agent",
+      "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+     },
+     {
+      "name": "Accept-Language",
+      "value": "it-IT,it;q=0.9,en;q=0.8"
+     },
+     {
+      "name": "Accept",
+      "value": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+     }
+    ],
+    "timeout": "30",
+    "shareCookies": false,
+    "parseResponse": false,
+    "allowRedirects": true,
+    "stopOnHttpError": false,
+    "requestCompressedContent": true
+   },
+   "metadata": {
+    "designer": {
+     "x": 600,
+     "y": 300,
+     "name": "Scrape sito del lead"
+    },
+    "restore": {
+     "expect": {
+      "method": {
+       "mode": "chose",
+       "label": "GET"
+      },
+      "headers": {
+       "mode": "chose",
+       "items": [
+        null,
+        null,
+        null
+       ]
+      },
+      "contentType": {
+       "label": "Empty"
+      },
+      "shareCookies": {
+       "mode": "chose"
+      },
+      "parseResponse": {
+       "mode": "chose"
+      },
+      "allowRedirects": {
+       "mode": "chose"
+      },
+      "queryParameters": {
+       "mode": "chose"
+      },
+      "stopOnHttpError": {
+       "mode": "chose"
+      },
+      "requestCompressedContent": {
+       "mode": "chose"
+      }
+     },
+     "parameters": {
+      "tlsType": {
+       "label": "Empty"
+      },
+      "authenticationType": {
+       "label": "No authenticationUse when no credentials are required for the request."
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "authenticationType",
+      "type": "select",
+      "label": "Authentication type",
+      "required": true,
+      "validate": {
+       "enum": [
+        "noAuth",
+        "apiKey",
+        "basicAuth",
+        "oAuth"
+       ]
+      }
+     },
+     {
+      "name": "tlsType",
+      "type": "select",
+      "label": "Transport layer security (TLS)",
+      "validate": {
+       "enum": [
+        "mTls",
+        "tls"
+       ]
+      }
+     },
+     {
+      "name": "proxyKeychain",
+      "type": "keychain:proxy",
+      "label": "Proxy"
+     }
+    ],
+    "expect": [
+     {
+      "name": "url",
+      "type": "url",
+      "label": "URL",
+      "required": true
+     },
+     {
+      "name": "method",
+      "type": "select",
+      "label": "Method",
+      "required": true,
+      "validate": {
+       "enum": [
+        "get",
+        "head",
+        "post",
+        "put",
+        "patch",
+        "delete",
+        "options"
+       ]
+      }
+     },
+     {
+      "name": "headers",
+      "spec": {
+       "name": "value",
+       "spec": [
+        {
+         "name": "name",
+         "type": "text",
+         "label": "Name",
+         "required": true,
+         "validate": {
+          "pattern": "^[-!#$%&'*+.^_`|~0-9A-Za-z]+$"
+         }
+        },
+        {
+         "name": "value",
+         "type": "text",
+         "label": "Value"
+        }
+       ],
+       "type": "collection",
+       "label": "Header"
+      },
+      "type": "array",
+      "label": "Headers"
+     },
+     {
+      "name": "queryParameters",
+      "spec": {
+       "name": "value",
+       "spec": [
+        {
+         "name": "name",
+         "type": "text",
+         "label": "Name",
+         "required": true
+        },
+        {
+         "name": "value",
+         "type": "text",
+         "label": "Value"
+        }
+       ],
+       "type": "collection",
+       "label": "Parameter"
+      },
+      "type": "array",
+      "label": "Query parameters"
+     },
+     {
+      "name": "contentType",
+      "type": "select",
+      "label": "Body content type",
+      "validate": {
+       "enum": [
+        "json",
+        "multipart",
+        "urlEncoded",
+        "custom"
+       ]
+      }
+     },
+     {
+      "name": "parseResponse",
+      "type": "boolean",
+      "label": "Parse response",
+      "required": true
+     },
+     {
+      "name": "stopOnHttpError",
+      "type": "boolean",
+      "label": "Return error if HTTP request fails",
+      "required": true
+     },
+     {
+      "name": "timeout",
+      "type": "uinteger",
+      "label": "Timeout",
+      "validate": {
+       "max": 300,
+       "min": 1
+      }
+     },
+     {
+      "name": "allowRedirects",
+      "type": "boolean",
+      "label": "Allow redirects",
+      "required": true
+     },
+     {
+      "name": "shareCookies",
+      "type": "boolean",
+      "label": "Share cookies with other HTTP modules",
+      "required": true
+     },
+     {
+      "name": "requestCompressedContent",
+      "type": "boolean",
+      "label": "Request compressed content",
+      "required": true
+     }
+    ],
+    "interface": [
+     {
+      "name": "data",
+      "type": "any",
+      "label": "Data"
+     },
+     {
+      "name": "statusCode",
+      "type": "number",
+      "label": "Status Code"
+     },
+     {
+      "name": "headers",
+      "spec": [
+       {
+        "name": "content-length",
+        "type": "text",
+        "label": "Content-Length"
+       },
+       {
+        "name": "content-encoding",
+        "type": "text",
+        "label": "Content-Encoding"
+       },
+       {
+        "name": "content-type",
+        "type": "text",
+        "label": "Content-Type"
+       },
+       {
+        "name": "server",
+        "type": "text",
+        "label": "Server"
+       },
+       {
+        "name": "cache-control",
+        "type": "text",
+        "label": "Cache-Control"
+       },
+       {
+        "name": "set-cookie",
+        "spec": {
+         "type": "text"
+        },
+        "type": "array",
+        "label": "Set-Cookie"
+       }
+      ],
+      "type": "collection",
+      "label": "Headers"
+     }
+    ]
+   },
+   "onerror": [
+    {
+     "id": 20,
+     "module": "builtin:Resume",
+     "version": 1,
+     "mapper": {
+      "data": "",
+      "statusCode": "0"
+     },
+     "metadata": {
+      "designer": {
+       "x": 900,
+       "y": 600,
+       "name": "Sito irraggiungibile -> continua senza contenuto sito"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "module": "regexp:HTMLToText",
+   "version": 1,
+   "parameters": {},
+   "mapper": {
+    "html": "{{2.data}}",
+    "newline": "lf",
+    "uppercaseHeadings": false
+   },
+   "metadata": {
+    "designer": {
+     "x": 900,
+     "y": 150,
+     "name": "HTML -> testo"
+    },
+    "restore": {
+     "expect": {
+      "newline": {
+       "label": "LF (\\n) - Unix/Mac OS X"
+      }
+     }
+    },
+    "expect": [
+     {
+      "name": "html",
+      "type": "text",
+      "label": "HTML"
+     },
+     {
+      "name": "newline",
+      "type": "select",
+      "label": "Line break",
+      "required": true,
+      "validate": {
+       "enum": [
+        "lf",
+        "crlf",
+        "cr"
+       ]
+      }
+     },
+     {
+      "name": "uppercaseHeadings",
+      "type": "boolean",
+      "label": "Uppercase headings",
+      "required": true
+     }
+    ]
+   }
+  },
+  {
+   "id": 4,
+   "module": "ai-local-agent:RunLocalAIAgent",
+   "version": 0,
+   "parameters": {
+    "makeConnectionId": null
+   },
+   "mapper": {
+    "defaultModel": "claude-sonnet-5",
+    "promptCaching": "none",
+    "reasoningEffort": "medium",
+    "systemPrompt": "Sei un ricercatore che prepara materiale grezzo per una discovery call di Mailift (email marketing per eCommerce DTC italiani).\n\nTi do i dati di un lead. Fai 5-7 ricerche online e riporta SOLO fatti verificati con fonte.\n\nCOSA CERCARE, in ordine:\n1. Chi comanda: titolare / fondatore / AD. Nome e cognome. Cerca: nome azienda + fondatore, + titolare, + intervista, + chi siamo.\n2. LinkedIn del titolare e pagina azienda: ruolo, dipendenti, anzianita'.\n3. Premi, riconoscimenti, certificazioni, menzioni stampa, anniversari, fiere.\n4. Dati societari: partita IVA (di solito nel footer del sito), ragione sociale, forma giuridica, anno di costituzione, sede, ATECO.\n   BILANCI — regole precise, qui si sbaglia facile:\n   - Data di oggi: {{now}}. Cerca sempre il bilancio PIU' RECENTE depositato, non il primo che trovi.\n   - Prova almeno due portali diversi (fatturatoitalia.it, ufficiocamerale.it, reportaziende.it, aziende.it, registroaziende.it) e confronta gli anni.\n   - Per OGNI cifra riporta SEMPRE l'anno di esercizio a cui si riferisce. Una cifra senza anno e' inutilizzabile: se la fonte non dichiara l'anno, scrivi anno non dichiarato.\n   - Riporta anche numero di dipendenti e costo del personale, se disponibili: dicono piu' del fatturato sulla struttura reale.\n   - Chiudi sempre con: anno piu' recente reperibile = X, e se X e' piu' vecchio di due anni rispetto a oggi scrivi esplicitamente che i dati recenti sono dietro paywall camerale.\n5. A cosa tengono: storia del brand, valori, prodotto simbolo, community, cause sostenute.\n6. Settore: 2-3 dinamiche attuali del loro mercato in Italia e 1-2 concorrenti diretti nominati.\n\nPARTITA IVA\nSe la trovi, mettila nel campo partita_iva: undici cifre attaccate, senza punti, spazi o prefisso IT. Un passaggio automatico la usa per interrogare il Registro Imprese. Se non la trovi, scrivi NESSUNA.\n\nNel campo ricerca metti tutto il materiale grezzo raccolto, con le fonti.\n\nREGOLE\n- Mai inventare. Se non trovi, scrivi non trovato.\n- Segnala gli omonimi invece di attribuire dati alla azienda sbagliata.\n- Per ogni fatto: il fatto + la fonte. Niente opinioni, niente consigli, niente dossier: solo materiale grezzo.\n-",
+    "message": "Nome: {{1.full_name}}\nRagione sociale: {{1.`Ragione sociale`}}\nPartita IVA dichiarata: {{1.`Partita iva`}}\nEmail: {{1.email}}\nSito dichiarato: {{1.`Il tuo sito Web?`}}\nSei un: {{1.`Sei un...`}}\nSettore: {{1.`In quale settore sei?`}} {{1.`In quale settore operi?`}}\nFatturato mensile: {{1.`Quale è il tuo attuale fatturato Mensile? 1`}}\nFatturato eCommerce: {{1.`Fatturato ecommerce 1`}}\nDimensione lista email: {{1.`Dimensione lista email `}} {{1.`Quale è la grandezza della tua lista?`}}\nQuota di fatturato da email: {{1.`Fatturato da email in % 1`}}\nRicavi attuali da email: {{1.`A quanto ammontano attualmente i tuoi ricavi attribuibili all'Email Marketing?`}}\nFrequenza di invio: {{1.`Frequenza di invio email`}}\nFlussi automatici esistenti: {{1.`Flussi automatici esistenti`}}\nChi gestisce l'email marketing: {{1.`Chi è attualmente responsabile del tuo EMAIL MARKETING?`}}\nSoddisfazione email marketing: {{1.`Quanto sei soddisfatto del tuo attuale EMAIL MARKETING e dei risultati che porta?`}}\nGia' seguito da un'agenzia: {{1.`Sei già seguit* da un'agenzia in questo momento?`}}\nBudget ads mensile: {{1.`Budget ads mensile`}}\nObiettivo dichiarato: {{1.`Qual è il tuo obiettivo al momento? Descrivi in maniera specifica.`}}\nDescrizione attivita': {{1.`Di cosa si occupa la tua attività nello specifico? Condividi il tuo sito web se possibile.`}}\nPerche' ha scaricato il calcolatore: {{1.`Per quale motivo hai scelto di scaricare il calcolatore?`}}\nNote libere: {{1.`Altro che hai bisogno di dirci?`}}\nCitta' / indirizzo: {{1.full_address}}\nSorgente: {{1.contact_source}} | campagna: {{1.`Campagna (nome)`}}\n\nGIA' PRESENTE SUL CRM (da automazioni precedenti)\nClassificazione: {{1.`Classificazione`}}\nMotivazione: {{1.`Motivazione`}}\nAzione consigliata: {{1.`Azione Consigliata`}}\nSpunti di apertura precedenti: {{1.`Spunti di apertura`}}\nReport email inviato: {{1.`link report email`}}\n\nTESTO DEL SITO (vuoto = sito non raggiungibile)\n{{substring(3.text; 0; 5000)}}",
+    "files": [],
+    "threadId": "",
+    "modelConfig": {
+     "recursionLimit": "300",
+     "iterationsFromHistoryCount": "10"
+    },
+    "timeout": "",
+    "outputType": "make-schema",
+    "outputSchema": [
+     {
+      "name": "ricerca",
+      "label": "Materiale di ricerca",
+      "help": "Tutti i fatti trovati, con le fonti",
+      "type": "text",
+      "default": "",
+      "required": false,
+      "multiline": true
+     },
+     {
+      "name": "partita_iva",
+      "label": "Partita IVA",
+      "help": "11 cifre attaccate oppure NESSUNA",
+      "type": "text",
+      "default": "",
+      "required": false,
+      "multiline": false
+     }
+    ]
+   },
+   "metadata": {
+    "designer": {
+     "x": 1200,
+     "y": 150,
+     "name": "Agente: ricerca online"
+    },
+    "restore": {
+     "parameters": {
+      "makeConnectionId": {
+       "label": "Anthropic Claude",
+       "data": {
+        "scoped": "true",
+        "connection": "anthropic-claude"
+       }
+      }
+     },
+     "expect": {
+      "defaultModel": {
+       "mode": "chose",
+       "label": "Claude Sonnet 5"
+      },
+      "promptCaching": {
+       "mode": "chose",
+       "label": "Off"
+      },
+      "reasoningEffort": {
+       "mode": "chose",
+       "label": "Low"
+      },
+      "files": {
+       "mode": "chose"
+      },
+      "outputType": {
+       "label": "Data structure"
+      },
+      "outputSchema": {
+       "items": [
+        null,
+        null
+       ]
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "makeConnectionId",
+      "type": "account:ai-provider,openai-gpt-3,anthropic-claude,gemini-ai-q9zyjp,ai-agent-foundry-openai,ai-agent-foundry-non-openai,mistral-ai,cohere,groq,ai-agent-xai,amazon-bedrock,ai-agent-openai-compatible",
+      "label": "Connection",
+      "required": true
+     }
+    ],
+    "expect": [
+     {
+      "name": "defaultModel",
+      "type": "select",
+      "label": "Model",
+      "required": true
+     },
+     {
+      "name": "promptCaching",
+      "type": "select",
+      "label": "Prompt caching",
+      "validate": {
+       "enum": [
+        "none",
+        "5m",
+        "1h"
+       ]
+      }
+     },
+     {
+      "name": "reasoningEffort",
+      "type": "select",
+      "label": "Reasoning effort",
+      "validate": {
+       "enum": [
+        "low",
+        "medium",
+        "high"
+       ]
+      }
+     },
+     {
+      "name": "systemPrompt",
+      "type": "text",
+      "label": "Instructions"
+     },
+     {
+      "name": "message",
+      "type": "text",
+      "label": "Input",
+      "required": true
+     },
+     {
+      "name": "files",
+      "type": "array",
+      "label": "Input files",
+      "spec": [
+       {
+        "name": "fileName",
+        "type": "filename",
+        "label": "File name",
+        "semantic": "file:name"
+       },
+       {
+        "name": "data",
+        "type": "buffer",
+        "label": "Data",
+        "semantic": "file:data"
+       }
+      ]
+     },
+     {
+      "name": "threadId",
+      "type": "text",
+      "label": "Conversation ID",
+      "validate": {
+       "max": 256
+      }
+     },
+     {
+      "name": "modelConfig",
+      "type": "collection",
+      "label": "Model configuration",
+      "spec": [
+       {
+        "name": "tokenLimit",
+        "type": "hidden",
+        "label": "Max output tokens"
+       },
+       {
+        "name": "recursionLimit",
+        "type": "hidden",
+        "label": "Steps per agent call"
+       },
+       {
+        "name": "iterationsFromHistoryCount",
+        "type": "number",
+        "label": "Maximum conversation history"
+       }
+      ]
+     },
+     {
+      "name": "timeout",
+      "type": "number",
+      "label": "Step timeout",
+      "validate": {
+       "min": 120,
+       "max": 600
+      }
+     },
+     {
+      "name": "outputType",
+      "type": "select",
+      "label": "Response format",
+      "required": true,
+      "validate": {
+       "enum": [
+        "text",
+        "make-schema",
+        "udt-schema"
+       ]
+      }
+     },
+     {
+      "name": "outputSchema",
+      "type": "udtspec",
+      "label": "Response structure",
+      "required": true,
+      "spec": [
+       {
+        "name": "name",
+        "label": "Name",
+        "placeholder": "Enter name",
+        "type": "text",
+        "required": true
+       },
+       {
+        "name": "label",
+        "label": "Label",
+        "type": "text"
+       },
+       {
+        "name": "help",
+        "label": "Description",
+        "type": "text",
+        "placeholder": "Enter description"
+       },
+       {
+        "name": "type",
+        "label": "Type",
+        "type": "udttype",
+        "required": true
+       }
+      ]
+     }
+    ],
+    "advanced": true
+   },
+   "tools": [
+    {
+     "name": "Ricerca web",
+     "description": "Cerca sul web informazioni su aziende, persone, settori. Passa una domanda specifica.",
+     "flow": [
+      {
+       "id": 3,
+       "module": "make-ai-web-search:generateAResponse",
+       "version": 1,
+       "parameters": {},
+       "mapper": {
+        "input": "",
+        "parseJson": false,
+        "user_location": {
+         "type": "approximate",
+         "country": "it"
+        }
+       },
+       "metadata": {
+        "designer": {
+         "x": 900,
+         "y": 900,
+         "name": "Ricerca web"
+        },
+        "restore": {
+         "expect": {
+          "parseJson": {
+           "mode": "chose"
+          },
+          "user_location": {
+           "nested": {
+            "country": {
+             "mode": "chose"
+            },
+            "timezone": {
+             "mode": "chose",
+             "label": "Empty"
+            }
+           }
+          }
+         }
+        },
+        "expect": [
+         {
+          "name": "input",
+          "type": "text",
+          "label": "Text",
+          "required": true
+         },
+         {
+          "name": "parseJson",
+          "type": "boolean",
+          "label": "Parse JSON in response",
+          "required": true
+         },
+         {
+          "name": "user_location",
+          "spec": [
+           {
+            "name": "type",
+            "type": "hidden"
+           },
+           {
+            "name": "city",
+            "type": "text",
+            "label": "City"
+           },
+           {
+            "name": "country",
+            "type": "select",
+            "label": "Country"
+           },
+           {
+            "name": "region",
+            "type": "text",
+            "label": "Region"
+           },
+           {
+            "name": "timezone",
+            "type": "select",
+            "label": "Timezone"
+           }
+          ],
+          "type": "collection",
+          "label": "User Location"
+         }
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 12,
+   "module": "http:MakeRequest",
+   "version": 4,
+   "parameters": {
+    "tlsType": "",
+    "authenticationType": "noAuth"
+   },
+   "mapper": {
+    "url": "https://company.openapi.com/IT-advanced/{{ifempty(1.`Partita iva`; 4.jsonResponse.partita_iva)}}",
+    "method": "get",
+    "headers": [
+     {
+      "name": "Authorization",
+      "value": "Bearer INSERISCI_OPENAPI_TOKEN"
+     }
+    ],
+    "timeout": "60",
+    "shareCookies": false,
+    "parseResponse": false,
+    "allowRedirects": true,
+    "stopOnHttpError": false,
+    "requestCompressedContent": true
+   },
+   "metadata": {
+    "designer": {
+     "x": 2400,
+     "y": 150,
+     "name": "openapi.it: dati camerali ufficiali"
+    },
+    "restore": {
+     "expect": {
+      "method": {
+       "mode": "chose",
+       "label": "GET"
+      },
+      "headers": {
+       "mode": "chose",
+       "items": [
+        null
+       ]
+      },
+      "contentType": {
+       "label": "Empty"
+      },
+      "shareCookies": {
+       "mode": "chose"
+      },
+      "parseResponse": {
+       "mode": "chose"
+      },
+      "allowRedirects": {
+       "mode": "chose"
+      },
+      "queryParameters": {
+       "mode": "chose"
+      },
+      "stopOnHttpError": {
+       "mode": "chose"
+      },
+      "requestCompressedContent": {
+       "mode": "chose"
+      }
+     },
+     "parameters": {
+      "tlsType": {
+       "label": "Empty"
+      },
+      "authenticationType": {
+       "label": "No authenticationUse when no credentials are required for the request."
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "authenticationType",
+      "type": "select",
+      "label": "Authentication type",
+      "required": true,
+      "validate": {
+       "enum": [
+        "noAuth",
+        "apiKey",
+        "basicAuth",
+        "oAuth"
+       ]
+      }
+     },
+     {
+      "name": "tlsType",
+      "type": "select",
+      "label": "Transport layer security (TLS)",
+      "validate": {
+       "enum": [
+        "mTls",
+        "tls"
+       ]
+      }
+     },
+     {
+      "name": "proxyKeychain",
+      "type": "keychain:proxy",
+      "label": "Proxy"
+     }
+    ],
+    "expect": [
+     {
+      "name": "url",
+      "type": "url",
+      "label": "URL",
+      "required": true
+     },
+     {
+      "name": "method",
+      "type": "select",
+      "label": "Method",
+      "required": true,
+      "validate": {
+       "enum": [
+        "get",
+        "head",
+        "post",
+        "put",
+        "patch",
+        "delete",
+        "options"
+       ]
+      }
+     },
+     {
+      "name": "headers",
+      "spec": {
+       "name": "value",
+       "spec": [
+        {
+         "name": "name",
+         "type": "text",
+         "label": "Name",
+         "required": true,
+         "validate": {
+          "pattern": "^[-!#$%&'*+.^_`|~0-9A-Za-z]+$"
+         }
+        },
+        {
+         "name": "value",
+         "type": "text",
+         "label": "Value"
+        }
+       ],
+       "type": "collection",
+       "label": "Header"
+      },
+      "type": "array",
+      "label": "Headers"
+     },
+     {
+      "name": "queryParameters",
+      "spec": {
+       "name": "value",
+       "spec": [
+        {
+         "name": "name",
+         "type": "text",
+         "label": "Name",
+         "required": true
+        },
+        {
+         "name": "value",
+         "type": "text",
+         "label": "Value"
+        }
+       ],
+       "type": "collection",
+       "label": "Parameter"
+      },
+      "type": "array",
+      "label": "Query parameters"
+     },
+     {
+      "name": "contentType",
+      "type": "select",
+      "label": "Body content type",
+      "validate": {
+       "enum": [
+        "json",
+        "multipart",
+        "urlEncoded",
+        "custom"
+       ]
+      }
+     },
+     {
+      "name": "parseResponse",
+      "type": "boolean",
+      "label": "Parse response",
+      "required": true
+     },
+     {
+      "name": "stopOnHttpError",
+      "type": "boolean",
+      "label": "Return error if HTTP request fails",
+      "required": true
+     },
+     {
+      "name": "timeout",
+      "type": "uinteger",
+      "label": "Timeout",
+      "validate": {
+       "max": 300,
+       "min": 1
+      }
+     },
+     {
+      "name": "allowRedirects",
+      "type": "boolean",
+      "label": "Allow redirects",
+      "required": true
+     },
+     {
+      "name": "shareCookies",
+      "type": "boolean",
+      "label": "Share cookies with other HTTP modules",
+      "required": true
+     },
+     {
+      "name": "requestCompressedContent",
+      "type": "boolean",
+      "label": "Request compressed content",
+      "required": true
+     }
+    ],
+    "interface": [
+     {
+      "name": "data",
+      "type": "any",
+      "label": "Data"
+     },
+     {
+      "name": "statusCode",
+      "type": "number",
+      "label": "Status Code"
+     },
+     {
+      "name": "headers",
+      "spec": [
+       {
+        "name": "content-length",
+        "type": "text",
+        "label": "Content-Length"
+       },
+       {
+        "name": "content-encoding",
+        "type": "text",
+        "label": "Content-Encoding"
+       },
+       {
+        "name": "content-type",
+        "type": "text",
+        "label": "Content-Type"
+       },
+       {
+        "name": "server",
+        "type": "text",
+        "label": "Server"
+       },
+       {
+        "name": "cache-control",
+        "type": "text",
+        "label": "Cache-Control"
+       },
+       {
+        "name": "set-cookie",
+        "spec": {
+         "type": "text"
+        },
+        "type": "array",
+        "label": "Set-Cookie"
+       }
+      ],
+      "type": "collection",
+      "label": "Headers"
+     }
+    ]
+   },
+   "onerror": [
+    {
+     "id": 30,
+     "module": "builtin:Resume",
+     "version": 1,
+     "mapper": {
+      "data": "",
+      "statusCode": "0"
+     },
+     "metadata": {
+      "designer": {
+       "x": 2700,
+       "y": 300,
+       "name": "P.IVA assente -> prosegui senza dati camerali"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "module": "ai-local-agent:RunLocalAIAgent",
+   "version": 0,
+   "parameters": {
+    "makeConnectionId": null
+   },
+   "mapper": {
+    "defaultModel": "claude-sonnet-5",
+    "promptCaching": "none",
+    "reasoningEffort": "medium",
+    "systemPrompt": "Sei l'analista pre-call di Mailift, agenzia italiana di email marketing per eCommerce DTC su Shopify + Klaviyo.\n\nRicevi: i dati del form GHL, il testo del sito del lead, e il materiale di ricerca online gia' raccolto da un altro agente. Scrivi il dossier che Lorenzo legge nei 3 minuti prima della discovery call.\n\nICP Mailift: eCommerce DTC italiano, 25k-300k euro/mese, Shopify + Klaviyo, margine 50%+, owner volto del brand, decision-maker unico.\nAnti-pattern da segnalare sempre: margine sottile, decisione a piu' teste o soci, altro operatore marketing gia' dentro, B2B puro, volume basso.\n\nFONTE UFFICIALE\nSe il blocco DATI CAMERALI UFFICIALI non e' vuoto contiene il JSON del Registro Imprese (via openapi.it): ragione sociale, forma giuridica, sede, ATECO, capitale, PEC, codice SdI, dipendenti, storico di ricavi e utili fino a 7 esercizi, soci con quota rilevante.\nE' la fonte piu' attendibile che hai: vince su qualunque portale terzo, e se i due divergono segnali la discrepanza.\nDallo storico prendi SEMPRE l'esercizio piu' recente presente, e se ci sono almeno tre anni descrivi la direzione (in crescita, stabile, in calo) con le cifre.\nElenca i soci con la loro quota: e' il modo piu' diretto per sapere se la decisione e' a una testa sola.\nSe il blocco e' vuoto, dillo: dati camerali non recuperati, e usa quello che ha trovato la ricerca.\n\nREGOLE FERREE\n- Usa SOLO quello che ti e' stato passato. Non inventare, non aggiungere. Se un dato manca: non trovato.\n- Distingui: dichiarato dal LEAD (form) / osservato sul SITO / trovato ONLINE.\n- Il fit ICP e' una stima pre-call, non una classificazione ufficiale.\n- BILANCI: ogni cifra va scritta con il suo anno di esercizio attaccato. Se il dato e' piu' vecchio di due anni, aggiungi subito dopo: dato vecchio di N anni, non e' la fotografia di oggi. Non usare mai un bilancio vecchio per concludere qualcosa sul presente: usalo per capire la struttura (marginalita', dipendenti, ordine di grandezza).\n- CONTROLLO INCROCIATO obbligatorio: confronta il fatturato dichiarato nel form (mensile x 12) con quello camerale. Se divergono di oltre il 30 per cento, mettilo tra le domande per la call: puo' voler dire che il dichiarato e' solo l'eCommerce mentre il camerale include il negozio fisico, oppure che l'azienda e' cresciuta o calata. Non dare per scontato quale delle due.\n- Italiano, asciutto, zero fuffa, niente complimenti.\n\nDUE OUTPUT, stessa analisi in due forme.\n\nCampo dossier_testo — finisce in una nota di GoHighLevel, che NON interpreta il markdown: i simboli resterebbero visibili.\n- niente cancelletti, asterischi, trattini bassi, backtick\n- titoli di sezione in MAIUSCOLO, preceduti da una riga vuota\n- elenchi con il trattino medio a inizio riga\n- righe di 60 trattini per separare le sezioni principali\n\nCampo dossier_html — stesso contenuto, per la stampa in PDF. Frammento HTML da mettere dentro il body, senza doctype, html, head, body.\n- titolo in <h1>, sezioni in <h2>, elenchi in <ul><li>, domande numerate in <ol><li>\n- la riga di sintesi iniziale in <p class=lead>\n- Fit ICP e Red flag avvolti in <div class=alert>\n- avvisi di dato vecchio o non verificato in <span class=warn>, fonti tra parentesi quadre in <span class=src>\n- MAI attributi style, script, immagini o link: il foglio di stile e' gia' pronto e usa solo queste classi\n- MAI virgolette doppie: gli attributi vanno senza virgolette, per esempio <p class=lead>\n\nStruttura:\n\n# Dossier pre-call — [Azienda]\n\n**In una riga**: [chi sono e qual e' il problema email piu' probabile]\n\n## Chi comanda\n- [titolare, ruolo, da quanto, LinkedIn, altri soci — o non trovato]\n\n## Azienda (dati verificati)\n- Ragione sociale / P.IVA / sede / anno / ATECO: … [fonte]\n- Numeri pubblici: fatturato ANNO X: … | utile ANNO X: … | dipendenti: … [fonte]\n\n## Cosa dichiara il lead (form)\n- [4-6 bullet]\n\n## Cosa dice il sito\n- Piattaforma: … | ESP: … | Popup/optin: …\n- Prodotti e fascia prezzo: … | Social proof: … | Social: …\n\n## Trovato online\n- Premi e riconoscimenti: …\n- Stampa e menzioni: …\n- A cosa tengono: …\n\n## Il loro settore adesso\n- [2-3 dinamiche + concorrenti diretti]\n\n## Fit ICP preliminare\n[probabile HOT / WARM / COLD / info insufficiente] — [2 righe]\n\n## Red flag da verificare in call\n- […]\n\n## 5 domande da fare in call\n1. …\n\n## Spunto di apertura\n[una frase che dimostra che li hai studiati davvero]\n\n## Ipotesi di revenue leak\n[dove sta il buco piu' probabile, ragionamento in 2 righe]",
+    "message": "Nome: {{1.full_name}}\nRagione sociale: {{1.`Ragione sociale`}}\nPartita IVA dichiarata: {{1.`Partita iva`}}\nEmail: {{1.email}}\nSito dichiarato: {{1.`Il tuo sito Web?`}}\nSei un: {{1.`Sei un...`}}\nSettore: {{1.`In quale settore sei?`}} {{1.`In quale settore operi?`}}\nFatturato mensile: {{1.`Quale è il tuo attuale fatturato Mensile? 1`}}\nFatturato eCommerce: {{1.`Fatturato ecommerce 1`}}\nDimensione lista email: {{1.`Dimensione lista email `}} {{1.`Quale è la grandezza della tua lista?`}}\nQuota di fatturato da email: {{1.`Fatturato da email in % 1`}}\nRicavi attuali da email: {{1.`A quanto ammontano attualmente i tuoi ricavi attribuibili all'Email Marketing?`}}\nFrequenza di invio: {{1.`Frequenza di invio email`}}\nFlussi automatici esistenti: {{1.`Flussi automatici esistenti`}}\nChi gestisce l'email marketing: {{1.`Chi è attualmente responsabile del tuo EMAIL MARKETING?`}}\nSoddisfazione email marketing: {{1.`Quanto sei soddisfatto del tuo attuale EMAIL MARKETING e dei risultati che porta?`}}\nGia' seguito da un'agenzia: {{1.`Sei già seguit* da un'agenzia in questo momento?`}}\nBudget ads mensile: {{1.`Budget ads mensile`}}\nObiettivo dichiarato: {{1.`Qual è il tuo obiettivo al momento? Descrivi in maniera specifica.`}}\nDescrizione attivita': {{1.`Di cosa si occupa la tua attività nello specifico? Condividi il tuo sito web se possibile.`}}\nPerche' ha scaricato il calcolatore: {{1.`Per quale motivo hai scelto di scaricare il calcolatore?`}}\nNote libere: {{1.`Altro che hai bisogno di dirci?`}}\nCitta' / indirizzo: {{1.full_address}}\nSorgente: {{1.contact_source}} | campagna: {{1.`Campagna (nome)`}}\n\nGIA' PRESENTE SUL CRM (da automazioni precedenti)\nClassificazione: {{1.`Classificazione`}}\nMotivazione: {{1.`Motivazione`}}\nAzione consigliata: {{1.`Azione Consigliata`}}\nSpunti di apertura precedenti: {{1.`Spunti di apertura`}}\nReport email inviato: {{1.`link report email`}}\n\nTESTO DEL SITO\n{{substring(3.text; 0; 5000)}}\n\nMATERIALE DI RICERCA ONLINE\n{{4.jsonResponse.ricerca}}\n\nDATI CAMERALI UFFICIALI (JSON Registro Imprese; vuoto = non recuperati)\n{{12.data}}",
+    "files": [],
+    "threadId": "",
+    "modelConfig": {
+     "recursionLimit": "300",
+     "iterationsFromHistoryCount": "10"
+    },
+    "timeout": "",
+    "outputType": "make-schema",
+    "outputSchema": [
+     {
+      "name": "dossier_testo",
+      "label": "Dossier (testo)",
+      "help": "Per la nota GHL, senza markdown",
+      "type": "text",
+      "default": "",
+      "required": false,
+      "multiline": true
+     },
+     {
+      "name": "dossier_html",
+      "label": "Dossier (HTML)",
+      "help": "Frammento HTML su una riga, senza virgolette doppie",
+      "type": "text",
+      "default": "",
+      "required": false,
+      "multiline": true
+     }
+    ]
+   },
+   "metadata": {
+    "designer": {
+     "x": 2700,
+     "y": 150,
+     "name": "Agente: scrivi il dossier"
+    },
+    "restore": {
+     "parameters": {
+      "makeConnectionId": {
+       "label": "Anthropic Claude",
+       "data": {
+        "scoped": "true",
+        "connection": "anthropic-claude"
+       }
+      }
+     },
+     "expect": {
+      "defaultModel": {
+       "mode": "chose",
+       "label": "Claude Sonnet 5"
+      },
+      "promptCaching": {
+       "mode": "chose",
+       "label": "Off"
+      },
+      "reasoningEffort": {
+       "mode": "chose",
+       "label": "Low"
+      },
+      "files": {
+       "mode": "chose"
+      },
+      "outputType": {
+       "label": "Data structure"
+      },
+      "outputSchema": {
+       "items": [
+        null,
+        null
+       ]
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "makeConnectionId",
+      "type": "account:ai-provider,openai-gpt-3,anthropic-claude,gemini-ai-q9zyjp,ai-agent-foundry-openai,ai-agent-foundry-non-openai,mistral-ai,cohere,groq,ai-agent-xai,amazon-bedrock,ai-agent-openai-compatible",
+      "label": "Connection",
+      "required": true
+     }
+    ],
+    "expect": [
+     {
+      "name": "defaultModel",
+      "type": "select",
+      "label": "Model",
+      "required": true
+     },
+     {
+      "name": "promptCaching",
+      "type": "select",
+      "label": "Prompt caching",
+      "validate": {
+       "enum": [
+        "none",
+        "5m",
+        "1h"
+       ]
+      }
+     },
+     {
+      "name": "reasoningEffort",
+      "type": "select",
+      "label": "Reasoning effort",
+      "validate": {
+       "enum": [
+        "low",
+        "medium",
+        "high"
+       ]
+      }
+     },
+     {
+      "name": "systemPrompt",
+      "type": "text",
+      "label": "Instructions"
+     },
+     {
+      "name": "message",
+      "type": "text",
+      "label": "Input",
+      "required": true
+     },
+     {
+      "name": "files",
+      "type": "array",
+      "label": "Input files",
+      "spec": [
+       {
+        "name": "fileName",
+        "type": "filename",
+        "label": "File name",
+        "semantic": "file:name"
+       },
+       {
+        "name": "data",
+        "type": "buffer",
+        "label": "Data",
+        "semantic": "file:data"
+       }
+      ]
+     },
+     {
+      "name": "threadId",
+      "type": "text",
+      "label": "Conversation ID",
+      "validate": {
+       "max": 256
+      }
+     },
+     {
+      "name": "modelConfig",
+      "type": "collection",
+      "label": "Model configuration",
+      "spec": [
+       {
+        "name": "tokenLimit",
+        "type": "hidden",
+        "label": "Max output tokens"
+       },
+       {
+        "name": "recursionLimit",
+        "type": "hidden",
+        "label": "Steps per agent call"
+       },
+       {
+        "name": "iterationsFromHistoryCount",
+        "type": "number",
+        "label": "Maximum conversation history"
+       }
+      ]
+     },
+     {
+      "name": "timeout",
+      "type": "number",
+      "label": "Step timeout",
+      "validate": {
+       "min": 120,
+       "max": 600
+      }
+     },
+     {
+      "name": "outputType",
+      "type": "select",
+      "label": "Response format",
+      "required": true,
+      "validate": {
+       "enum": [
+        "text",
+        "make-schema",
+        "udt-schema"
+       ]
+      }
+     },
+     {
+      "name": "outputSchema",
+      "type": "udtspec",
+      "label": "Response structure",
+      "required": true,
+      "spec": [
+       {
+        "name": "name",
+        "label": "Name",
+        "placeholder": "Enter name",
+        "type": "text",
+        "required": true
+       },
+       {
+        "name": "label",
+        "label": "Label",
+        "type": "text"
+       },
+       {
+        "name": "help",
+        "label": "Description",
+        "type": "text",
+        "placeholder": "Enter description"
+       },
+       {
+        "name": "type",
+        "label": "Type",
+        "type": "udttype",
+        "required": true
+       }
+      ]
+     }
+    ],
+    "advanced": true
+   },
+   "tools": []
+  },
+  {
+   "id": 23,
+   "module": "highlevel:addNotetoContact",
+   "version": 1,
+   "parameters": {
+    "__IMTCONN__": 3250712
+   },
+   "mapper": {
+    "body": "{{7.jsonResponse.dossier_testo}}",
+    "userId": "a6q5UoMUJNI31KccBJP4",
+    "contactId": "{{1.contact_id}}"
+   },
+   "metadata": {
+    "designer": {
+     "x": 3000,
+     "y": 0,
+     "name": "GHL: scrivi nota dossier"
+    },
+    "restore": {
+     "expect": {
+      "userId": {
+       "mode": "chose",
+       "label": "Lorenzo Baretta"
+      },
+      "contactId": {
+       "mode": "edit"
+      }
+     },
+     "parameters": {
+      "__IMTCONN__": {
+       "data": {
+        "scoped": "true",
+        "connection": "highlevel3"
+       },
+       "label": "mailift (Location: baretta's Account)"
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "__IMTCONN__",
+      "type": "account:highlevel,highlevel3",
+      "label": "Connection",
+      "required": true
+     }
+    ],
+    "expect": [
+     {
+      "name": "contactId",
+      "type": "select",
+      "label": "Contact ID",
+      "required": true
+     },
+     {
+      "name": "body",
+      "type": "text",
+      "label": "Body",
+      "required": true
+     },
+     {
+      "name": "userId",
+      "type": "select",
+      "label": "User ID"
+     }
+    ]
+   }
+  },
+  {
+   "id": 13,
+   "module": "ai-local-agent:RunLocalAIAgent",
+   "version": 0,
+   "parameters": {
+    "makeConnectionId": null
+   },
+   "mapper": {
+    "defaultModel": "claude-haiku-4-5",
+    "promptCaching": "none",
+    "reasoningEffort": "low",
+    "systemPrompt": "Trasformi il JSON del Registro Imprese (openapi.it, servizio IT-advanced) nei campi personalizzati di un contatto GoHighLevel. Non scrivi prosa: produci solo dati.\n\nI nomi dei campi nella risposta openapi sono: vatCode, taxCode, companyName, pec, sdiCode, detailedLegalForm.description, atecoClassification.ateco.code e .description, address.registeredOffice (streetName, zipCode, town, province.code), shareCapital, employees.employee, balanceSheets.all[] (year, turnover, netWorth), shareHolders[] (companyName, percentShare). Se la struttura reale differisce, adattati: cerca il dato per significato, non per posizione.\n\nMAPPATURA — usa esattamente questi id:\nXFYCqGHXHkdL1ktCrdG2 = partita IVA (vatCode, solo le 11 cifre)\nL3O4mX5GZ3GGg4Hc2KxO = ragione sociale (companyName, esattamente come da Registro)\njdxxW9O3MlXY3hqgt9sx = codice SDI (sdiCode)\nYkYL4kGVFVxqXkcQuk5B = PEC (pec)\nBPx4u5COUnJycDG97IdB = sede legale, formato: Via Nazionale 228, 98050 Terme Vigliatore (ME)\nxTsbqXw3s1jvXQw3pS81 = soci e quote, formato: Mario Rossi 60%, Anna Bianchi 40% — massimo 5, dal piu' grande al piu' piccolo\nwI9sRvNbUyeGw9StkM8V = fatturato camerale, formato: 600.449 EUR (2022) - utile 4.964 EUR — usa SEMPRE l'esercizio piu' recente presente e scrivi l'anno tra parentesi\n54SM8YT53PkDr5PH7pqq = dati camerali, riassunto denso su piu' righe: forma giuridica, ATECO con descrizione, capitale sociale, dipendenti, e lo storico degli ultimi 3 esercizi disponibili (anno: ricavi, utile)\n\nREGOLE FERREE\n- Un campo il cui dato manca nel JSON va OMESSO del tutto. Mai scrivere non disponibile, non trovato, N/D o stringhe vuote: questi campi finiscono nei contratti, un placeholder li sporca.\n- Non inventare e non arrotondare: riporta le cifre come stanno.\n- Importi: cifre con separatore delle migliaia e la sigla EUR, mai il simbolo di valuta.\n- Se il JSON e' vuoto, malformato o e' un errore di autenticazione, non produrre nessun elemento.\n\nFORMATO\nNel campo campi metti SOLO gli elementi dell'array customFields, separati da virgola, ognuno nella forma {\"id\": \"...\", \"value\": \"...\"} — niente parentesi quadre, niente virgola finale, nessun commento. Se non c'e' nessun dato, lascia il campo vuoto.",
+    "message": "JSON REGISTRO IMPRESE\n{{12.data}}",
+    "files": [],
+    "threadId": "",
+    "modelConfig": {
+     "recursionLimit": "300",
+     "iterationsFromHistoryCount": "10"
+    },
+    "timeout": "",
+    "outputType": "make-schema",
+    "outputSchema": [
+     {
+      "name": "campi",
+      "label": "Elementi customFields",
+      "help": "Oggetti {id,value} separati da virgola",
+      "type": "text",
+      "default": "",
+      "required": false,
+      "multiline": true
+     }
+    ]
+   },
+   "metadata": {
+    "designer": {
+     "x": 3000,
+     "y": 150,
+     "name": "Agente: mappa i dati fiscali"
+    },
+    "restore": {
+     "parameters": {
+      "makeConnectionId": {
+       "label": "Anthropic Claude",
+       "data": {
+        "scoped": "true",
+        "connection": "anthropic-claude"
+       }
+      }
+     },
+     "expect": {
+      "defaultModel": {
+       "mode": "chose",
+       "label": "Claude Haiku 4.5"
+      },
+      "promptCaching": {
+       "mode": "chose",
+       "label": "Off"
+      },
+      "reasoningEffort": {
+       "mode": "chose",
+       "label": "Low"
+      },
+      "files": {
+       "mode": "chose"
+      },
+      "outputType": {
+       "label": "Data structure"
+      },
+      "outputSchema": {
+       "items": [
+        null
+       ]
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "makeConnectionId",
+      "type": "account:ai-provider,openai-gpt-3,anthropic-claude,gemini-ai-q9zyjp,ai-agent-foundry-openai,ai-agent-foundry-non-openai,mistral-ai,cohere,groq,ai-agent-xai,amazon-bedrock,ai-agent-openai-compatible",
+      "label": "Connection",
+      "required": true
+     }
+    ],
+    "expect": [
+     {
+      "name": "defaultModel",
+      "type": "select",
+      "label": "Model",
+      "required": true
+     },
+     {
+      "name": "promptCaching",
+      "type": "select",
+      "label": "Prompt caching",
+      "validate": {
+       "enum": [
+        "none",
+        "5m",
+        "1h"
+       ]
+      }
+     },
+     {
+      "name": "reasoningEffort",
+      "type": "select",
+      "label": "Reasoning effort",
+      "validate": {
+       "enum": [
+        "low",
+        "medium",
+        "high"
+       ]
+      }
+     },
+     {
+      "name": "systemPrompt",
+      "type": "text",
+      "label": "Instructions"
+     },
+     {
+      "name": "message",
+      "type": "text",
+      "label": "Input",
+      "required": true
+     },
+     {
+      "name": "files",
+      "type": "array",
+      "label": "Input files",
+      "spec": [
+       {
+        "name": "fileName",
+        "type": "filename",
+        "label": "File name",
+        "semantic": "file:name"
+       },
+       {
+        "name": "data",
+        "type": "buffer",
+        "label": "Data",
+        "semantic": "file:data"
+       }
+      ]
+     },
+     {
+      "name": "threadId",
+      "type": "text",
+      "label": "Conversation ID",
+      "validate": {
+       "max": 256
+      }
+     },
+     {
+      "name": "modelConfig",
+      "type": "collection",
+      "label": "Model configuration",
+      "spec": [
+       {
+        "name": "tokenLimit",
+        "type": "hidden",
+        "label": "Max output tokens"
+       },
+       {
+        "name": "recursionLimit",
+        "type": "hidden",
+        "label": "Steps per agent call"
+       },
+       {
+        "name": "iterationsFromHistoryCount",
+        "type": "number",
+        "label": "Maximum conversation history"
+       }
+      ]
+     },
+     {
+      "name": "timeout",
+      "type": "number",
+      "label": "Step timeout",
+      "validate": {
+       "min": 120,
+       "max": 600
+      }
+     },
+     {
+      "name": "outputType",
+      "type": "select",
+      "label": "Response format",
+      "required": true,
+      "validate": {
+       "enum": [
+        "text",
+        "make-schema",
+        "udt-schema"
+       ]
+      }
+     },
+     {
+      "name": "outputSchema",
+      "type": "udtspec",
+      "label": "Response structure",
+      "required": true,
+      "spec": [
+       {
+        "name": "name",
+        "label": "Name",
+        "placeholder": "Enter name",
+        "type": "text",
+        "required": true
+       },
+       {
+        "name": "label",
+        "label": "Label",
+        "type": "text"
+       },
+       {
+        "name": "help",
+        "label": "Description",
+        "type": "text",
+        "placeholder": "Enter description"
+       },
+       {
+        "name": "type",
+        "label": "Type",
+        "type": "udttype",
+        "required": true
+       }
+      ]
+     }
+    ],
+    "advanced": true
+   },
+   "tools": []
+  },
+  {
+   "id": 14,
+   "module": "highlevel:universal",
+   "version": 1,
+   "parameters": {
+    "__IMTCONN__": 3250712
+   },
+   "mapper": {
+    "url": "/contacts/{{1.contact_id}}",
+    "method": "PUT",
+    "headers": [],
+    "qs": [],
+    "body": "{\"customFields\": [{{13.jsonResponse.campi}}]}"
+   },
+   "metadata": {
+    "designer": {
+     "x": 2700,
+     "y": 150,
+     "name": "GHL: scrivi i campi fiscali"
+    },
+    "restore": {
+     "expect": {
+      "method": {
+       "mode": "chose",
+       "label": "PUT"
+      },
+      "headers": {
+       "mode": "chose"
+      },
+      "qs": {
+       "mode": "chose"
+      }
+     },
+     "parameters": {
+      "__IMTCONN__": {
+       "label": "mailift (Location: baretta's Account)",
+       "data": {
+        "scoped": "true",
+        "connection": "highlevel3"
+       }
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "__IMTCONN__",
+      "type": "account:highlevel,highlevel3",
+      "label": "Connection",
+      "required": true
+     }
+    ],
+    "expect": [
+     {
+      "name": "url",
+      "type": "text",
+      "label": "URL",
+      "required": true
+     },
+     {
+      "name": "method",
+      "type": "select",
+      "label": "Method",
+      "required": true,
+      "validate": {
+       "enum": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE"
+       ]
+      }
+     },
+     {
+      "name": "headers",
+      "type": "array",
+      "label": "Headers",
+      "spec": [
+       {
+        "name": "key",
+        "type": "text",
+        "label": "Key"
+       },
+       {
+        "name": "value",
+        "type": "text",
+        "label": "Value"
+       }
+      ]
+     },
+     {
+      "name": "qs",
+      "type": "array",
+      "label": "Query String",
+      "spec": [
+       {
+        "name": "key",
+        "type": "text",
+        "label": "Key"
+       },
+       {
+        "name": "value",
+        "type": "text",
+        "label": "Value"
+       }
+      ]
+     },
+     {
+      "name": "body",
+      "type": "any",
+      "label": "Body"
+     }
+    ]
+   },
+   "filter": {
+    "name": "Payload non vuoto",
+    "conditions": [
+     [
+      {
+       "a": "{{13.jsonResponse.campi}}",
+       "o": "exist"
+      }
+     ]
+    ]
+   }
+  },
+  {
+   "id": 17,
+   "module": "http:MakeRequest",
+   "version": 4,
+   "parameters": {
+    "authenticationType": "noAuth",
+    "tlsType": ""
+   },
+   "mapper": {
+    "url": "https://api.cloudconvert.com/v2/jobs",
+    "method": "post",
+    "headers": [
+     {
+      "name": "Authorization",
+      "value": "Bearer INSERISCI_CLOUDCONVERT_TOKEN"
+     }
+    ],
+    "contentType": "json",
+    "parseResponse": true,
+    "stopOnHttpError": true,
+    "timeout": "120",
+    "allowRedirects": true,
+    "shareCookies": false,
+    "requestCompressedContent": true,
+    "inputMethod": "jsonString",
+    "jsonStringBodyContent": "{\"tasks\": {\"importa\": {\"operation\": \"import/raw\", \"file\": \"<!doctype html><html lang=it><head><meta charset=utf-8><style>@page{size:A4;margin:18mm 16mm}\\n*{box-sizing:border-box}\\nbody{margin:0;font-family:Inter,Helvetica,Arial,sans-serif;font-size:10.5pt;line-height:1.55;color:#0b1a2c;background:#fff}\\n.hd{border-bottom:3px solid #ff8a3d;padding-bottom:10px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:baseline}\\n.hd .b{font-size:15pt;font-weight:800;letter-spacing:-.02em;color:#06101c}\\n.hd .b i{color:#ff8a3d;font-style:normal}\\n.hd .t{font-size:8.5pt;color:#5a6c82;text-transform:uppercase;letter-spacing:.09em}\\nh1{font-size:19pt;line-height:1.2;margin:0 0 4px;color:#06101c;letter-spacing:-.02em}\\nh2{font-size:11pt;margin:22px 0 7px;color:#06101c;text-transform:uppercase;letter-spacing:.06em;border-left:3px solid #ff8a3d;padding-left:9px}\\np{margin:0 0 9px}\\np.lead{font-size:11.5pt;color:#243a54;background:#f4f7fb;border-radius:7px;padding:12px 14px;margin:0 0 18px}\\nul,ol{margin:0 0 10px;padding-left:19px}\\nli{margin-bottom:5px}\\nstrong{color:#06101c;font-weight:650}\\n.alert{background:#fff8f3;border:1px solid #ffd9bf;border-radius:8px;padding:13px 15px;margin:12px 0}\\n.alert h2{margin-top:0;border-left-color:#ff8a3d}\\n.warn{color:#c2410c;font-weight:600}\\n.src{color:#8fa3bc;font-size:8.5pt}\\n.ft{margin-top:26px;padding-top:9px;border-top:1px solid #e3eaf2;font-size:8pt;color:#8fa3bc;display:flex;justify-content:space-between}</style></head><body><div class=hd><div class=b>mail<i>ift</i></div><div class=t>Dossier pre-call - riservato</div></div>{{7.jsonResponse.dossier_html}}<div class=ft><span>Mailift - Email Profit System</span><span>Generato il {{formatDate(now; DD/MM/YYYY)}}</span></div></body></html>\", \"filename\": \"dossier.html\"}, \"converti\": {\"operation\": \"convert\", \"input\": \"importa\", \"input_format\": \"html\", \"output_format\": \"pdf\", \"engine\": \"chrome\"}, \"esporta\": {\"operation\": \"export/url\", \"input\": \"converti\", \"inline\": false}}, \"tag\": \"mailift-dossier\"}"
+   },
+   "metadata": {
+    "designer": {
+     "x": 3000,
+     "y": 0,
+     "name": "CloudConvert: crea il job PDF"
+    },
+    "restore": {
+     "parameters": {
+      "authenticationType": {
+       "label": "No authenticationUse when no credentials are required for the request."
+      },
+      "tlsType": {
+       "label": "Empty"
+      }
+     },
+     "expect": {
+      "method": {
+       "mode": "chose",
+       "label": "POST"
+      },
+      "headers": {
+       "mode": "chose",
+       "items": [
+        null
+       ]
+      },
+      "queryParameters": {
+       "mode": "chose"
+      },
+      "contentType": {
+       "label": "application/jsonEnter data in the JSON format, as a string or using a data structure."
+      },
+      "parseResponse": {
+       "mode": "chose"
+      },
+      "stopOnHttpError": {
+       "mode": "chose"
+      },
+      "allowRedirects": {
+       "mode": "chose"
+      },
+      "shareCookies": {
+       "mode": "chose"
+      },
+      "requestCompressedContent": {
+       "mode": "chose"
+      },
+      "inputMethod": {
+       "label": "JSON stringEnter the JSON body as a raw text string. If values contain JSON reserved characters, you must escape them manually."
+      },
+      "paginationType": {
+       "label": "Empty"
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "authenticationType",
+      "type": "select",
+      "label": "Authentication type",
+      "required": true,
+      "validate": {
+       "enum": [
+        "noAuth",
+        "apiKey",
+        "basicAuth",
+        "oAuth"
+       ]
+      }
+     },
+     {
+      "name": "tlsType",
+      "type": "select",
+      "label": "Transport layer security (TLS)",
+      "validate": {
+       "enum": [
+        "mTls",
+        "tls"
+       ]
+      }
+     },
+     {
+      "name": "proxyKeychain",
+      "type": "keychain:proxy",
+      "label": "Proxy"
+     }
+    ],
+    "expect": [
+     {
+      "name": "url",
+      "type": "url",
+      "label": "URL",
+      "required": true
+     },
+     {
+      "name": "method",
+      "type": "select",
+      "label": "Method",
+      "required": true,
+      "validate": {
+       "enum": [
+        "get",
+        "head",
+        "post",
+        "put",
+        "patch",
+        "delete",
+        "options"
+       ]
+      }
+     },
+     {
+      "name": "headers",
+      "type": "array",
+      "label": "Headers",
+      "spec": {
+       "name": "value",
+       "label": "Header",
+       "type": "collection",
+       "spec": [
+        {
+         "name": "name",
+         "label": "Name",
+         "type": "text",
+         "required": true,
+         "validate": {
+          "pattern": "^[-!#$%&'*+.^_`|~0-9A-Za-z]+$"
+         }
+        },
+        {
+         "name": "value",
+         "label": "Value",
+         "type": "text"
+        }
+       ]
+      }
+     },
+     {
+      "name": "queryParameters",
+      "type": "array",
+      "label": "Query parameters",
+      "spec": {
+       "name": "value",
+       "label": "Parameter",
+       "type": "collection",
+       "spec": [
+        {
+         "name": "name",
+         "label": "Name",
+         "type": "text",
+         "required": true
+        },
+        {
+         "name": "value",
+         "label": "Value",
+         "type": "text"
+        }
+       ]
+      }
+     },
+     {
+      "name": "contentType",
+      "type": "select",
+      "label": "Body content type",
+      "validate": {
+       "enum": [
+        "json",
+        "multipart",
+        "urlEncoded",
+        "custom"
+       ]
+      }
+     },
+     {
+      "name": "parseResponse",
+      "type": "boolean",
+      "label": "Parse response",
+      "required": true
+     },
+     {
+      "name": "stopOnHttpError",
+      "type": "boolean",
+      "label": "Return error if HTTP request fails",
+      "required": true
+     },
+     {
+      "name": "timeout",
+      "type": "uinteger",
+      "label": "Timeout",
+      "validate": {
+       "min": 1,
+       "max": 300
+      }
+     },
+     {
+      "name": "allowRedirects",
+      "type": "boolean",
+      "label": "Allow redirects",
+      "required": true
+     },
+     {
+      "name": "shareCookies",
+      "type": "boolean",
+      "label": "Share cookies with other HTTP modules",
+      "required": true
+     },
+     {
+      "name": "requestCompressedContent",
+      "type": "boolean",
+      "label": "Request compressed content",
+      "required": true
+     },
+     {
+      "name": "inputMethod",
+      "type": "select",
+      "label": "Body input method",
+      "required": true,
+      "validate": {
+       "enum": [
+        "dataStructure",
+        "jsonString"
+       ]
+      }
+     },
+     {
+      "name": "jsonStringBodyContent",
+      "type": "text",
+      "label": "Body content",
+      "required": true
+     },
+     {
+      "name": "paginationType",
+      "type": "select",
+      "label": "Pagination type",
+      "validate": {
+       "enum": [
+        "offsetBased",
+        "pageBased",
+        "urlBased",
+        "tokenBased"
+       ]
+      }
+     }
+    ],
+    "interface": [
+     {
+      "name": "data",
+      "label": "Data",
+      "type": "any"
+     },
+     {
+      "name": "statusCode",
+      "label": "Status Code",
+      "type": "number"
+     },
+     {
+      "name": "headers",
+      "label": "Headers",
+      "type": "collection",
+      "spec": [
+       {
+        "name": "content-length",
+        "label": "Content-Length",
+        "type": "text"
+       },
+       {
+        "name": "content-encoding",
+        "label": "Content-Encoding",
+        "type": "text"
+       },
+       {
+        "name": "content-type",
+        "label": "Content-Type",
+        "type": "text"
+       },
+       {
+        "name": "server",
+        "label": "Server",
+        "type": "text"
+       },
+       {
+        "name": "cache-control",
+        "label": "Cache-Control",
+        "type": "text"
+       },
+       {
+        "name": "set-cookie",
+        "label": "Set-Cookie",
+        "type": "array",
+        "spec": {
+         "type": "text"
+        }
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": 18,
+   "module": "http:MakeRequest",
+   "version": 4,
+   "parameters": {
+    "authenticationType": "noAuth",
+    "tlsType": ""
+   },
+   "mapper": {
+    "url": "https://sync.api.cloudconvert.com/v2/jobs/{{17.data.data.id}}",
+    "method": "get",
+    "headers": [
+     {
+      "name": "Authorization",
+      "value": "Bearer INSERISCI_CLOUDCONVERT_TOKEN"
+     }
+    ],
+    "parseResponse": true,
+    "stopOnHttpError": true,
+    "timeout": "300",
+    "allowRedirects": true,
+    "shareCookies": false,
+    "requestCompressedContent": true
+   },
+   "metadata": {
+    "designer": {
+     "x": 3300,
+     "y": 0,
+     "name": "CloudConvert: attendi il PDF"
+    },
+    "restore": {
+     "parameters": {
+      "authenticationType": {
+       "label": "No authenticationUse when no credentials are required for the request."
+      },
+      "tlsType": {
+       "label": "Empty"
+      }
+     },
+     "expect": {
+      "method": {
+       "mode": "chose",
+       "label": "GET"
+      },
+      "headers": {
+       "mode": "chose",
+       "items": [
+        null
+       ]
+      },
+      "queryParameters": {
+       "mode": "chose"
+      },
+      "contentType": {
+       "label": "Empty"
+      },
+      "parseResponse": {
+       "mode": "chose"
+      },
+      "stopOnHttpError": {
+       "mode": "chose"
+      },
+      "allowRedirects": {
+       "mode": "chose"
+      },
+      "shareCookies": {
+       "mode": "chose"
+      },
+      "requestCompressedContent": {
+       "mode": "chose"
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "authenticationType",
+      "type": "select",
+      "label": "Authentication type",
+      "required": true,
+      "validate": {
+       "enum": [
+        "noAuth",
+        "apiKey",
+        "basicAuth",
+        "oAuth"
+       ]
+      }
+     },
+     {
+      "name": "tlsType",
+      "type": "select",
+      "label": "Transport layer security (TLS)",
+      "validate": {
+       "enum": [
+        "mTls",
+        "tls"
+       ]
+      }
+     },
+     {
+      "name": "proxyKeychain",
+      "type": "keychain:proxy",
+      "label": "Proxy"
+     }
+    ],
+    "expect": [
+     {
+      "name": "url",
+      "type": "url",
+      "label": "URL",
+      "required": true
+     },
+     {
+      "name": "method",
+      "type": "select",
+      "label": "Method",
+      "required": true,
+      "validate": {
+       "enum": [
+        "get",
+        "head",
+        "post",
+        "put",
+        "patch",
+        "delete",
+        "options"
+       ]
+      }
+     },
+     {
+      "name": "headers",
+      "type": "array",
+      "label": "Headers",
+      "spec": {
+       "name": "value",
+       "label": "Header",
+       "type": "collection",
+       "spec": [
+        {
+         "name": "name",
+         "label": "Name",
+         "type": "text",
+         "required": true,
+         "validate": {
+          "pattern": "^[-!#$%&'*+.^_`|~0-9A-Za-z]+$"
+         }
+        },
+        {
+         "name": "value",
+         "label": "Value",
+         "type": "text"
+        }
+       ]
+      }
+     },
+     {
+      "name": "queryParameters",
+      "type": "array",
+      "label": "Query parameters",
+      "spec": {
+       "name": "value",
+       "label": "Parameter",
+       "type": "collection",
+       "spec": [
+        {
+         "name": "name",
+         "label": "Name",
+         "type": "text",
+         "required": true
+        },
+        {
+         "name": "value",
+         "label": "Value",
+         "type": "text"
+        }
+       ]
+      }
+     },
+     {
+      "name": "contentType",
+      "type": "select",
+      "label": "Body content type",
+      "validate": {
+       "enum": [
+        "json",
+        "multipart",
+        "urlEncoded",
+        "custom"
+       ]
+      }
+     },
+     {
+      "name": "parseResponse",
+      "type": "boolean",
+      "label": "Parse response",
+      "required": true
+     },
+     {
+      "name": "stopOnHttpError",
+      "type": "boolean",
+      "label": "Return error if HTTP request fails",
+      "required": true
+     },
+     {
+      "name": "timeout",
+      "type": "uinteger",
+      "label": "Timeout",
+      "validate": {
+       "min": 1,
+       "max": 300
+      }
+     },
+     {
+      "name": "allowRedirects",
+      "type": "boolean",
+      "label": "Allow redirects",
+      "required": true
+     },
+     {
+      "name": "shareCookies",
+      "type": "boolean",
+      "label": "Share cookies with other HTTP modules",
+      "required": true
+     },
+     {
+      "name": "requestCompressedContent",
+      "type": "boolean",
+      "label": "Request compressed content",
+      "required": true
+     }
+    ],
+    "interface": [
+     {
+      "name": "data",
+      "label": "Data",
+      "type": "any"
+     },
+     {
+      "name": "statusCode",
+      "label": "Status Code",
+      "type": "number"
+     },
+     {
+      "name": "headers",
+      "label": "Headers",
+      "type": "collection",
+      "spec": [
+       {
+        "name": "content-length",
+        "label": "Content-Length",
+        "type": "text"
+       },
+       {
+        "name": "content-encoding",
+        "label": "Content-Encoding",
+        "type": "text"
+       },
+       {
+        "name": "content-type",
+        "label": "Content-Type",
+        "type": "text"
+       },
+       {
+        "name": "server",
+        "label": "Server",
+        "type": "text"
+       },
+       {
+        "name": "cache-control",
+        "label": "Cache-Control",
+        "type": "text"
+       },
+       {
+        "name": "set-cookie",
+        "label": "Set-Cookie",
+        "type": "array",
+        "spec": {
+         "type": "text"
+        }
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": 19,
+   "module": "highlevel:universal",
+   "version": 1,
+   "parameters": {
+    "__IMTCONN__": 3250712
+   },
+   "mapper": {
+    "url": "/contacts/{{1.contact_id}}",
+    "method": "PUT",
+    "headers": [],
+    "qs": [],
+    "body": "{\"customFields\": [{\"id\": \"wNyNDjq2ApPGAR4Z08sw\", \"value\": \"{{18.data.data.tasks[].result.files[].url}}\"}]}"
+   },
+   "metadata": {
+    "designer": {
+     "x": 3900,
+     "y": 150,
+     "name": "GHL: allega il PDF al contatto"
+    },
+    "restore": {
+     "expect": {
+      "method": {
+       "mode": "chose",
+       "label": "PUT"
+      },
+      "headers": {
+       "mode": "chose"
+      },
+      "qs": {
+       "mode": "chose"
+      }
+     },
+     "parameters": {
+      "__IMTCONN__": {
+       "label": "mailift (Location: baretta's Account)",
+       "data": {
+        "scoped": "true",
+        "connection": "highlevel3"
+       }
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "__IMTCONN__",
+      "type": "account:highlevel,highlevel3",
+      "label": "Connection",
+      "required": true
+     }
+    ],
+    "expect": [
+     {
+      "name": "url",
+      "type": "text",
+      "label": "URL",
+      "required": true
+     },
+     {
+      "name": "method",
+      "type": "select",
+      "label": "Method",
+      "required": true,
+      "validate": {
+       "enum": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE"
+       ]
+      }
+     },
+     {
+      "name": "headers",
+      "type": "array",
+      "label": "Headers",
+      "spec": [
+       {
+        "name": "key",
+        "type": "text",
+        "label": "Key"
+       },
+       {
+        "name": "value",
+        "type": "text",
+        "label": "Value"
+       }
+      ]
+     },
+     {
+      "name": "qs",
+      "type": "array",
+      "label": "Query String",
+      "spec": [
+       {
+        "name": "key",
+        "type": "text",
+        "label": "Key"
+       },
+       {
+        "name": "value",
+        "type": "text",
+        "label": "Value"
+       }
+      ]
+     },
+     {
+      "name": "body",
+      "type": "any",
+      "label": "Body"
+     }
+    ]
+   },
+   "filter": {
+    "name": "PDF generato",
+    "conditions": [
+     [
+      {
+       "a": "{{18.data.data.tasks[].result.files[].url}}",
+       "o": "exist"
+      }
+     ]
+    ]
+   }
+  }
+ ],
+ "metadata": {
+  "instant": false,
+  "version": 1,
+  "scenario": {
+   "roundtrips": 1,
+   "maxErrors": 3,
+   "autoCommit": true,
+   "autoCommitTriggerLast": true,
+   "sequential": false,
+   "slots": null,
+   "confidential": false,
+   "dataloss": false,
+   "dlq": false,
+   "freshVariables": false
+  },
+  "designer": {
+   "orphans": []
+  },
+  "zone": "eu1.make.com",
+  "notes": [
+   {
+    "moduleIds": [
+     15
+    ],
+    "content": "<p><strong>Perche' esiste:</strong> il campo <em>Il tuo sito Web?</em> e' compilato solo nel 29% dei lead. Questo modulo pesca il dominio da qualunque campo (motivazione, descrizione, spunti) e come ultima risorsa dall'email, escludendo gmail e simili.</p>",
+    "isFilterNote": false,
+    "metadata": {
+     "color": "#ff8a3d"
+    }
+   },
+   {
+    "moduleIds": [
+     4
+    ],
+    "content": "<p>Ricerca online con web search + web fetch nativi dell'API Anthropic. L'header <strong>anthropic-beta: web-fetch-2025-09-10</strong> e' obbligatorio, senza non parte il fetch delle pagine.</p><p>Il prompt impone di scrivere la P.IVA come <strong>P.IVA + 11 cifre attaccate</strong>: il modulo 11 la rilegge da qui. Non modificare quel pezzo.</p>",
+    "isFilterNote": false,
+    "metadata": {
+     "color": "#ff8a3d"
+    }
+   },
+   {
+    "moduleIds": [
+     12
+    ],
+    "content": "<p>Registro Imprese via openapi.it, endpoint IT-advanced: 30 chiamate gratis al mese, poi 0,10 euro. Da' storico ricavi/utili fino a 7 esercizi e i soci con quota, che il web non da'.</p><p>Se la P.IVA manca, l'handler <em>Resume</em> fa proseguire lo scenario a mani vuote: il dossier esce lo stesso.</p>",
+    "isFilterNote": false,
+    "metadata": {
+     "color": "#ff8a3d"
+    }
+   },
+   {
+    "moduleIds": [
+     7
+    ],
+    "content": "<p>Seconda chiamata, senza tool: trasforma il materiale grezzo nel dossier. Serve separata perche' la prima risposta e' frammentata e il modello commenta tra una ricerca e l'altra.</p><p>Il testo esce <strong>senza markdown</strong>: le note GHL non lo interpretano e i simboli resterebbero visibili.</p>",
+    "isFilterNote": false,
+    "metadata": {
+     "color": "#ff8a3d"
+    }
+   },
+   {
+    "moduleIds": [
+     13
+    ],
+    "content": "<p>Mappa il JSON camerale sui campi del contatto. Usa il <strong>prefill</strong> (ultimo messaggio assistant) per produrre JSON gia' escapato: per questo gira su <strong>claude-haiku-4-5</strong>. Sonnet 5 e Opus 4.6 rifiutano il prefill con errore 400.</p><p>Regola da non togliere: un campo senza dato va omesso, mai riempito con 'non disponibile' — finisce nei contratti.</p>",
+    "isFilterNote": false,
+    "metadata": {
+     "color": "#ff8a3d"
+    }
+   },
+   {
+    "moduleIds": [
+     17
+    ],
+    "content": "<p>Il foglio di stile del PDF sta <strong>qui dentro</strong>, non nel prompt: colori Mailift, Inter, intestazione con wordmark. La grafica si cambia in questo modulo senza toccare l'AI.</p><p>CloudConvert: 25 conversioni al giorno gratis, rendering con Chrome quindi CSS completo.</p>",
+    "isFilterNote": false,
+    "metadata": {
+     "color": "#ff8a3d"
+    }
+   },
+   {
+    "moduleIds": [
+     19
+    ],
+    "content": "<p>GHL <strong>scarica e copia</strong> il file nel proprio storage: quindi l'URL temporaneo di CloudConvert va bene, non serve ricaricare il PDF sulla media library.</p><p>Attenzione: i file sul campo si accumulano invece di sostituirsi.</p>",
+    "isFilterNote": false,
+    "metadata": {
+     "color": "#ff8a3d"
+    }
+   }
+  ]
+ }
+}

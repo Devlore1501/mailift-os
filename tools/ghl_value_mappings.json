@@ -1,0 +1,336 @@
+{
+  "_meta": {
+    "descrizione": "Mappature per unificare i valori storici dei custom field GHL. File dati, non codice: le regole si rivedono qui senza toccare la logica di tools/ghl_normalize_values.py.",
+    "creato": "2026-08-01",
+    "baseline": ".tmp/ghl_backup_2026-08-01.json (63 campi, 528 contatti, 2023 valori)",
+    "causa_radice": "Il 21/07/2026 la picklist fatturato e' passata da 5 fasce (15k-80k) a 6 (10k-300k) SOTTO i dati gia' raccolti. Ogni modifica di picklist non retroattiva lascia orfani i valori storici.",
+    "ordine_obbligatorio": [
+      "1. aggiungere le nuove opzioni alla picklist LASCIANDO le vecchie",
+      "2. migrare i valori sui contatti",
+      "3. rimuovere le vecchie opzioni"
+    ],
+    "attenzione": "I valori devono combaciare CARATTERE PER CARATTERE: en-dash U+2013, spazi doppi e spazi in coda sono significativi. Vedi workers/ghl-form-proxy.js:31."
+  },
+
+  "campi": [
+    {
+      "field_id": "P4Yk1Shwwntwvknjtj0L",
+      "nome": "Budget ads mensile",
+      "problema": "77 contatti hanno '0 - 5000€', una fascia che poi e' stata spezzata in '0 - 3000€' + '3000€ - 5000€'. Riunendola il campo torna pulito.",
+      "picklist_finale": [
+        "0 - 5.000€",
+        "5.000€ - 15.000€",
+        "15.000€ - 30.000€",
+        "30.000€ - 50.000€"
+      ],
+      "value_map": {
+        "0 - 5000€": "0 - 5.000€",
+        "meno di 5.000€": "0 - 5.000€",
+        "0 - 3000€": "0 - 5.000€",
+        "3000€ - 5000€": "0 - 5.000€"
+      },
+      "lascia_intatti": [],
+      "form_da_aggiornare": ["Survey | Survey 2"]
+    },
+
+    {
+      "field_id": "QRUfUi5wrmTHPAT1fSuf",
+      "nome": "Dimensione lista email",
+      "problema": "La picklist ha un buco tra 5.000 e 6.000, quindi '3.000 - 10.000' non ricade in nessuna opzione. Si chiude il buco rinominando la fascia invece di fondere due scaglioni: tra 1k e 10k di lista c'e' un 10x di potenziale, fonderli distruggerebbe informazione utile su 36 contatti.",
+      "picklist_finale": [
+        "Nessuna / non lo so",
+        "100 - 1.000",
+        "1.000 - 5.000",
+        "5.000 - 10.000",
+        "10.000 - 30.000",
+        "30.000 - 50.000",
+        "50.000+"
+      ],
+      "value_map": {
+        "6.000 - 10.000": "5.000 - 10.000",
+        "3.000 - 10.000": "5.000 - 10.000",
+        "5-10k": "5.000 - 10.000",
+        "10-30k": "10.000 - 30.000",
+        "500000": "50.000+",
+        "0": "Nessuna / non lo so",
+        "zero": "Nessuna / non lo so",
+        "O": "Nessuna / non lo so",
+        "Non lo so ": "Nessuna / non lo so"
+      },
+      "inferenze": {
+        "3.000 - 10.000": "punto medio 6.500 -> ricade in 5.000-10.000. Inferenza, non dato dichiarato: 8 contatti."
+      },
+      "lascia_intatti": ["10"],
+      "form_da_aggiornare": ["Survey | Survey 2"]
+    },
+
+    {
+      "field_id": "qIYwUAY9tphgt99pfdBP",
+      "nome": "Fatturato da email in % 1",
+      "problema": "Poche varianti testuali della stessa risposta, piu' un 'non lo so' che non ha un'opzione dedicata e finiva scritto a mano.",
+      "picklist_finale": [
+        "0 - 10%",
+        "10% e 20%",
+        "20% e 30%",
+        "30% e 40%",
+        "40% e 60%",
+        "oltre 60%",
+        "Non lo so"
+      ],
+      "value_map": {
+        "meno del 10%": "0 - 10%",
+        "zero": "0 - 10%",
+        "0": "0 - 10%",
+        "non lo so": "Non lo so"
+      },
+      "lascia_intatti": ["3500,00"],
+      "form_da_aggiornare": ["Survey | Survey 2"]
+    },
+
+    {
+      "field_id": "bW87MPPTFNr51QBtNZmG",
+      "nome": "Quale è il tuo attuale fatturato Mensile? 1",
+      "problema": "Spostamento della soglia di qualifica da 10k a 15k/mese (01/08/2026). Le prime due fasce cambiano etichetta: i lead tra 10k e 15k passano da qualificati a sotto soglia.",
+      "ATTENZIONE_ORDINE": "picklist_finale contiene l'UNIONE di vecchie e nuove opzioni. Le vecchie NON vanno rimosse finche' landing e worker non sono deployati: fino a quel momento la landing continua a mandare le etichette vecchie, e ogni opt-in nella finestra intermedia nascerebbe orfano. Dopo il deploy, sostituire picklist_finale con picklist_dopo_deploy e rilanciare.",
+      "picklist_finale": [
+        "Meno di 15.000€/mese",
+        "15.000 – 25.000€/mese",
+        "Meno di 10.000€/mese",
+        "10.000 – 25.000€/mese",
+        "25.000 – 50.000€/mese",
+        "50.000 – 100.000€/mese",
+        "100.000 – 300.000€/mese",
+        "Oltre 300.000€/mese"
+      ],
+      "picklist_dopo_deploy": [
+        "Meno di 15.000€/mese",
+        "15.000 – 25.000€/mese",
+        "25.000 – 50.000€/mese",
+        "50.000 – 100.000€/mese",
+        "100.000 – 300.000€/mese",
+        "Oltre 300.000€/mese"
+      ],
+      "value_map": {
+        "meno di 15k €/mese": "Meno di 15.000€/mese",
+        "meno di 10k €/mese": "Meno di 15.000€/mese",
+        "under-15k": "Meno di 15.000€/mese",
+        "10k – 25k €/anno": "Meno di 15.000€/mese",
+        "0 - 10K€": "Meno di 15.000€/mese",
+        "0": "Meno di 15.000€/mese",
+        "800": "Meno di 15.000€/mese",
+        "1000": "Meno di 15.000€/mese",
+        "5000": "Meno di 15.000€/mese",
+        "11000": "Meno di 15.000€/mese",
+        "15k – 25k €/mese": "15.000 – 25.000€/mese",
+        "15-25k": "15.000 – 25.000€/mese",
+        "15000": "15.000 – 25.000€/mese",
+        "16k": "15.000 – 25.000€/mese",
+        "25k – 50k €/mese": "25.000 – 50.000€/mese",
+        "tra 25k€ e 50k€ mese": "25.000 – 50.000€/mese",
+        "tra 300K€ e 500K€": "25.000 – 50.000€/mese",
+        "50k –  80k €/mese": "50.000 – 100.000€/mese",
+        "50k - 80k €/mese": "50.000 – 100.000€/mese",
+        "50K€-100K€": "50.000 – 100.000€/mese",
+        "1000000": "50.000 – 100.000€/mese",
+        "100K€ - 200k€": "100.000 – 300.000€/mese",
+
+        "meno di 300K€ annui": "Meno di 15.000€/mese",
+        "Meno di 200k €/anno": "Meno di 15.000€/mese",
+        "meno di 20K€": "Meno di 15.000€/mese",
+        "10K€ -20K€": "15.000 – 25.000€/mese",
+        "10k – 25k €/mese": "15.000 – 25.000€/mese",
+        "10.000 – 25.000€/mese": "15.000 – 25.000€/mese",
+        "Meno di 10.000€/mese": "Meno di 15.000€/mese",
+        "20K€ -50K€": "25.000 – 50.000€/mese",
+        "500k": "25.000 – 50.000€/mese",
+        "oltre 80k €/mese": "50.000 – 100.000€/mese",
+        "800k€+": "50.000 – 100.000€/mese",
+        "piu di 1M€": "50.000 – 100.000€/mese",
+        "200K€+": "100.000 – 300.000€/mese"
+      },
+      "lascia_intatti": ["3000€ - 5000€"],
+      "regole_di_lettura": {
+        "scala_K_euro": "'10K€ -20K€', '20K€ -50K€', ... sono MENSILI (confermato da Lorenzo, 01/08/2026)",
+        "numeri_grossi_scritti_a_mano": "'500k', '800k€+', '1M' sono ANNUI: si dividono per 12",
+        "intervalli_a_cavallo": "si assegnano per punto medio"
+      },
+      "inferenze": {
+        "10K€ -20K€": "37 contatti. Intervallo 10-20k, punto medio esattamente sul confine dei 15k: 50/50 tra le due fasce. Assegnato alla fascia alta perche' sbagliare per difetto squalifica un lead valido, sbagliare per eccesso costa solo una call. Resta comunque sotto i 25k, quindi 'Qualifica fatturato' lo classifica Sotto soglia in entrambi i casi.",
+        "20K€ -50K€": "7 contatti. Scavalca la soglia ICP dei 25k. Decisione esplicita di Lorenzo (01/08/2026): sono ICP.",
+        "oltre 80k €/mese": "12 contatti. Aperto verso l'alto, chiuso su 50-100k per plausibilita'.",
+        "200K€+": "2 contatti. Aperto verso l'alto, chiuso su 100-300k.",
+        "500k / 800k€+ / piu di 1M€ / 1000000": "Letti come ANNUI e divisi per 12: come mensili darebbero cifre implausibili. Regola confermata da Lorenzo."
+      },
+      "form_da_aggiornare": ["optin calcolart", "Calcolatore email"]
+    },
+
+    {
+      "field_id": "beYFGQ1sbcsop9KtxPko",
+      "nome": "Fatturato ecommerce 1",
+      "problema": "Duplicato legacy del campo fatturato, con una scala tutta sua ('0 a 25k€ mese', 'tra 50k€ e 100k€ mese'): 63 valori su 66 erano orfani della sua stessa picklist. Sta in '99 · Legacy' ma resta visibile negli elenchi contatti, dove faceva sembrare sporco un dato che sul campo canonico e' pulito. Allineato alle stesse 6 fasce cosi' le due colonne parlano la stessa lingua.",
+      "picklist_finale": [
+        "Meno di 15.000€/mese",
+        "15.000 – 25.000€/mese",
+        "25.000 – 50.000€/mese",
+        "50.000 – 100.000€/mese",
+        "100.000 – 300.000€/mese",
+        "Oltre 300.000€/mese"
+      ],
+      "value_map": {
+        "meno di 15k €/mese": "Meno di 15.000€/mese",
+        "meno di 10k €/mese": "Meno di 15.000€/mese",
+        "meno di 300K€ annui": "Meno di 15.000€/mese",
+        "Meno di 200k €/anno": "Meno di 15.000€/mese",
+        "0 a 25k€ mese": "Meno di 15.000€/mese",
+        "0": "Meno di 15.000€/mese",
+        "15k – 25k €/mese": "15.000 – 25.000€/mese",
+        "10k – 25k €/mese": "15.000 – 25.000€/mese",
+        "tra 15k€ e 25k€ mese": "15.000 – 25.000€/mese",
+        "17500": "15.000 – 25.000€/mese",
+        "25k – 50k €/mese": "25.000 – 50.000€/mese",
+        "tra 25k€ e 50k€ mese": "25.000 – 50.000€/mese",
+        "tra 300K€ e 500K€": "25.000 – 50.000€/mese",
+        "37500": "25.000 – 50.000€/mese",
+        "50k - 80k €/mese": "50.000 – 100.000€/mese",
+        "50k –  80k €/mese": "50.000 – 100.000€/mese",
+        "oltre 80k €/mese": "50.000 – 100.000€/mese",
+        "tra 50k€ e 100k€ mese": "50.000 – 100.000€/mese",
+        "piu di 1M€": "50.000 – 100.000€/mese",
+        "tra 100k€ e 200k€ mese": "100.000 – 300.000€/mese",
+        "200k+": "100.000 – 300.000€/mese",
+        "Oltre i 250k€ mese": "100.000 – 300.000€/mese"
+      },
+      "lascia_intatti": [],
+      "nota_scale": "'0 a 25k€ mese' scavalca i 15k: assegnato per punto medio (12.500) alla fascia bassa, stessa regola usata sul campo canonico.",
+      "form_da_aggiornare": []
+    },
+
+    {
+      "field_id": "oY62C54WmJAIAg7rOuQr",
+      "nome": "In quale settore operi?",
+      "problema": "Due sole varianti testuali di opzioni gia' esistenti.",
+      "picklist_finale": null,
+      "value_map": {
+        "Altro settore": "Altro",
+        "Abbigliamento & Accessori": "👗 Abbigliamento o accessori"
+      },
+      "lascia_intatti": [],
+      "form_da_aggiornare": []
+    },
+
+    {
+      "field_id": "kn6PHzIowLTsC56QE8Cv",
+      "nome": "In quale settore sei?",
+      "problema": "Manca l'opzione 'Altro', quindi 19 lead hanno scritto la propria nicchia a mano. Tre sono chiaramente riconducibili a un'opzione esistente; le altre sono nicchie reali e vanno conservate, non buttate.",
+      "picklist_finale": [
+        "🧴 Beauty & Personal Care",
+        "👗 Abbigliamento o accessori",
+        "💻 Prodotti digitali",
+        "🏠 Articoli per la casa",
+        "💍 Gioielli",
+        "🍔 Food & Beverage",
+        "⛑️ Salute e integrazione",
+        "Altro"
+      ],
+      "value_map": {
+        "Custom sneakers ": "👗 Abbigliamento o accessori",
+        "Calzature": "👗 Abbigliamento o accessori",
+        "Abbigliamento e attrezzatura outdoor": "👗 Abbigliamento o accessori",
+        "Accessori e ricambi Camper ": "Altro",
+        "Palloncini personalizzati con logo": "Altro",
+        "Attrezzature Fitness ": "Altro",
+        "Piscine": "Altro",
+        "LED per insegne luminose": "Altro",
+        "animali domestici": "Altro",
+        "Artigianato": "Altro",
+        "Ricambi per rimorchi ": "Altro",
+        "Pet": "Altro",
+        "Quad ": "Altro",
+        "Oggetti personalizzati per eventi ": "Altro",
+        "Servii": "Altro",
+        "Prodotti personalizzati articoli religiosi ": "Altro",
+        "Vinili cd": "Altro",
+        "Articoli da collezione": "Altro",
+        "Amdadulhoque516@gmail.com": "Altro"
+      },
+      "preserva_originale_in": {
+        "field_id": "v2DrGFJLSwY0QpJDHT2N",
+        "nome": "Specifica se Altro...",
+        "perche": "Campo TEXT gia' esistente e a zero utilizzi, nato esattamente per questo. Riuso invece di crearne uno nuovo. La nicchia dichiarata (Piscine, Quad, LED per insegne) e' informazione di valore per il targeting.",
+        "solo_se_mappato_a": "Altro"
+      },
+      "lascia_intatti": [],
+      "form_da_aggiornare": ["Survey | Survey 0", "optin calcolart", "Calcolatore email"]
+    }
+  ],
+
+  "qualifica_fatturato": {
+    "descrizione": "Campo derivato su cui far girare segmenti e automazioni. Il campo grezzo del fatturato resta intatto: quiz, landing e GHL sono gia' allineati sulle 6 fasce e la distinzione 15-25k serve al targeting CAPI.",
+    "nome_campo": "Qualifica fatturato",
+    "tipo": "SINGLE_OPTIONS",
+    "opzioni": [
+      "Sotto soglia (<25k/mese)",
+      "ICP (≥25k/mese)",
+      "Da riconfermare"
+    ],
+    "nota_niente_enterprise": "Niente fascia 'Enterprise': nessuno dei 528 contatti dichiara oltre 300k/mese. Tenerla spingerebbe in 'Da riconfermare' una ventina di lead palesemente qualificati il cui valore e' aperto verso l'alto ('oltre 80k €/mese', '200K€+', 'piu di 1M€'), che con due sole fasce si risolvono correttamente in ICP.",
+    "sorgenti": ["bW87MPPTFNr51QBtNZmG", "beYFGQ1sbcsop9KtxPko"],
+    "nota_sorgenti": "Legge il campo principale; se vuoto ricade sul secondo. Il fallback porta la copertura da 211 a 238 contatti.",
+    "scala_k_euro": "Confermato da Lorenzo il 01/08/2026: la scala '10K€ -20K€ / 20K€ -50K€ / ...' del form 'report personalizzato' (gen-ott 2025, 55 contatti) era MENSILE.",
+    "intervalli_mensili_euro": {
+      "Meno di 15.000€/mese": [0, 15000],
+      "15.000 – 25.000€/mese": [15000, 25000],
+      "25.000 – 50.000€/mese": [25000, 50000],
+      "50.000 – 100.000€/mese": [50000, 100000],
+      "100.000 – 300.000€/mese": [100000, 300000],
+      "Oltre 300.000€/mese": [300000, null],
+      "Meno di 10.000€/mese": [0, 10000],
+      "meno di 10k €/mese": [0, 10000],
+      "meno di 15k €/mese": [0, 15000],
+      "under-15k": [0, 15000],
+      "meno di 20K€": [0, 20000],
+      "10k – 25k €/mese": [10000, 25000],
+      "15k – 25k €/mese": [15000, 25000],
+      "15-25k": [15000, 25000],
+      "10.000 – 25.000€/mese": [10000, 25000],
+      "25k – 50k €/mese": [25000, 50000],
+      "25.000 – 50.000€/mese": [25000, 50000],
+      "tra 25k€ e 50k€ mese": [25000, 50000],
+      "tra 15k€ e 25k€ mese": [15000, 25000],
+      "50k –  80k €/mese": [50000, 80000],
+      "50k - 80k €/mese": [50000, 80000],
+      "oltre 80k €/mese": [80000, null],
+      "0 a 25k€ mese": [0, 25000],
+      "0 - 10K€": [0, 10000],
+      "10K€ -20K€": [10000, 20000],
+      "20K€ -50K€": [20000, 50000],
+      "50K€-100K€": [50000, 100000],
+      "100K€ - 200k€": [100000, 200000],
+      "200K€+": [200000, null],
+      "200k+": [200000, null],
+      "Oltre i 250k€ mese": [250000, null],
+      "meno di 300K€ annui": [0, 25000],
+      "tra 300K€ e 500K€": [25000, 41667],
+      "10k – 25k €/anno": [833, 2083],
+      "Meno di 200k €/anno": [0, 16667],
+      "800k€+": [66667, null],
+      "piu di 1M€": [83333, null],
+      "1000000": [83333, 83333],
+      "0": [0, 0],
+      "800": [800, 800],
+      "1000": [1000, 1000],
+      "5000": [5000, 5000],
+      "11000": [11000, 11000],
+      "15000": [15000, 15000],
+      "16k": [16000, 16000],
+      "17500": [17500, 17500],
+      "37500": [37500, 37500]
+    },
+    "nota_annui": "I valori marcati 'annui'/'/anno' sono gia' convertiti in euro/mese negli intervalli sopra (divisi per 12).",
+    "non_mappabili": {
+      "500k": "scala ignota: 500k/mese o /anno cambia completamente la qualifica",
+      "3000€ - 5000€": "e' un valore di Budget ads finito nel campo fatturato"
+    },
+    "regola": "Si classifica solo se l'intervallo ricade INTERAMENTE dentro una fascia. Se scavalca una soglia -> 'Da riconfermare'. Meglio un dato dichiarato incerto che una qualifica inventata."
+  }
+}

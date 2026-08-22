@@ -262,6 +262,7 @@ def run(cliente: str, trascrizione: str) -> None:
     print(preview)
     print("---")
     print(f"\nPer committare: git add clients/ && git commit -m 'Call {cliente} {today}'")
+    print("Per integrare questa call nel knowledge graph: /graphify . --update")
 
 
 if __name__ == "__main__":

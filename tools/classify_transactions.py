@@ -42,8 +42,7 @@ load_dotenv(ENV_PATH if ENV_PATH.exists() else ROOT / ".env")
 # o sul supplier_name che Claude proporrebbe) e reason human-readable mostrata in UI.
 AUTOFATTURA_BLACKLIST: list[dict] = [
     {"pattern": r"google\s+cloud\s+italy", "reason": "Google Cloud Italy Srl - IT, IVA 22% diretta"},
-    {"pattern": r"google\s+workspace.*\bitaly\b", "reason": "Google Workspace IT - IVA 22% diretta"},
-    {"pattern": r"google\s+workspace.*\bIT\b", "reason": "Google Workspace IT - IVA 22% diretta"},
+    {"pattern": r"google\s+workspace", "reason": "Google Workspace Mailift e' fatturato da Google Cloud Italy Srl (P.IVA IT11256580967) con IVA 22% diretta, verificato su fattura reale (sessione 2026-04-08, cancellata autofattura 20/a creata per errore). La descrizione bancaria (es. 'Google Workspace_mailift.') non menziona 'Italy', quindi va escluso a prescindere dal testo."},
 ]
 
 SYSTEM_PROMPT = """Sei un assistente fiscale italiano specializzato in IVA e reverse charge.
@@ -56,13 +55,35 @@ REGOLE:
 - TD19 = acquisti da fornitore extra-UE/UE di beni gia' presenti in Italia (art. 17 c.2 - integrazione).
 - Aliquota IVA in autofattura: di norma 22%.
 - NON richiedono autofattura: bonifici verso fornitori italiani, stipendi, F24, commissioni bancarie ITALIANE, giroconti, rimborsi, accrediti, pagamenti rate finanziamenti italiani, ricariche conto.
-- Esempi tipici SI: Google Ireland (Ads/Workspace), Meta Platforms Ireland (Facebook Ads), Microsoft Ireland, Amazon Web Services EMEA SARL, LinkedIn Ireland, Apple Distribution International, Stripe Payments Europe, OpenAI L.L.C., Anthropic PBC, Cloudflare, GitHub, Figma, Notion Labs, Adobe Ireland, Dropbox Ireland, Hostinger International, Make.com (Celonis s.r.o.), Lovable AB, Apify Technologies, ElevenLabs Inc, Higgsfield, Revolut Bank UAB / Revolut Payments UAB.
+- Esempi tipici SI: Google Ireland (SOLO Ads, mai Workspace), Meta Platforms Ireland (Facebook Ads), Microsoft Ireland, Amazon Web Services EMEA SARL, LinkedIn Ireland, Apple Distribution International, Stripe Payments Europe, OpenAI L.L.C., Anthropic PBC, Cloudflare, GitHub, Figma, Notion Labs, Adobe Ireland, Dropbox Ireland, Hostinger International, Make.com (Celonis s.r.o.), Lovable AB, Apify Technologies, ElevenLabs Inc, Higgsfield, Revolut Bank UAB / Revolut Payments UAB.
 - DKV Euro Service e' un fornitore tedesco di servizi flotta -> TD17.
 - "Commissione Revolut Business" -> Revolut e' lituano/UE -> TD17.
 
+FORNITORI RICORRENTI GIA' AUTOFATTURATI (devi SEMPRE includerli, confidence high — verificati
+sulle autofatture emesse nei mesi precedenti, sessione 2026-08-22):
+- "Myleadfox" -> Myleadfox, US, extra-UE, TD17 (autofatture 21/a e 30/a)
+- "Digital Media Llc" / "Digital Media LLC" -> Digital Media LLC, US, extra-UE, TD17 (autofatture 32/a e 50/a)
+- "Skool" / "P.skool.com" -> Skool Inc, US, TD17
+- "Openart Ai" -> OpenArt Inc, US, TD17
+- "Canva" -> Canva Pty Ltd, AU, TD17
+- "Opus Clip" -> Opus Clip (One Sub Inc.), US, TD17
+- "Gamma.app" -> Gamma Tech, Inc., US, TD17
+- "Paddle.net" -> Paddle.com Market Ltd, GB, TD17
+- "Anthropic" -> Anthropic, PBC, US, TD17
+- "Elevenlabs" -> ElevenLabs, Inc., US, TD17
+- "Lovable" -> Lovable Labs Incorporated, SE, TD17
+- "Hostinger" -> Hostinger International Ltd, CY, TD17
+Un addebito su carta a un fornitore estero di software/servizi digitali va SEMPRE incluso,
+anche se di importo minimo (1-20 EUR): l'obbligo di autofattura non ha soglia.
+
+P.IVA: NON inventare mai il numero. Compila supplier_vat_number SOLO se sei certo che sia
+quello reale e verificabile su VIES (es. Meta IE9692928F, Apple IE9700053D,
+Dropbox IE9852817J). In ogni altro caso lascia stringa vuota: SDI accetta l'autofattura
+con P.IVA estera vuota, mentre una P.IVA sbagliata rende il documento errato.
+
 FORNITORI DA ESCLUDERE (skipped_italian=true, NON vanno in autofattura):
 - Google Cloud Italy Srl (IT, IVA 22% diretta)
-- Google Workspace IT / Google Workspace Italy (IT, IVA 22% diretta)
+- Google Workspace, QUALSIASI dicitura (es. "Google Workspace_mailift.", "Google Workspace", ecc.), ANCHE SE la descrizione non menziona "Italy" o "IT": per l'account Mailift e' sempre fatturato da Google Cloud Italy Srl (P.IVA IT11256580967) con IVA 22% diretta. Verificato su fattura reale. Non proporre mai "Google Ireland" come fornitore per un addebito Workspace.
 - Qualsiasi fornitore italiano che emetta fattura con IVA 22% diretta al committente IT Mailift (quindi con P.IVA IT e dicitura italiana nella descrizione): flagga con skipped_italian=true e skip_reason chiaro.
 
 Per ciascun fornitore conosciuto, fornisci P.IVA UE e codice paese ISO se la conosci con certezza.

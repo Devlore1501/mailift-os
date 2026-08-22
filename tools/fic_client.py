@@ -121,6 +121,41 @@ def _normalize_name(name: str) -> str:
     return " ".join(tokens)
 
 
+def vies_check(vat_number: str, timeout: float = 10.0) -> bool | None:
+    """Valida una P.IVA UE su VIES.
+
+    Ritorna True (valida), False (VIES risponde INVALID) o None (non verificabile:
+    paese extra-UE, formato non riconosciuto, VIES irraggiungibile).
+
+    Serve a bloccare le P.IVA allucinate dal classificatore: sessione 2026-08-22 sono
+    state trovate 3 P.IVA Revolut diverse su 3 autofatture (17/a, 38/a, 51/a), tutte
+    INVALID su VIES, e una P.IVA di Google Cloud EMEA usata per Dropbox (35/a).
+    """
+    v = (vat_number or "").strip().upper().replace(" ", "")
+    m = re.match(r"^([A-Z]{2})([A-Z0-9]{2,14})$", v)
+    if not m:
+        return None
+    cc, num = m.group(1), m.group(2)
+    if cc not in _EU_COUNTRIES:
+        return None
+    try:
+        resp = requests.get(
+            f"https://ec.europa.eu/taxation_customs/vies/rest-api/ms/{cc}/vat/{num}",
+            timeout=timeout,
+        )
+        if resp.status_code != 200:
+            return None
+        data = resp.json()
+    except Exception:
+        return None
+    err = (data.get("userError") or "").upper()
+    if err == "VALID":
+        return True
+    if err == "INVALID":
+        return False
+    return None
+
+
 @dataclass
 class AutofatturaLine:
     description: str
@@ -351,6 +386,10 @@ class FicClient:
         #   - address_city: nome del paese in lowercase se la citta' non e' nota
         #   - address_street: obbligatorio, placeholder "Estero" se non noto
         country_iso = (country or "").upper()
+        # Non registrare mai in anagrafica una P.IVA che VIES dichiara INVALID
+        if vat_number and vies_check(vat_number) is False:
+            print(f"      [warn] P.IVA {vat_number} per il nuovo fornitore {name} e' INVALID su VIES -> lascio vuota")
+            vat_number = ""
         is_extra_ue = country_iso and country_iso not in _EU_COUNTRIES
         destinatario_code = os.getenv("FIC_DESTINATARIO_CODE", "M5UXCR1")
         country_it = _country_it_name(country_iso)
@@ -469,12 +508,23 @@ class FicClient:
         # già esiste in FiC ma ha i campi indirizzo vuoti (fix bug giugno 2026).
         is_foreign = country_iso and country_iso != "IT"
         country_it_name = _country_it_name(country_iso or "")
+        # P.IVA: si preferisce quella gia' registrata in anagrafica FiC (stabile tra i run)
+        # a quella proposta dal classificatore, che storicamente le allucina. In entrambi i
+        # casi si valida su VIES: se VIES risponde INVALID si lascia il campo VUOTO, che il
+        # SDI accetta per i fornitori esteri (vedi workflow, nota 11).
+        vat_candidate = (supplier.get("vat_number") or af.supplier_vat_number or "").strip()
+        if vat_candidate and vies_check(vat_candidate) is False:
+            print(
+                f"      [warn] P.IVA {vat_candidate} di {af.supplier_name} risulta INVALID su VIES "
+                f"-> emetto con P.IVA vuota"
+            )
+            vat_candidate = ""
         entity: dict[str, Any] = {
             "id": supplier.get("id"),
             "name": supplier.get("name") or af.supplier_name,
             "country": country_it_name or supplier.get("country") or None,
             "country_iso": country_iso,
-            "vat_number": af.supplier_vat_number or supplier.get("vat_number") or "",
+            "vat_number": vat_candidate,
             "ei_code": destinatario_code,
             "address_street": supplier.get("address_street") or ("Estero" if is_foreign else None),
             "address_postal_code": supplier.get("address_postal_code") or ("00000" if is_foreign else None),

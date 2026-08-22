@@ -1,0 +1,108 @@
+{
+  "_meta": {
+    "descrizione": "Layout delle cartelle custom field GHL, allineato alle fasi del processo di vendita invece che alla fonte del dato.",
+    "creato": "2026-08-01",
+    "vincoli_api_verificati": {
+      "rinominare_cartella_custom": "SI — PUT /locations/{loc}/customFields/{id} con name",
+      "spostare_campo_tra_cartelle": "SI — PUT con parentId",
+      "creare_cartella_nuova": "NO — dataType non accetta FOLDER, per questo si riusano le 7 cartelle custom esistenti",
+      "toccare_cartelle_standard": "NO — 'Cannot update standard folder or field' (Contact, General Info, Additional Info)"
+    },
+    "nota_standard": "Le 3 cartelle standard restano visibili ma vuote: tutti i loro campi vengono spostati altrove. Additional Info da sola ne conteneva 28."
+  },
+
+  "rinomina_cartelle": {
+    "G7sOWHCF5qzJSlCHQOzW": "01 · Attribuzione & Sorgente",
+    "ia1mZvBNaD5UDP99uU9q": "02 · Qualifica ICP",
+    "BATHiXVuin9PUtkEbGfo": "03 · Dati azienda",
+    "KvetEyfjJhv5ij0bdRSr": "04 · Pre-call & Dossier",
+    "muRMRwo2J56K2x410qEw": "05 · Setting & Follow-up",
+    "egMzaQWV6Wc0OwMLGN0B": "06 · Contratto & Onboarding",
+    "sjnyCC71hA10AaQjqQT4": "99 · Legacy — non usare"
+  },
+
+  "_nota_legacy": "'99 · Legacy' NON significa 'da cancellare'. Contiene campi che hanno ancora dati (Nome 118 usi, Cognome 47, Fatturato ecommerce 1 66 usi): restano leggibili, ma non vanno piu' usati per cose nuove. La cancellazione e' una decisione separata.",
+
+  "campi_per_cartella": {
+    "G7sOWHCF5qzJSlCHQOzW": [
+      "5APJqEOKW7biksaGeJID",
+      "kV7HlxLjxYACKMcB5hN9",
+      "HWyRvoBU4nB8SGdjkJJY",
+      "FFS9ENqoI2lDezkohCvt",
+      "Glt7SwgUvNe68F25y55x",
+      "RnarEKtTf2beKZqJBa0L",
+      "eKaxYaJ7LvDy9zpr9Hcf",
+      "WET6YQuMwg70V1LWlyOq"
+    ],
+    "ia1mZvBNaD5UDP99uU9q": [
+      "1VfQ2u6WMjMsRUMWl294",
+      "bW87MPPTFNr51QBtNZmG",
+      "7vu3LbWcBBphr9Q4LiOE",
+      "kn6PHzIowLTsC56QE8Cv",
+      "oY62C54WmJAIAg7rOuQr",
+      "v2DrGFJLSwY0QpJDHT2N",
+      "QRUfUi5wrmTHPAT1fSuf",
+      "P4Yk1Shwwntwvknjtj0L",
+      "qIYwUAY9tphgt99pfdBP",
+      "MZCq4lqPE3FKQTIieaiz",
+      "jWItk9f0OSQON4Xfv1uz",
+      "6fYX223xjJX4j59suKMs",
+      "GbJh5XHiVbvlgnRmiYfW"
+    ],
+    "BATHiXVuin9PUtkEbGfo": [
+      "L3O4mX5GZ3GGg4Hc2KxO",
+      "XFYCqGHXHkdL1ktCrdG2",
+      "jdxxW9O3MlXY3hqgt9sx",
+      "YkYL4kGVFVxqXkcQuk5B",
+      "BPx4u5COUnJycDG97IdB",
+      "xTsbqXw3s1jvXQw3pS81",
+      "wI9sRvNbUyeGw9StkM8V",
+      "54SM8YT53PkDr5PH7pqq"
+    ],
+    "KvetEyfjJhv5ij0bdRSr": [
+      "wNyNDjq2ApPGAR4Z08sw",
+      "jYL6sjnAVSD48TGAmebt",
+      "r5pZPQ7yDmx1t0hM99QR",
+      "Prl3Oi6cYs1GvHcUZxuW",
+      "0JaZiEBK64jKk2ppsnxx"
+    ],
+    "muRMRwo2J56K2x410qEw": [
+      "nvcYj33JhrPdCXBqvOwx",
+      "NHuPsYDP5UoisvsiDSVr",
+      "svTUkrdWNjMnSaYBrYsI",
+      "INdYqQ3CrqDcBDECkDnC",
+      "9n6aGb0k0Sm7srxT2Qvs"
+    ],
+    "egMzaQWV6Wc0OwMLGN0B": [
+      "QwZ03yOdEZ0XmYnA7I36"
+    ],
+    "sjnyCC71hA10AaQjqQT4": [
+      "beYFGQ1sbcsop9KtxPko",
+      "iIjIk5VPCM8cbjVCRv2S",
+      "C1D2YMGIUMKJLI8QNO1z",
+      "5dNn93KYZUDYbh5cvHwG",
+      "ibouNoTsquPoxrEADoDp",
+      "VZx2dlhB3cbDDq2zIUX4",
+      "SyJdl3EHoBOvjzTpzkkB",
+      "Q1bdHTASyBDzVOV1aunQ",
+      "w4uv2D40TKlZC3GYwHn1",
+      "TfYhClXZFPTqrQQcsodB",
+      "6d2gs79q3vxzxnyHU1iW",
+      "ISHExDdYdXMW9inOt1EN",
+      "Xt9xIMeBAiECQlFkdAf7",
+      "NfWlDkmyxlKWtsfbIpTv",
+      "YXo7tUTmeDxch5sG6AQk",
+      "kbSAKEXmp3rNDFeo8mid",
+      "xHuLsOThsMU416MEVtFw",
+      "7mjbKNSUj4ygUUFeQDuF",
+      "zgrdh8CJpXBpmDREiXkj",
+      "HQ2cVtuqJNGgIm4yCK4J",
+      "HAhBepssKrDONMrl6tVV",
+      "bNj845mPaNqasXBmKDZK",
+      "gY9XUI2cB9pS2UFNXukH",
+      "gXkqSQ3G2cnXRsNjs8RC"
+    ]
+  },
+
+  "_nota_ordine": "L'ordine dentro ogni lista e' l'ordine in cui i campi appaiono nella scheda contatto (position = indice * 10). In '02 · Qualifica ICP' il primo e' 'Qualifica fatturato': e' il campo su cui segmentare, deve essere il primo che vedi."
+}
