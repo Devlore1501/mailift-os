@@ -13,7 +13,8 @@
       "Bash(wc -l frontend/src/*.tsx frontend/src/api/*.ts frontend/src/pages/*.tsx)",
       "Bash(python3 -c \"import json,sys; p=json.load\\(sys.stdin\\); print\\('name:',p.get\\('name'\\)\\); print\\('scripts:'\\); [print\\(' ',k,'=',v\\) for k,v in p.get\\('scripts',{}\\).items\\(\\)]; print\\('deps:'\\); [print\\(' ',k,v\\) for k,v in p.get\\('dependencies',{}\\).items\\(\\)]\")",
       "Bash(.venv/bin/python -c ':*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Workflow(deep-research)"
     ]
   }
 }
