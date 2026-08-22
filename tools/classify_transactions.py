@@ -71,7 +71,9 @@ sulle autofatture emesse nei mesi precedenti, sessione 2026-08-22):
 - "Paddle.net" -> Paddle.com Market Ltd, GB, TD17
 - "Anthropic" -> Anthropic, PBC, US, TD17
 - "Elevenlabs" -> ElevenLabs, Inc., US, TD17
-- "Lovable" -> Lovable Labs Incorporated, SE, TD17
+- "Lovable" -> Lovable Labs Incorporated, **US** (Dover, Delaware — extra-UE), TD17.
+  Verificato sulla fattura 0LNAHU2R-0019 del 24/07/2026: l'emittente e' l'entita' statunitense,
+  NON "Lovable AB" svedese. Non proporre mai SE per Lovable.
 - "Hostinger" -> Hostinger International Ltd, CY, TD17
 Un addebito su carta a un fornitore estero di software/servizi digitali va SEMPRE incluso,
 anche se di importo minimo (1-20 EUR): l'obbligo di autofattura non ha soglia.

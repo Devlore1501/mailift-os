@@ -393,10 +393,24 @@ Il token Gmail dell'account **personal** è scaduto (`invalid_grant`) e la maggi
 ricevute SaaS arriva lì. Rifare `python tools/gmail_oauth_setup.py --account personal` per
 riabilitare il pre-check sulle fatture reali.
 
-### 4. Ambiguità aperte da chiudere sulla fattura vera
-- **Lovable**: in anagrafica FiC è "Lovable Labs Incorporated" con country **Svezia** ma indirizzo
-  **Dover, Delaware (US)**. Trattamento storico incoerente: 10/a US 0%, 25/a Svezia 0%, 33/a e
-  61/a Svezia 22% RC. Se l'emittente reale è l'entità US → va vat_id=10.
+### 4. Lovable è statunitense — CHIUSO sulla fattura vera
+Fattura **0LNAHU2R-0019 del 24/07/2026**: emittente **Lovable Labs Incorporated, 1111b South
+Governors Avenue, Dover, Delaware 19904, United States**, "Tax to be paid on reverse charge basis",
+0%. Bill to corretto: mailift srl, Via Casilina 1940, 00132 Roma, IT VAT IT18160081008 (l'email
+sul portale è ancora la gmail personale — da cambiare nel pannello Billing di Lovable).
+Quindi Lovable è **extra-UE → vat_id=10, RF18**, e la country "Svezia" in anagrafica FiC era
+sbagliata (probabilmente per via di "Lovable AB", entità diversa).
+
+Corretto il 22/08/2026: anagrafica fornitore 50070423 (country Stati Uniti + indirizzo reale) e
+autofattura 61/a (vat 0→10, lordo 30,50→25,00, RF01→RF18). Prompt del classificatore aggiornato.
+
+### 5. DatiFattureCollegate: si lasciano vuoti
+Tentato di popolare `ei_data.od_number` / `od_date` con il numero della fattura reale: FiC richiede
+anche `original_document_type` e rifiuta i valori provati (`invoice`, `TD01`, `supplier_invoice`)
+senza documentare l'enum. Verificato che **nessuna** delle 60 autofatture storiche — comprese quelle
+del commercialista accettate dal SDI — ha quei campi valorizzati: non servono, lasciarli vuoti.
+
+### 6. Ambiguità ancora aperta
 - **Paddle.com Market Ltd (GB)**: 15/a del 2025 usava vat_id=0 (22%), la regola attuale post-Brexit
   lo tratta come extra-UE → vat_id=10 (65/a). Allineare la scelta con il commercialista.
 
