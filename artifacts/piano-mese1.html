@@ -5,242 +5,165 @@
 
 <style>
 :root{
-  --paper:#F2F1EC;
-  --card:#FBFAF7;
-  --ink:#15201F;
-  --ink-2:#3D4A48;
-  --ink-3:#6E7B78;
-  --rule:#D8D8D0;
-  --rule-soft:#E7E6DF;
-  --accent:#0B6360;
-  --accent-soft:#DCEAE7;
-  --accent-ink:#084B49;
-  --warn:#9A5B08;
-  --warn-soft:#F6E8D2;
-  --done:#4A6B3E;
-  --done-soft:#E2EBDB;
+  --paper:#F2F1EC; --card:#FBFAF7; --ink:#15201F; --ink-2:#3D4A48; --ink-3:#6E7B78;
+  --rule:#D8D8D0; --rule-soft:#E7E6DF;
+  --accent:#0B6360; --accent-soft:#DCEAE7; --accent-ink:#084B49;
+  --warn:#9A5B08; --warn-soft:#F6E8D2;
+  --done:#4A6B3E; --done-soft:#E2EBDB;
+  --heat:#A6371F; --heat-soft:#F6E1DA;
   --shadow:0 1px 2px rgba(21,32,31,.05), 0 8px 24px -14px rgba(21,32,31,.22);
-
   --display:"Archivo", ui-sans-serif, system-ui, sans-serif;
   --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
   --mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --paper:#101817;
-    --card:#18211F;
-    --ink:#E9EAE5;
-    --ink-2:#B4BDBA;
-    --ink-3:#7E8A87;
-    --rule:#2B3634;
-    --rule-soft:#222C2A;
-    --accent:#5FC7BE;
-    --accent-soft:#1B3634;
-    --accent-ink:#8FDDD5;
-    --warn:#E5A957;
-    --warn-soft:#392D18;
-    --done:#9FC48D;
-    --done-soft:#25321F;
+    --paper:#101817; --card:#18211F; --ink:#E9EAE5; --ink-2:#B4BDBA; --ink-3:#7E8A87;
+    --rule:#2B3634; --rule-soft:#222C2A;
+    --accent:#5FC7BE; --accent-soft:#1B3634; --accent-ink:#8FDDD5;
+    --warn:#E5A957; --warn-soft:#392D18;
+    --done:#9FC48D; --done-soft:#25321F;
+    --heat:#E8907A; --heat-soft:#3A2119;
     --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 26px -16px rgba(0,0,0,.7);
   }
 }
 :root[data-theme="dark"]{
-  --paper:#101817;
-  --card:#18211F;
-  --ink:#E9EAE5;
-  --ink-2:#B4BDBA;
-  --ink-3:#7E8A87;
-  --rule:#2B3634;
-  --rule-soft:#222C2A;
-  --accent:#5FC7BE;
-  --accent-soft:#1B3634;
-  --accent-ink:#8FDDD5;
-  --warn:#E5A957;
-  --warn-soft:#392D18;
-  --done:#9FC48D;
-  --done-soft:#25321F;
+  --paper:#101817; --card:#18211F; --ink:#E9EAE5; --ink-2:#B4BDBA; --ink-3:#7E8A87;
+  --rule:#2B3634; --rule-soft:#222C2A;
+  --accent:#5FC7BE; --accent-soft:#1B3634; --accent-ink:#8FDDD5;
+  --warn:#E5A957; --warn-soft:#392D18;
+  --done:#9FC48D; --done-soft:#25321F;
+  --heat:#E8907A; --heat-soft:#3A2119;
   --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 26px -16px rgba(0,0,0,.7);
 }
 
 *{box-sizing:border-box}
-body{
-  margin:0;
-  background:var(--paper);
-  color:var(--ink);
-  font-family:var(--serif);
-  font-size:17px;
-  line-height:1.6;
-  -webkit-font-smoothing:antialiased;
-}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);
+  font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
 .wrap{max-width:1080px;margin:0 auto;padding:0 20px 96px}
 
-/* ---------- masthead ---------- */
 .masthead{padding:48px 0 28px;border-bottom:2px solid var(--ink)}
-.eyebrow{
-  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--accent);margin:0 0 14px
-}
-h1{
-  font-family:var(--display);font-weight:800;font-size:clamp(38px,7vw,64px);
-  line-height:.98;letter-spacing:-.028em;margin:0;text-wrap:balance;
-}
-.dek{
-  font-size:19px;color:var(--ink-2);max-width:62ch;margin:18px 0 0;
-}
-.meta-row{
-  display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:24px;
+.eyebrow{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(38px,7vw,64px);
+  line-height:.98;letter-spacing:-.028em;margin:0;text-wrap:balance}
+.dek{font-size:19px;color:var(--ink-2);max-width:62ch;margin:18px 0 0}
+.meta-row{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:24px;
   font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;
-  text-transform:uppercase;color:var(--ink-3)
-}
+  text-transform:uppercase;color:var(--ink-3)}
 .meta-row b{color:var(--ink);font-weight:700}
 
-/* ---------- month grid ---------- */
-.section-label{
-  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--ink-3);
-  margin:44px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--rule);
-}
+.tests{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;
+  margin-top:32px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden}
+.test{background:var(--card);padding:18px 20px}
+.test h3{font-family:var(--display);font-weight:700;font-size:17px;margin:0 0 8px;letter-spacing:-.01em}
+.test h3 span{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--accent);
+  display:block;margin-bottom:6px;font-weight:700}
+.test p{margin:0;font-size:15.5px;color:var(--ink-2);line-height:1.55}
+
+.section-label{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3);margin:44px 0 16px;padding-bottom:8px;
+  border-bottom:1px solid var(--rule)}
 .grid-scroll{overflow-x:auto;padding-bottom:4px}
-.month{
-  display:grid;grid-template-columns:52px repeat(4,minmax(150px,1fr));
-  gap:6px;min-width:700px;
-}
-.gh{
-  font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--ink-3);padding:0 0 8px 2px
-}
-.wk{
-  font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink-3);
-  display:flex;align-items:center;justify-content:center;
-}
-.cell{
-  display:block;width:100%;text-align:left;cursor:pointer;
-  background:var(--card);border:1px solid var(--rule);border-radius:3px;
-  padding:9px 10px 10px;font:inherit;color:inherit;
-  transition:border-color .12s, transform .12s;
-  border-left:3px solid var(--accent);
-}
+.month{display:grid;grid-template-columns:52px repeat(4,minmax(150px,1fr));gap:6px;min-width:700px}
+.gh{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3);padding:0 0 8px 2px}
+.wk{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink-3);
+  display:flex;align-items:center;justify-content:center}
+.cell{display:block;width:100%;text-align:left;cursor:pointer;background:var(--card);
+  border:1px solid var(--rule);border-radius:3px;padding:9px 10px 10px;font:inherit;color:inherit;
+  transition:border-color .12s, transform .12s;border-left:3px solid var(--accent)}
 .cell:hover{border-color:var(--ink-3);transform:translateY(-1px)}
 .cell:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .cell.is-shot{border-left-color:var(--done)}
 .cell.is-warn{border-left-color:var(--warn)}
 .cell .d{font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:.06em}
-.cell .t{
-  font-family:var(--display);font-weight:600;font-size:13px;line-height:1.25;
-  margin-top:5px;letter-spacing:-.008em;
-}
-.cell .s{
-  font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--ink-3);margin-top:6px;display:block
-}
+.cell .t{font-family:var(--display);font-weight:600;font-size:13px;line-height:1.25;
+  margin-top:5px;letter-spacing:-.008em}
+.cell .s{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-3);margin-top:6px;display:block}
 
-/* ---------- legend + filters ---------- */
-.bar{
-  display:flex;flex-wrap:wrap;gap:8px;align-items:center;
-  margin:32px 0 0;padding:14px 0;border-top:1px solid var(--rule);
-  border-bottom:1px solid var(--rule);
-  position:sticky;top:0;z-index:20;background:var(--paper);
-}
-.bar .lbl{
-  font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--ink-3);margin-right:4px
-}
-.chip{
-  font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.04em;
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:32px 0 0;padding:14px 0;
+  border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+  position:sticky;top:0;z-index:20;background:var(--paper)}
+.bar .lbl{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3);margin-right:4px}
+.chip{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.04em;
   padding:6px 12px;border-radius:100px;border:1px solid var(--rule);
-  background:transparent;color:var(--ink-2);cursor:pointer;transition:.12s;
-}
+  background:transparent;color:var(--ink-2);cursor:pointer;transition:.12s}
 .chip:hover{border-color:var(--ink-3);color:var(--ink)}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .count{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
 
-/* ---------- week heading ---------- */
-.week-head{
-  display:flex;align-items:baseline;gap:14px;
-  margin:52px 0 20px;padding-bottom:10px;border-bottom:2px solid var(--ink);
-}
-.week-head h2{
-  font-family:var(--display);font-weight:800;font-size:22px;margin:0;
-  letter-spacing:-.02em;
-}
+.week-head{display:flex;align-items:baseline;gap:14px;margin:52px 0 20px;
+  padding-bottom:10px;border-bottom:2px solid var(--ink)}
+.week-head h2{font-family:var(--display);font-weight:800;font-size:22px;margin:0;letter-spacing:-.02em}
 .week-head span{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.08em}
 
-/* ---------- card ---------- */
-.card{
-  background:var(--card);border:1px solid var(--rule);border-radius:4px;
-  box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden;scroll-margin-top:80px;
-}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:4px;
+  box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden;scroll-margin-top:80px}
 .card.is-warn{border-top:3px solid var(--warn)}
 .card.is-shot{opacity:.86}
-.card-top{
-  display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;
-  padding:18px 22px 14px;border-bottom:1px solid var(--rule-soft);
-}
+.card-top{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;
+  padding:18px 22px 14px;border-bottom:1px solid var(--rule-soft)}
 .slot{flex:0 0 auto;min-width:84px}
-.slot .day{
-  font-family:var(--display);font-weight:800;font-size:26px;line-height:1;
-  letter-spacing:-.02em;font-variant-numeric:tabular-nums;
-}
-.slot .dow{
-  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--ink-3);margin-top:5px;display:block
-}
+.slot .day{font-family:var(--display);font-weight:800;font-size:26px;line-height:1;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.slot .dow{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-3);margin-top:5px;display:block}
 .head{flex:1 1 320px;min-width:0}
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
-.tag{
-  font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.1em;
+.tag{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.1em;
   text-transform:uppercase;padding:3px 8px;border-radius:3px;
-  background:var(--accent-soft);color:var(--accent-ink);
-}
+  background:var(--accent-soft);color:var(--accent-ink)}
 .tag.t-warn{background:var(--warn-soft);color:var(--warn)}
 .tag.t-done{background:var(--done-soft);color:var(--done)}
+.tag.t-heat{background:var(--heat-soft);color:var(--heat)}
 .tag.t-plain{background:transparent;color:var(--ink-3);border:1px solid var(--rule)}
-.head h3{
-  font-family:var(--display);font-weight:700;font-size:20px;line-height:1.2;
-  margin:0;letter-spacing:-.018em;text-wrap:balance;
-}
-.shot-toggle{
-  flex:0 0 auto;display:flex;align-items:center;gap:7px;cursor:pointer;
+.head h3{font-family:var(--display);font-weight:700;font-size:20px;line-height:1.2;
+  margin:0;letter-spacing:-.018em;text-wrap:balance}
+.shot-toggle{flex:0 0 auto;display:flex;align-items:center;gap:7px;cursor:pointer;
   font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--ink-3);user-select:none;padding-top:4px
-}
+  color:var(--ink-3);user-select:none;padding-top:4px}
 .shot-toggle input{accent-color:var(--accent);width:15px;height:15px;cursor:pointer}
 
+.gives{display:flex;gap:12px;align-items:baseline;padding:13px 22px;
+  background:var(--accent-soft);border-bottom:1px solid var(--rule-soft)}
+.gives b{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--accent-ink);flex:0 0 auto;padding-top:2px}
+.gives span{font-family:var(--display);font-weight:600;font-size:15.5px;line-height:1.4;
+  color:var(--accent-ink);letter-spacing:-.006em}
+
 .card-body{padding:20px 22px 22px}
-.hookline{
-  font-family:var(--display);font-weight:600;font-size:21px;line-height:1.32;
+.hookline{font-family:var(--display);font-weight:600;font-size:21px;line-height:1.32;
   letter-spacing:-.014em;margin:0 0 20px;padding-left:16px;
-  border-left:3px solid var(--accent);text-wrap:balance;
-}
-.beat{display:grid;grid-template-columns:118px 1fr;gap:14px;padding:9px 0;border-top:1px solid var(--rule-soft)}
+  border-left:3px solid var(--accent);text-wrap:balance}
+.beat{display:grid;grid-template-columns:126px 1fr;gap:14px;padding:9px 0;
+  border-top:1px solid var(--rule-soft)}
 .beat:first-of-type{border-top:none}
-.beat dt{
-  font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--ink-3);padding-top:5px;
-}
+.beat dt{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);padding-top:5px}
 .beat dd{margin:0;color:var(--ink)}
 .beat dd p{margin:0 0 7px}
 .beat dd p:last-child{margin-bottom:0}
+.beat.heat{background:var(--heat-soft);margin:0 -12px;padding:11px 12px;border-radius:3px;
+  border-top-color:transparent}
+.beat.heat dt{color:var(--heat)}
+.beat.heat dd{font-family:var(--display);font-weight:600;font-size:18px;line-height:1.35;
+  letter-spacing:-.01em}
+.beat.script dd{background:var(--paper);border:1px dashed var(--rule);border-radius:3px;
+  padding:11px 13px;font-size:16px}
 dl{margin:0}
 
-.cap{
-  margin-top:22px;border:1px solid var(--rule);border-radius:4px;
-  background:var(--paper);
-}
-.cap-head{
-  display:flex;align-items:center;gap:10px;padding:11px 16px;
-  border-bottom:1px solid var(--rule-soft);
-}
-.cap-head b{
-  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--ink-3)
-}
-.copy{
-  margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:.06em;
+.cap{margin-top:22px;border:1px solid var(--rule);border-radius:4px;background:var(--paper)}
+.cap-head{display:flex;align-items:center;gap:10px;padding:11px 16px;
+  border-bottom:1px solid var(--rule-soft)}
+.cap-head b{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3)}
+.copy{margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:.06em;
   padding:5px 11px;border:1px solid var(--rule);border-radius:3px;
-  background:transparent;color:var(--ink-2);cursor:pointer;transition:.12s
-}
+  background:transparent;color:var(--ink-2);cursor:pointer;transition:.12s}
 .copy:hover{border-color:var(--accent);color:var(--accent)}
 .copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .cap-body{padding:16px 18px;font-size:16px;line-height:1.66;color:var(--ink-2)}
@@ -248,22 +171,15 @@ dl{margin:0}
 .cap-body p:last-child{margin-bottom:0}
 .cap-body .tagline{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.02em}
 
-.note{
-  margin-top:16px;padding:12px 16px;border-radius:4px;
-  background:var(--warn-soft);border:1px solid transparent;
-  font-size:15px;line-height:1.5;color:var(--ink);
-}
+.note{margin-top:16px;padding:12px 16px;border-radius:4px;background:var(--warn-soft);
+  font-size:15px;line-height:1.5;color:var(--ink)}
 .note b{font-family:var(--display);font-weight:700}
-
 .empty{padding:40px 0;color:var(--ink-3);font-family:var(--mono);font-size:12px}
 
-/* ---------- closing ---------- */
 .closing{margin-top:64px;padding-top:28px;border-top:2px solid var(--ink)}
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:26px;margin-top:20px}
-.col h4{
-  font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--accent);margin:0 0 10px
-}
+.col h4{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--accent);margin:0 0 10px}
 .col p{margin:0 0 10px;font-size:16px;color:var(--ink-2)}
 .col ul{margin:0;padding-left:18px;font-size:16px;color:var(--ink-2)}
 .col li{margin-bottom:6px}
@@ -273,8 +189,8 @@ dl{margin:0}
   body{font-size:16px}
   .beat{grid-template-columns:1fr;gap:3px}
   .beat dt{padding-top:0}
-  .card-top{padding:16px}
-  .card-body{padding:16px}
+  .card-top,.card-body{padding:16px}
+  .gives{padding:12px 16px;flex-wrap:wrap;gap:6px}
   .bar{position:static}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -285,12 +201,23 @@ dl{margin:0}
 <header class="masthead">
   <p class="eyebrow">Mailift · Instagram · 24 agosto — 20 settembre 2026</p>
   <h1>Foglio di ripresa</h1>
-  <p class="dek">Sedici contenuti in quattro settimane. Ogni scheda ha l'hook, i beat da dire a voce, la didascalia pronta da incollare e la parola chiave della CTA.</p>
+  <p class="dek">Sedici contenuti in quattro settimane. Ogni scheda dichiara cosa lascia in mano a chi guarda e dove deve far sentire qualcosa, prima ancora dei beat da dire a voce.</p>
   <div class="meta-row">
     <span><b>16</b> contenuti</span>
     <span><b>4</b> a settimana · lun mer ven dom</span>
     <span><b>11</b> quick win · <b>5</b> altro</span>
     <span>metrica: <b>salvataggi</b>, non views</span>
+  </div>
+
+  <div class="tests">
+    <div class="test">
+      <h3><span>Test 1</span>Cosa mi lascia nel concreto?</h3>
+      <p>Chi guarda deve poter dire una frase che comincia con <em>adesso ho</em> o <em>domani faccio</em>. Non <em>ho capito che</em>: capire non è avere. Ogni quick win consegna parole da copiare, un numero con la sua soglia, o un gesto da fare entro stasera.</p>
+    </div>
+    <div class="test">
+      <h3><span>Test 2</span>Cosa fa sentire?</h3>
+      <p>In ogni script c'è una riga marcata <b style="color:var(--heat)">↯</b> che non spiega niente. È dove chi guarda prova qualcosa. Va detta più piano, con una pausa prima. Le informazioni si salvano, le emozioni si mandano a qualcuno.</p>
+    </div>
   </div>
 </header>
 
@@ -313,8 +240,13 @@ dl{margin:0}
   <h2 style="font-family:var(--display);font-weight:800;font-size:26px;margin:0;letter-spacing:-.02em">Prima di pubblicare</h2>
   <div class="cols">
     <div class="col">
+      <h4>Le parole esatte vanno in sovrimpressione</h4>
+      <p>Quattro contenuti consegnano testo da copiare: le tre righe sopra il bottone, gli oggetti delle mail di carrello, il messaggio a sette giorni, le due frasi del biglietto.</p>
+      <p>Quel testo non va solo detto. Va <b>scritto a schermo</b>, fermo, leggibile. È la parte che si fotografa, ed è il motivo per cui un video finisce nei salvataggi invece che nei mi piace.</p>
+    </div>
+    <div class="col">
       <h4>Il collo di bottiglia</h4>
-      <p>Sette contenuti su sedici chiudono con una parola chiave. La risorsa deve esistere <b>prima</b> che il video esca: con questo pubblico una promessa non mantenuta costa più di quanto valga il lead.</p>
+      <p>Sette contenuti su sedici chiudono con una parola chiave. La risorsa deve esistere <b>prima</b> che il video esca.</p>
       <ul>
         <li><b>INBOX · SEGMENTI · WELCOME · PULIZIA</b> — urgenti, già promesse nei video girati</li>
         <li><b>CARRELLO · LISTA · RIACQUISTO · RECENSIONI</b> — servono entro la settimana 2</li>
@@ -323,13 +255,7 @@ dl{margin:0}
     <div class="col">
       <h4>I quattro fuori territorio</h4>
       <p>Tasto Acquista, sito da mobile, packaging, offerta post-checkout escono dall'area email e retention.</p>
-      <p>Un founder da 100k spesso ha già qualcuno sul CRO. Un consiglio impreciso lì costa credibilità proprio col target migliore. Vanno verificati uno per uno, e girati in un unico blocco perché richiedono tutti schermate o oggetti.</p>
-    </div>
-    <div class="col">
-      <h4>La regola dei contenitori</h4>
-      <p>Le strutture <b>educative</b> hanno forma parallela: si riavvolgono e si salvano. Vanno sui quick win.</p>
-      <p>Le strutture <b>narrative</b> non si salvano, si ricordano. Vanno sul mercoledì, una a settimana.</p>
-      <p>Nessun contenitore si ripete in due uscite consecutive: il difetto più probabile di un piano non è il singolo script, è che abbiano tutti la stessa curva.</p>
+      <p>Un founder da 100k spesso ha già qualcuno sul CRO. Un consiglio impreciso lì costa credibilità proprio col target migliore. Da verificare uno per uno, e da girare in un unico blocco perché richiedono tutti schermate o oggetti.</p>
     </div>
     <div class="col">
       <h4>Cosa si guarda a fine mese</h4>
@@ -345,6 +271,7 @@ dl{margin:0}
 const D = [
  {n:1,day:"24",dow:"Lun",wk:1,t:"I 3 gruppi da cui partire nel database",
   kind:"Quick win",macro:"Contatti che non uso",struct:"Schema",cta:"commento SEGMENTI",kw:1,shot:1,warn:0,
+  gives:"I tre segmenti e cosa mandare a ognuno",emo:"Riconoscimento",
   hook:"Stai trattando chi ha speso duemila euro da te esattamente come uno che non ha mai comprato niente.",
   beats:[["Promessa","Tre gruppi, dieci minuti, e cambia la performance di ogni email che mandi."],["Body 1","Gli attivi: chi ha aperto o cliccato negli ultimi due mesi. Le campagne mandale prima a loro: proteggi la reputazione e vendi di più."],["Loop 1","Il secondo vale più di tutti gli altri messi insieme…"],["Body 2","I clienti che hanno speso di più. Non mandargli lo stesso sconto di massa: dagli accesso anticipato, novità prima degli altri. Ti costa zero e li leghi."],["Loop 2","E il terzo è quello che ti fa recuperare soldi già persi…"],["Body 3","Chi non si fa vivo da mesi. Isolalo e mandagli una sequenza dedicata, diversa dal resto. Sono i clienti più economici che hai."],["CTA","Se oggi mandi tutto a tutti, questi tre sono la cosa più veloce che puoi sistemare. Commenta SEGMENTI."]],
   cap:["Mandare la stessa email a tutta la lista fa due danni. Uno lo vedi, l'altro no.","Quello che vedi: i clienti buoni si stufano. Chi ha speso tanto da te riceve lo stesso identico messaggio di uno sconosciuto, non si sente riconosciuto, e col tempo smette di aprirti.","Quello che non vedi è peggio. Ogni volta che mandi anche a chi non apre da un anno, il tuo tasso di apertura crolla. E Gmail ti giudica su quello. Quindi i contatti morti stanno danneggiando la consegna delle email ai clienti vivi.","È il motivo per cui a volte va tutto peggio senza aver cambiato niente.","Nel video ti ho detto i tre segmenti. Sono la versione minima, quella da cui parto sempre prima di toccare qualsiasi altra cosa.","Commenta SEGMENTI e ti mando i criteri esatti."],
@@ -352,6 +279,8 @@ const D = [
 
  {n:12,day:"26",dow:"Mer",wk:1,t:"Non hai un business, hai un affitto",
   kind:"Opinione",macro:"Crescere senza ads",struct:"La lezione",cta:"segui",kw:0,shot:1,warn:0,
+  gives:"Niente di operativo, ed è corretto per un'opinione. Il conto (5% contro 25% del fatturato) lo recupera la didascalia",
+  emo:"Colpevole esterno",
   hook:"Non hai un business. Hai un affitto. E il padrone di casa ha appena alzato il prezzo del venti per cento.",
   beats:[["Promessa","Il problema vero non sono i costi. È un'altra cosa, e ti riguarda anche se il budget ce l'hai."],["Body 1","Ogni mese paghi per esistere a una piattaforma che decide lei il prezzo."],["Loop 1","E può fare di peggio…"],["Body 2","Può cambiare le regole o chiuderti l'account domani mattina. E tu ci hai costruito sopra tutta l'azienda."],["Loop 2","Il che ti lascia una sola cosa davvero tua…"],["Body 3","Le persone che hanno già comprato da te. I loro contatti. Il rapporto diretto. Quando i costi salgono, chi possiede quello continua a vendere. Chi dipende solo dalle ads va sotto."],["CTA","Non è un video contro la pubblicità: la pubblicità serve. È per chi è stanco di essere in affitto. Se sei tra quelli, seguimi."]],
   cap:["Il rapporto diretto con i tuoi clienti è l'unica cosa che possiedi davvero.","E qui arriva la parte che nel video non ci stava.","Quasi tutti quel rapporto ce l'hanno già. Migliaia di contatti raccolti in anni: gente che ha comprato, che si è fidata, che ha lasciato la sua email.","E non riceve niente da mesi.","Non è che ti manca l'asset. Ce l'hai e lo lasci lì mentre ogni mese firmi un assegno per andare a cercare persone nuove.","Due conti veloci: se le email ti portano il 5% del fatturato invece del 25, e fatturi 100k al mese, sono 20.000 euro al mese che restano fermi. Da clienti che hai già pagato una volta.","Non è fatturato da trovare. È fatturato da incassare.","E tu quanto fa oggi l'email sul tuo fatturato? Scrivi il numero qui sotto, ti dico se sei sopra o sotto la media."],
@@ -359,6 +288,7 @@ const D = [
 
  {n:2,day:"28",dow:"Ven",wk:1,t:"Cosa deve ricevere chi si iscrive",
   kind:"Quick win",macro:"Contatti che non uso",struct:"Vieni e commenta",cta:"commento WELCOME",kw:1,shot:1,warn:0,
+  gives:"Le tre email e l'ordine in cui vanno",emo:"Ingiustizia",
   hook:"Ti lascia la mail nel momento in cui si fida di più di te. E tu rispondi grazie per l'iscrizione, ecco il dieci per cento.",
   beats:[["Promessa","Ecco le tre che dovrebbe ricevere. L'ordine conta più del contenuto."],["Body 1","La prima non vende niente. Racconta chi sei e perché esisti. La gente compra dai brand di cui si fida, e la fiducia parte da lì."],["Loop 1","La seconda ha un vincolo di tempo preciso…"],["Body 2","Entro ventiquattr'ore, mentre si ricorda ancora di te. E lì smonti il dubbio numero uno: recensioni, garanzia, resi facili."],["Loop 2","E la terza è dove quasi tutti lasciano i soldi sul tavolo…"],["Body 3","L'offerta con una scadenza vera. Non quando vuoi. Senza questa, tutta la fiducia che hai costruito resta lì e non diventa un ordine."],["CTA","Commenta WELCOME e ti mando la struttura delle tre."]],
   cap:["Il welcome flow è la sequenza che quasi tutti gli ecommerce su Shopify hanno impostato male, e si vede subito dai numeri.","Nel video ti ho detto quali sono le tre email. Aggiungo la cosa che le fa funzionare davvero.","Non è il contenuto. È che vengono lette.","Quando una persona si iscrive è l'unico momento in cui apre tutto quello che le mandi. Passata quella finestra, torni a essere una newsletter come le altre. Per questo l'ordine conta: se sprechi il momento di massima attenzione per dare un codice sconto, poi devi ricomprarti quell'attenzione ogni volta.","Un cliente aveva un welcome fatto di una mail sola. L'abbiamo spezzato in tre, senza cambiare l'offerta. Stessa lista, stesso prodotto, numeri diversi.","Commenta WELCOME e ti mando la struttura, con cosa scrivere in ognuna."],
@@ -366,21 +296,25 @@ const D = [
 
  {n:3,day:"30",dow:"Dom",wk:1,t:"Prima di aumentare Meta, fai queste 4 cose",
   kind:"Quick win",macro:"Crescere senza ads",struct:"2 persone",cta:"salva",kw:0,shot:0,warn:0,
+  gives:"Quattro numeri con la loro soglia, e cosa vuol dire starci sotto",emo:"Fatica sprecata",
   hook:"Due ecommerce fanno centomila al mese. Tra un anno uno dei due ha il doppio del margine.",
-  beats:[["Parità","Stesso prodotto, stesso budget, stesso team."],["Persona A","Il primo vuole crescere e alza il budget su Meta del trenta per cento. È la cosa che farebbe chiunque: più traffico, più vendite."],["Persona B","Il secondo, prima di toccare il budget, fa quattro controlli che costano zero.|Guarda quanti dei suoi clienti hanno comprato più di una volta. Sotto il venti per cento, il buco è lì.|Prende chi non compra da sei mesi e gli manda qualcosa. Quelle persone le ha già pagate una volta.|Controlla se chi lascia il carrello riceve davvero qualcosa, e dopo quanto.|E calcola quanto gli costa un cliente per davvero. Spesa diviso clienti nuovi, non il ROAS che gli dà la piattaforma."],["Sei mesi dopo","Il primo ha più ordini e lo stesso margine di prima, perché ogni ordine in più se l'è comprato. Il secondo ha meno ordini nuovi e più soldi in banca, perché una parte dei suoi ordini non li ha pagati a nessuno."],["Perché","Alzare il budget lavora solo su gente nuova, che è la parte più cara che esiste. Quei quattro controlli lavorano su gente che hai già pagato."],["CTA","Salvatelo e rifallo la prossima volta che stai per toccare il budget."]],
-  cap:["La persona A non è stupida. È la scelta che farei anche io se guardassi solo i numeri di questo mese.","Alzare il budget è l'unica leva che ha una risposta immediata. La spingi oggi e domani vedi i numeri muoversi. Tutte le altre cose di cui parlo nel video danno risultato tra sei settimane, e nel frattempo non succede niente.","Per questo quasi nessuno le fa. Non per ignoranza. Per impazienza.","C'è però un dettaglio del quarto controllo che nel video non ci stava, ed è quello che di solito fa cambiare idea.","Quando calcoli quanto ti costa davvero un cliente, non usare il ROAS della piattaforma. Prendi tutto quello che hai speso in pubblicità nel mese e dividilo per i clienti nuovi veri, quelli che non avevano mai comprato prima. Non per gli ordini. Per le persone.","Il numero che esce è quasi sempre più alto di quello che avevi in testa.","E più è alto quel numero, più vale ogni cliente che torna una seconda volta.","Tu ce l'hai quel dato? Scrivilo qui sotto, ti dico se il tuo problema è il traffico o quello che succede dopo."],
+  beats:[["Parità","Stesso prodotto, stesso budget, stesso team."],["Persona A","Il primo vuole crescere e alza il budget su Meta del trenta per cento. È la cosa che farebbe chiunque: più traffico, più vendite."],["Persona B · i 4 numeri","Il secondo, prima di toccare il budget, si scrive quattro numeri. Ci mette dieci minuti.|Uno: quanti dei suoi clienti hanno comprato più di una volta. Se è sotto il venti per cento, il buco è lì, e più traffico lo allarga.|Due: quanti contatti non comprano da sei mesi. Se sono più di mille, il primo posto dove guardare non è Meta, è quel file.|Tre: quanto passa tra il carrello abbandonato e la prima mail. Se è più di un'ora, la finestra buona è già chiusa.|Quattro: spesa pubblicitaria del mese diviso clienti nuovi veri. Non ordini. Persone che non avevano mai comprato.",1],["Il numero che decide","L'ultimo è quello che decide tutto. Se quel numero è più alto del margine che fai sul primo ordine, ogni cliente nuovo lo stai pagando per vederlo tornare. E se non torna, l'hai pagato e basta."],["↯ La riga","Il primo non è pigro. È il contrario, sta correndo. Solo che sta correndo dentro una stanza che perde.",0,1],["Sei mesi dopo","Il primo ha più ordini e lo stesso margine di prima. Il secondo ha meno ordini nuovi e più soldi in banca, perché una parte dei suoi ordini non li ha pagati a nessuno."],["CTA","Salvatelo. Sono quattro numeri e dieci minuti, e ti dicono se il tuo problema è il traffico o quello che succede dopo."]],
+  cap:["La persona A non è stupida. È la scelta che farei anche io se guardassi solo i numeri di questo mese.","Alzare il budget è l'unica leva che ha una risposta immediata. La spingi oggi e domani vedi i numeri muoversi. Tutte le altre cose di cui parlo nel video danno risultato tra sei settimane, e nel frattempo non succede niente.","Per questo quasi nessuno le fa. Non per ignoranza. Per impazienza.","C'è però un dettaglio del quarto numero che nel video non ci stava, ed è quello che di solito fa cambiare idea.","Non usare il ROAS della piattaforma. Prendi tutto quello che hai speso in pubblicità nel mese e dividilo per i clienti nuovi veri, quelli che non avevano mai comprato prima. Non per gli ordini. Per le persone.","Il numero che esce è quasi sempre più alto di quello che avevi in testa.","E più è alto quel numero, più vale ogni cliente che torna una seconda volta.","Tu ce l'hai quel dato? Scrivilo qui sotto, ti dico se il tuo problema è il traffico o quello che succede dopo."],
   tags:"#ecommerce #shopify #metaads #retention #emailmarketing #dtc"},
 
  {n:4,day:"31",dow:"Lun",wk:2,t:"Le 3 informazioni vicino al tasto Acquista",
   kind:"Quick win",macro:"Vendere di più",struct:"Lo sapevi che",cta:"salva",kw:0,shot:0,warn:1,
-  hook:"Vicino al tuo tasto Acquista mancano tre informazioni.",
-  beats:[["Promessa","Mettile e vendi di più con lo stesso identico traffico. Chi arriva lì ha già deciso quasi tutto."],["Passo 1","Una data, non una promessa. Non spedizione in 24-48 ore. Ricevi entro giovedì."],["Passo 2","Cosa succede se non va bene. Reso, cambio taglia, chi paga la spedizione. Scritto lì, non nel footer."],["Passo 3","Quante persone l'hanno già comprato. Il rating vicino al bottone, non in fondo alla pagina dopo dodici scroll."],["Risultato","Fai queste tre cose e togli tre motivi per rimandare a chi aveva già deciso. E chi rimanda su un ecommerce non torna."],["CTA","Salvatelo e guardalo con la tua pagina prodotto aperta."]],
+  gives:"Le tre righe già scritte, in ordine, e dove vanno messe",emo:"Ingiustizia",
+  hook:"Vicino al tuo tasto Acquista mancano tre righe.",
+  beats:[["Promessa","Te le scrivo io. Vanno nei tre centimetri sopra o sotto il bottone, in quest'ordine."],["Riga 1","Ordina entro le 14, ricevi giovedì 3.|Una data vera, non spedizione in 24-48 ore. Ventiquattr'ore da quando? Chi legge non lo sa e non va a controllare.",1],["Riga 2","Non ti va? Cambio o rimborso entro 30 giorni, il reso lo paghiamo noi.|Scritto lì. Non nel footer, non in una pagina a parte.",1],["Riga 3","4,8 su 5, milleduecento recensioni.|Il numero vicino al bottone, non in fondo alla pagina dopo dodici scroll.",1],["Perché queste tre","Chi arriva a quel punto ha già deciso quasi tutto. Se esita, esita per un dubbio pratico che ci mette due secondi a venire e zero secondi a farlo uscire dal sito."],["↯ La riga","Quella persona l'hai pagata per portarla lì. E poi l'hai persa perché non c'era scritto quando arriva.",0,1],["CTA","Salvatelo, apri la tua scheda prodotto dal telefono e conta quante delle tre vedi senza scorrere."]],
   cap:["Le hai già tutte e tre sul sito. Lo so.","Il problema non è che mancano. È dove stanno.","La data di consegna è nella pagina spedizioni. La politica di reso è nel footer. Le recensioni sono in fondo alla scheda prodotto, dopo la descrizione lunga, dopo le foto, dopo il ti potrebbe interessare anche.","Tutte informazioni presenti. Nessuna nel punto in cui servono.","Chi sta per comprare non va a cercarle. Non apre una seconda scheda del browser per leggersi la politica di reso. Ha un dubbio di due secondi, non lo risolve, e rimanda. E rimandare su un ecommerce vuol dire quasi sempre mai.","Una cosa che vedo spesso: si passano settimane a rifare le foto e a riscrivere la descrizione, e poi la cosa che ferma davvero le persone è quando mi arriva.","Guarda la tua scheda prodotto adesso, dal telefono. Quante delle tre vedi senza scorrere?"],
   tags:"#ecommerce #shopify #cro #schedaprodotto #conversioni #dtc",
   note:"Fuori dal territorio email e retention. Ogni affermazione va verificata prima di girare."},
 
  {n:14,day:"02",dow:"Mer",wk:2,t:"La frase che riassume il 90% degli ecommerce",
   kind:"Esperienza",macro:"Crescere senza ads",struct:"La lezione",cta:"segui",kw:0,shot:1,warn:0,
+  gives:"Niente di operativo: è riconoscimento puro. Va bene una volta al mese, non di più",
+  emo:"Riconoscimento",
   hook:"Spendo quindicimila euro al mese in pubblicità e non so quanti clienti arrivino davvero. Se questa frase ti suona familiare, stai perdendo soldi in un punto preciso.",
   beats:[["Promessa","Me l'ha detta un cliente in call. È la frase che riassume il novanta per cento degli ecommerce che vedo."],["Body 1","Quella persona non è pigra. Fa tutto lei: ordini, contenuti, assistenza, pubblicità, fornitori."],["Loop 1","Ed è proprio questo che la frega…"],["Body 2","Corre così forte che guarda solo il rubinetto. Quanto traffico entra, quanto costa. Il fondo del secchio non lo guarda mai."],["Loop 2","E il buco è sempre nello stesso punto…"],["Body 3","Dopo che il cliente ha comprato. Lì tutti smettono di parlare. E quel cliente, che hai pagato per farti arrivare, dopo un mese si è dimenticato che esisti."],["CTA","Io faccio una cosa sola: recupero quello che stai già lasciando scappare. Se ti sei riconosciuto, seguimi."]],
   cap:["Quella call è finita con una domanda che mi ha fatto lui: ma secondo te sto sbagliando qualcosa di grosso?","No. Stava facendo tutto quello che gli avevano detto di fare. Traffico, creatività, offerte, ottimizzazioni. Il problema è che nessuno gli aveva mai detto di guardare cosa succede dopo.","È una cosa che ho notato dopo decine di call: nessuno arriva da me perché ha capito di avere un problema di email. Arrivano perché il margine non torna e non sanno spiegarsi il perché.","L'email è quasi sempre il posto dove si è rotto, ma è l'ultimo a cui si pensa. Perché non fa rumore. Le ads che vanno male le vedi subito, un flusso che non esiste non te lo dice nessuno.","Se ti ci ritrovi, siamo nel posto giusto."],
@@ -388,28 +322,32 @@ const D = [
 
  {n:5,day:"04",dow:"Ven",wk:2,t:"Prima dello sconto sul carrello, manda questo",
   kind:"Quick win",macro:"Sto perdendo vendite",struct:"Meglio e peggio",cta:"commento CARRELLO",kw:1,shot:0,warn:0,
+  gives:"Oggetto e contenuto di tutte e tre le mail, con i tempi",emo:"Colpa",
   hook:"La tua mail di carrello sta insegnando ai clienti ad abbandonare il carrello.",
-  beats:[["Frame","C'è un momento peggiore e un momento migliore per metterci dentro uno sconto."],["Il peggiore","Il peggiore è la prima mail, un'ora dopo.|Perché a quell'ora una parte di quelle persone aveva solo chiuso la scheda per fare altro. Quelle compravano comunque, e tu gli hai appena regalato il dieci per cento.|E le altre imparano la regola. Lascia il carrello, arriva il codice. La imparano in due ordini."],["Il migliore","Il migliore è la terza mail, e solo a chi non ha reagito alle prime due.|Perché la prima, entro un'ora, ha solo il prodotto e il pulsante.|La seconda, il giorno dopo, risponde al dubbio che li ha fermati: spedizione, taglia, reso.|E chi a quel punto è ancora fermo, fermo non ci è rimasto per il prezzo. Lì lo sconto serve davvero."],["Perché","Recuperi quasi uguale. Ma smetti di pagare quelli che compravano lo stesso."],["CTA","Commenta CARRELLO e ti mando la sequenza con i tempi."]],
+  beats:[["Frame","C'è un momento peggiore e un momento migliore per metterci dentro uno sconto."],["Il peggiore","Il peggiore è la prima mail, un'ora dopo.|Perché a quell'ora una parte di quelle persone aveva solo chiuso la scheda per fare altro. Quelle compravano comunque, e tu gli hai appena regalato il dieci per cento.|E le altre imparano la regola. Lascia il carrello, arriva il codice. La imparano in due ordini."],["↯ La riga","Non sono clienti furbi. Sono clienti addestrati. E li hai addestrati tu.",0,1],["Le tre mail","Mail uno, entro un'ora. Oggetto: hai lasciato qualcosa. Dentro: la foto del prodotto e il pulsante. Basta. Niente sconto, niente urgenza, niente paragrafo.|Mail due, il giorno dopo. Oggetto: la domanda che si sta facendo lui. Dubbi sulla taglia? Dentro: come si sceglie, quanto ci mette ad arrivare, come si rende.|Mail tre, due giorni dopo, e solo a chi non ha aperto le prime due. Qui puoi metterci un motivo per decidere adesso, perché chi è arrivato fin qui non si è fermato per il prezzo.",1],["Perché","Recuperi quasi uguale. Ma smetti di pagare quelli che compravano lo stesso."],["CTA","Commenta CARRELLO e ti mando i tre testi interi con i tempi."]],
   cap:["C'è una domanda che mi fanno sempre a questo punto: e quelli che la regola l'hanno già imparata?","Perché se mandi il codice sconto nella prima mail di carrello abbandonato da due anni, i tuoi clienti abituali lo sanno. Aggiungono al carrello, chiudono la scheda, aspettano.","Quell'abitudine non si toglie in una settimana.","Quello che funziona è smettere di premiarla senza annunciare niente. Nessuna email che dice da oggi basta sconti, perché quella la leggono in trecento e si arrabbiano in trecento. Si toglie e basta, e si sposta il valore da un'altra parte: spedizione gratis sopra soglia, un regalo, l'accesso anticipato.","Nei primi venti giorni una parte di loro non compra. È la parte scomoda e nessuno la dice.","Poi tornano, perché il prodotto lo volevano davvero, e tornano a prezzo pieno.","Tu nella prima mail di carrello cosa ci metti oggi? Scrivimelo qui sotto.","Commenta CARRELLO e ti mando la sequenza con i tempi esatti."],
   tags:"#carrelloabbandonato #klaviyo #shopify #emailmarketing #ecommerce #dtc"},
 
  {n:6,day:"06",dow:"Dom",wk:2,t:"Tre controlli sul sito dal telefono",
   kind:"Quick win",macro:"Il sito può vendere meglio",struct:"Azione → risultato",cta:"salva",kw:0,shot:0,warn:1,
+  gives:"Cinque controlli, e per ognuno il rimedio da fare stasera",emo:"Vergogna leggera",
   hook:"Apri il tuo sito dal telefono adesso. Due minuti.",
-  beats:[["Raffica","Se per vedere il prezzo devi scorrere, hai perso chi voleva solo sapere quanto costa.|Se il popup compare prima che uno abbia capito dove è, hai perso il contatto e la visita.|Se per chiuderlo serve il secondo tentativo, hai perso anche chi voleva restare.|Se il checkout obbliga a creare un account, stai facendo fare un'iscrizione a chi voleva solo comprare.|Se l'unico modo di pagare è digitare sedici numeri, hai perso chi era sul divano."],["Chiusura","La maggior parte dei tuoi ordini arriva da lì. E tu il sito lo guardi dal computer. Non è traffico nuovo: è traffico che stai già pagando."],["CTA","Salvatelo e fallo stasera."]],
+  beats:[["Raffica","Se per vedere il prezzo devi scorrere, hai perso chi voleva solo sapere quanto costa. Si sposta sopra la piega, oggi.|Se il popup compare prima che uno abbia capito dove è, hai perso il contatto e la visita. Si sposta a quindici secondi, o all'uscita.|Se per chiuderlo serve il secondo tentativo, hai perso anche chi voleva restare. La crocetta si allarga.|Se il checkout obbliga a creare un account, stai facendo fare un'iscrizione a chi voleva solo comprare. Si mette guest checkout, è una spunta.|Se l'unico modo di pagare è digitare sedici numeri, hai perso chi era sul divano. Si accendono Apple Pay e PayPal, ci vogliono dieci minuti."],["↯ La riga","Nessuna di queste cinque cose l'ha fatta un nemico. Le hai impostate tu, mesi fa, guardando il sito dal computer.",0,1],["Chiusura","La maggior parte dei tuoi ordini arriva dal telefono. E non è traffico nuovo: è traffico che stai già pagando due volte, una a Meta e una qui."],["CTA","Salvatelo e fallo stasera."]],
   cap:["C'è un motivo per cui il tuo sito dal telefono non lo guardi mai davvero.","Quando lo apri tu sei già loggato, il popup non compare perché l'hai già chiuso venti volte, i dati della carta sono salvati e le immagini sono in cache. Vedi la versione migliore che esisterà mai di quel sito. Quella che nessun cliente vedrà.","La prova vera si fa così: finestra in incognito, rete dati invece del wifi, e provi a comprare qualcosa fino in fondo. Fino al pagamento. Poi annulli.","Ci metti quattro minuti e ti fa un po' male.","L'ho fatto con un cliente in call, condividendo lo schermo. Il popup gli è comparso dopo due secondi, sopra il prezzo, e la crocetta per chiuderlo era mezza fuori dallo schermo. Lo aveva impostato lui otto mesi prima. Dal computer funzionava benissimo.","Falla stasera e scrivimi qui sotto quale delle cinque ti ha fregato."],
   tags:"#shopify #ecommerce #mobile #cro #conversioni #dtc",
   note:"Fuori dal territorio email e retention. Ogni affermazione va verificata prima di girare."},
 
  {n:7,day:"07",dow:"Lun",wk:3,t:"Tre promo da fare senza -20%",
   kind:"Quick win",macro:"Devo sempre scontare",struct:"3 livelli",cta:"commento LISTA",kw:1,shot:0,warn:0,
+  gives:"La formula della soglia e il metodo per trovare il bundle nei propri ordini",emo:"Orgoglio",
   hook:"Tre promozioni da fare questo weekend senza abbassare il prezzo.",
-  beats:[["Frame","Tre livelli, dal più facile al più efficace. Il primo lo fai stasera."],["Livello 1","Accesso anticipato. Apri il nuovo prodotto ventiquattro ore prima solo a chi ha già comprato. Costo zero, e fa sentire riconosciuti i clienti che ti tengono in piedi."],["Livello 2","Il regalo sopra soglia. Sopra ottanta euro aggiungi qualcosa che a te costa poco e a chi compra vale tanto. La gente aggiunge al carrello per arrivarci. Alzi lo scontrino invece di tagliare il margine."],["Livello 3","Il bundle. Due prodotti che si usano insieme, a un prezzo che ha senso solo insieme. Qui non stai scontando: stai vendendo un'altra cosa. E il prezzo del singolo resta quello che era."],["Chiusura","Tutte e tre aumentano quanto spende una persona, invece di diminuire quanto guadagni tu. Ogni sconto insegna che il prezzo vero è un altro, e che conviene aspettare."],["CTA","Commenta LISTA e ti mando cinquanta idee di promo che non sono sconti."]],
+  beats:[["Frame","Tre livelli, dal più facile al più efficace. Il primo lo fai stasera."],["Livello 1","Accesso anticipato. Apri il nuovo prodotto ventiquattro ore prima solo a chi ha già comprato. Non serve niente: una mail a un segmento. Costo zero, e i clienti che ti tengono in piedi si sentono riconosciuti per la prima volta."],["Livello 2 · la formula","La soglia non la scegli a caso, la calcoli. Prendi il tuo scontrino medio e aggiungi il venti per cento. Se vendi a ottanta, la soglia è novantasei, e la scrivi novantanove.|Sopra ci metti qualcosa che a te costa poco e a chi compra vale tanto. La gente aggiunge al carrello per arrivarci, e tu alzi lo scontrino invece di tagliare il margine.",1],["Livello 3 · il metodo","E il bundle non lo inventi. Vai negli ordini, filtra quelli con due prodotti dentro, e guarda quali due tornano di più. Quello è il tuo bundle. Te l'hanno già scritto i clienti, tu devi solo mettergli un prezzo e un nome.",1],["↯ La riga","Lo sconto non è una strategia. È la cosa che si fa il giovedì quando ci si accorge di non avere idee per il weekend.",0,1],["Chiusura","Tutte e tre alzano quanto spende una persona, invece di abbassare quanto guadagni tu."],["CTA","Commenta LISTA e ti mando cinquanta idee di promo che non sono sconti."]],
   cap:["Il livello tre è quello che quasi nessuno fa, e non per il motivo che pensi.","Il bundle non richiede sconti, non richiede budget, non richiede un tool. Richiede di decidere quali due prodotti stanno bene insieme. E quella decisione è l'unica delle tre che non puoi delegare a nessuno.","Per questo resta lì.","Un modo veloce per trovarli senza inventarsi niente: guarda gli ordini in cui una persona ha comprato due cose insieme. Non quello che secondo te dovrebbe stare insieme. Quello che sta già insieme nei carrelli veri, dove i clienti l'hanno già fatto da soli. Quello è il tuo bundle, e te l'hanno scritto loro.","La cosa che mi fa un po' arrabbiare è vedere brand con margini buoni che a novembre fanno il meno trenta perché lo fanno tutti. Non perché serva. Perché è l'unica idea che è venuta entro venerdì.","Tu il prossimo weekend cosa avevi in programma? Scrivimelo qui sotto.","Commenta LISTA e ti mando cinquanta idee di promo che non sono sconti."],
   tags:"#ecommerce #shopify #promozioni #margine #aov #dtc"},
 
  {n:16,day:"09",dow:"Mer",wk:3,t:"Le email non le apre nessuno? Non le vede nessuno",
   kind:"Verticale",macro:"Contatti che non uso",struct:"Supporto visivo",cta:"commento INBOX",kw:1,shot:1,warn:0,
+  gives:"Tre mosse operative, nessuna sul copy",emo:"Sollievo",
   hook:"Le tue email non le apre nessuno perché non le vede nessuno. Sono due problemi diversi e stai curando quello sbagliato.",
   beats:[["Promessa","Tre mosse per rimetterle davanti agli occhi. Nessuna riguarda cosa scrivi."],["Body 1","La grafica. Se la tua email è un banner enorme con dieci immagini, per Gmail è pubblicità. E la pubblicità va in Promozioni."],["Loop 1","La seconda pesa il doppio…"],["Body 2","Smetti di mandare a tutta la lista. Chi non apre da un anno abbassa il tuo punteggio, e finisci in spam anche con chi ti vorrebbe leggere."],["Loop 2","E la terza non la fa quasi nessuno…"],["Body 3","Nella prima email chiedi di risponderti. Una domanda vera. Per Gmail una risposta è il segnale più forte che esista: quella persona ti vuole."],["CTA","Sei sotto il trenta per cento di aperture? Commenta INBOX e ti mando la checklist."]],
   cap:["Una mia cliente si è portata dietro per due anni una frase che le aveva detto la vecchia agenzia: le email ormai non le apre più nessuno.","Ci aveva creduto. E aveva smesso di investirci.","Poi abbiamo aperto il suo account e la storia era un'altra. Le email le mandava, e arrivavano pure. Solo che finivano tutte nella tab Promozioni, in mezzo alle offerte di brand che non si ricordava nemmeno di seguire.","Nel video ti ho detto le tre mosse. La parte scomoda è un'altra.","Quando pulisci la lista, per due o tre settimane i numeri assoluti scendono. Meno destinatari, meno aperture totali, e ti viene il dubbio di averla fatta grossa. È lì che quasi tutti si spaventano e ricominciano a mandare a tutti.","Se resisti quelle tre settimane, la reputazione si rimette a posto.","Commenta INBOX e ti mando la checklist della deliverability."],
@@ -417,61 +355,64 @@ const D = [
 
  {n:8,day:"11",dow:"Ven",wk:3,t:"Il messaggio 7 giorni dopo l'ordine",
   kind:"Quick win",macro:"I clienti non tornano",struct:"2 persone",cta:"commento RIACQUISTO",kw:1,shot:0,warn:0,
+  gives:"Il messaggio intero, tre righe, da copiare",emo:"Calore",
   hook:"Due brand spediscono lo stesso prodotto allo stesso cliente.",
-  beats:[["Parità","Stesso giorno, stessa consegna. Al settimo giorno fanno due cose diverse."],["Brand A","Il primo manda una promozione. Nuovo arrivo, dieci per cento, valido fino a domenica. È la cosa che sembra giusta: il cliente è caldo, colpisci adesso."],["Brand B","Il secondo manda tre righe, senza grafica, e non vende niente. Un consiglio pratico su come sfruttare al meglio quello che ha appena comprato. E chiude con una domanda vera: è tutto a posto?"],["Trenta giorni dopo","Il primo ha una disiscrizione in più e un cliente che ha imparato una cosa: quando questi scrivono, vogliono soldi.|Il secondo ha una risposta. E dentro quella risposta o c'è un problema, che ha appena scoperto prima che diventasse una recensione da una stella, oppure c'è un grazie, che è una conversazione aperta."],["Perché","Il secondo acquisto non si chiede. Si prepara. E quando poi scriverai per vendere, non sarai uno che scrive solo per vendere."],["CTA","Commenta RIACQUISTO e ti mando la sequenza dei trenta giorni."]],
+  beats:[["Parità","Stesso giorno, stessa consegna. Al settimo giorno fanno due cose diverse."],["Brand A","Il primo manda una promozione. Nuovo arrivo, dieci per cento, fino a domenica. È la cosa che sembra giusta: il cliente è caldo, colpisci adesso."],["Brand B · il testo","Il secondo manda tre righe. Te le detto.|Ciao Marco, il tuo ordine è arrivato la settimana scorsa.|Una cosa che quasi nessuno fa e che cambia il risultato: [il consiglio vero sul tuo prodotto, uno solo].|È tutto a posto?|Fine. Testo semplice, niente immagini, niente pulsante, niente logo in cima. Deve sembrare scritta da te dal telefono, perché è quello che è.",1],["Trenta giorni dopo","Il primo ha una disiscrizione in più e un cliente che ha imparato una cosa: quando questi scrivono, vogliono soldi.|Il secondo ha una risposta. E dentro quella risposta o c'è un problema, che ha scoperto prima che diventasse una recensione da una stella, oppure c'è un grazie."],["↯ La riga","È l'unica email dell'anno a cui i tuoi clienti rispondono. E tu non l'hai mai mandata.",0,1],["CTA","Commenta RIACQUISTO e ti mando la sequenza dei trenta giorni con i testi."]],
   cap:["Il brand B ha un problema che il brand A non ha: alle risposte deve rispondere.","È la ragione numero uno per cui questa email non viene mandata. Non perché non funzioni. Perché genera lavoro.","Arrivano risposte vere, scritte da persone vere, e vanno lette. Alcune sono tutto benissimo grazie. Altre sono in realtà è arrivato con la scatola ammaccata e non sapevo a chi dirlo.","Quella seconda è la mail più preziosa che ricevi questo mese. È una recensione da una stella che non è ancora stata scritta, e ti è arrivata in privato mentre sei ancora in tempo.","Se hai paura del volume, mandala prima solo a chi ha ordinato sopra una certa cifra. Cento ordini al mese diventano venti risposte, e venti risposte le leggi in un caffè.","Quanti giorni dopo l'ordine scrivi ai tuoi clienti oggi? Se la risposta è mai, siamo in due a saperlo.","Commenta RIACQUISTO e ti mando la sequenza dei trenta giorni."],
   tags:"#retention #klaviyo #shopify #ecommerce #postacquisto #dtc"},
 
  {n:9,day:"13",dow:"Dom",wk:3,t:"Cosa mettere dentro il pacco",
   kind:"Quick win",macro:"Brand ricordato",struct:"Meglio e peggio",cta:"salva",kw:0,shot:0,warn:1,
+  gives:"Le due frasi che vanno sul biglietto, e le tre che non ci vanno",emo:"Fisicità",
   hook:"Dentro il pacco metti il volantino con il dieci per cento. Buttalo.",
-  beats:[["Frame","Quel momento è l'unica volta in cui hai l'attenzione fisica di un cliente al cento per cento. C'è un modo peggiore e un modo migliore per usarla."],["Il peggiore","Il flyer sconto. Perché dice una cosa sola: hai pagato troppo. La prima sensazione che gli fai provare dopo l'acquisto è il dubbio di aver sbagliato."],["Il migliore","Un biglietto che sembri scritto da una persona. Anche stampato, ma con un nome e una firma. Non un flyer.|Come usare bene quello che ha comprato. Due righe, o un QR verso una pagina fatta bene.|E un motivo per tornare che non sia uno sconto generico. I nuovi arrivi prima degli altri, o il prodotto che completa quello che ha preso."],["Perché","Il pacco è l'unico contatto fisico che hai con un cliente. Tutto il resto è uno schermo."],["CTA","Salvatelo prima del prossimo ordine di materiali."]],
+  beats:[["Il peggiore","Il flyer sconto dice una cosa sola, e la dice a uno che ha appena pagato prezzo pieno: potevi spendere meno."],["↯ La riga","Mentre apre la scatola, con quella faccia che facciamo tutti quando arriva un pacco, la prima cosa che gli fai provare è il dubbio di aver sbagliato.",0,1],["Il biglietto","Al posto del flyer ci va un biglietto con due frasi. Due, non tre.|La prima dice perché quel prodotto esiste. Tipo: questa crema l'abbiamo fatta perché mia madre non trovava niente che non le irritasse la pelle.|La seconda dice cosa fare se qualcosa non va, con un contatto vero. Se non ti trovi, scrivimi qui, rispondo io.|E sotto ci va un nome. Non il team. Un nome.",1],["Cosa non ci va","Non ci va il codice sconto, non ci va il QR verso Instagram, non ci va la storia del brand in nove righe. Chi ha un pacco in mano legge per otto secondi."],["Perché","Il pacco è l'unico contatto fisico che hai con un cliente in tutta la relazione. Tutto il resto è uno schermo."],["CTA","Salvatelo prima del prossimo ordine di materiali."]],
   cap:["Il flyer con il dieci per cento costa poco a stamparlo e tanto in un altro modo.","Chi lo trova nel pacco ha appena pagato prezzo pieno. E la prima cosa che gli dici, mentre apre la scatola con quella faccia che facciamo tutti quando arriva un pacco, è che poteva pagare di meno.","Non è un dettaglio da niente. È l'unico momento della relazione in cui hai il suo corpo e non il suo schermo.","Una cosa che ho visto funzionare bene e che costa quasi zero: il biglietto scritto a mano solo per gli ordini sopra una certa soglia. Non per tutti. Non è scalabile e va bene così. Sono venti biglietti al mese scritti la domenica sera, e sono venti persone che fotografano il pacco.","Il resto degli ordini prende la versione stampata con il nome e la firma. Funziona lo stesso, quasi.","Cosa c'è dentro il tuo pacco adesso? Rispondi qui sotto, sono curioso."],
   tags:"#ecommerce #shopify #packaging #unboxing #retention #dtc",
   note:"Fuori dal territorio email e retention. Ogni affermazione va verificata prima di girare."},
 
  {n:10,day:"14",dow:"Lun",wk:4,t:"L'offerta subito dopo il checkout",
   kind:"Quick win",macro:"Guadagnare di più da ogni cliente",struct:"Lo sapevi che",cta:"salva",kw:0,shot:0,warn:1,
+  gives:"Come scegliere il prodotto guardando i secondi acquisti, più le tre regole",emo:"Rimpianto",
   hook:"Il momento in cui un cliente accetta di spendere di più è trenta secondi dopo aver comprato.",
-  beats:[["Promessa","Nella pagina di ringraziamento proponi una cosa sola. Ma deve rispettare tre regole, o si rigira contro."],["Passo 1","Complementare, mai alternativa. Se gli fai pensare forse dovevo prendere quell'altro, hai appena creato un reso."],["Passo 2","Non deve rifare il pagamento. Se deve reinserire la carta, l'hai persa."],["Passo 3","Una proposta sola. Due opzioni fanno rimandare, e qui rimandare vuol dire mai."],["Risultato","Fai queste tre cose e quel cliente non lo stai acquisendo: l'hai già pagato. Tutto quello che aggiunge in quel momento è margine quasi pulito."],["CTA","Salvatelo e guarda cosa succede oggi sulla tua pagina di ringraziamento."]],
+  beats:[["Promessa","Nella pagina di ringraziamento proponi una cosa sola. Ti dico quale, e le tre regole per non farla diventare un reso."],["Come scegliere","Non indovinare. Prendi i clienti che hanno comprato due volte e guarda cos'hanno preso la seconda. Quello è il prodotto. Te l'hanno già detto loro: tu gli stai solo togliendo l'attesa di un mese.",1],["Regola 1","Complementare, mai alternativa. Se gli fai pensare forse dovevo prendere quell'altro, hai appena creato un reso."],["Regola 2","Non deve rifare il pagamento. Se ricompare il form della carta, l'hai persa. Provala tu con un ordine vero prima di lasciarla accesa."],["Regola 3","Una proposta sola. Due opzioni fanno rimandare, e qui rimandare vuol dire mai."],["↯ La riga","Quella finestra oggi ce l'hai avuta una volta per ogni ordine. E si è chiusa da sola, tutte le volte.",0,1],["CTA","Salvatelo e guarda cosa succede adesso sulla tua pagina di ringraziamento."]],
   cap:["La regola più violata è la seconda, e si viola quasi sempre per pigrizia tecnica.","Le app di post purchase upsell in teoria fanno il pagamento con un click. In pratica dipende da come è configurato il gateway, e in un numero di casi non piccolo il cliente si ritrova davanti al form della carta.","A quel punto non è più un'aggiunta. È un secondo acquisto. E un secondo acquisto in trenta secondi non lo fa nessuno.","Se non sei sicuro di come si comporta il tuo, fai un ordine vero da cliente, accetta l'offerta, e guarda cosa ti chiede. Costa il prezzo di un prodotto e ti dice se stai lasciando margine sul tavolo.","L'altra cosa che nel video non ci stava: quello che offri dopo il checkout non deve essere il tuo prodotto più caro. Deve essere quello che chi ha appena comprato quella cosa lì comprerebbe comunque tra un mese. Gli stai solo togliendo l'attesa.","Ce l'hai una pagina di ringraziamento tua, o è quella di default? Nessun giudizio, è di default per quasi tutti."],
   tags:"#shopify #ecommerce #aov #upsell #checkout #dtc",
   note:"Fuori dal territorio email e retention. Ogni affermazione va verificata prima di girare."},
 
  {n:15,day:"16",dow:"Mer",wk:4,t:"Case study: calo stagionale -40%, fatturato tenuto",
   kind:"Case study",macro:"Crescere senza ads",struct:"Percorso dell'eroe",cta:"link in bio",kw:0,shot:1,warn:0,
+  gives:"Da definire: il testo non è in archivio",emo:"Da definire",
   hook:"Le vendite sono crollate del quaranta per cento. Il fatturato no. E non abbiamo aggiunto budget.",
-  beats:[["Nota","Girato, ma il testo non è nell'archivio: va recuperato dalla registrazione prima del montaggio."],["Struttura da rispettare","Percorso dell'eroe. L'eroe è il cliente, non tu. Il beat dei tentativi falliti (cosa aveva già provato prima di chiamarti) è quello che fa riconoscere chi guarda: se lo tagli, il case study sembra una pubblicità."]],
+  beats:[["Nota","Girato, ma il testo non è nell'archivio: va recuperato dalla registrazione prima del montaggio."],["Struttura da rispettare","Percorso dell'eroe. L'eroe è il cliente, non tu. Il beat dei tentativi falliti, cioè cosa aveva già provato prima di chiamarti, è quello che fa riconoscere chi guarda: se lo tagli, il case study sembra una pubblicità."]],
   cap:["Da scrivere dopo aver recuperato il testo del video."],
   tags:"#casestudy #ecommerce #shopify #retention #emailmarketing #dtc",
   note:"Unico contenuto senza testo in archivio. Recuperare la trascrizione dalla registrazione, poi scrivere la didascalia."},
 
  {n:11,day:"18",dow:"Ven",wk:4,t:"La richiesta di recensione fatta bene",
   kind:"Quick win",macro:"Voglio più clienti",struct:"Azione → risultato",cta:"commento RECENSIONI",kw:1,shot:0,warn:0,
-  hook:"Chiedi le recensioni e non risponde nessuno. Stai chiedendo nel momento sbagliato.",
-  beats:[["Raffica","Se la chiedi il giorno della consegna, non ti risponde. Il prodotto non l'ha ancora usato, non ha niente da dire.|Se scrivi lascia una recensione, non ti risponde. Gli stai chiedendo di scrivere un tema.|Se chiedi come ti sei trovato con la taglia, ti risponde. Rispondere a una domanda precisa costa dieci secondi.|Se il link porta a una registrazione, non ti risponde. Hai messo un ostacolo davanti a un favore.|Se aspetti che l'abbia usato davvero, due settimane per una crema, qualche giorno per una scarpa, ti risponde, e ti risponde bene."],["Chiusura","Le recensioni non sono un favore che ti fanno. Sono la cosa che convince il prossimo che sta guardando la stessa scheda prodotto adesso."],["CTA","Commenta RECENSIONI e ti mando i testi che uso e quando mandarli."]],
+  gives:"Le tre domande pronte, una per tipo di prodotto, e quando mandarle",emo:"Solitudine del compratore",
+  hook:"Chiedi le recensioni e non risponde nessuno. Stai chiedendo la cosa sbagliata nel momento sbagliato.",
+  beats:[["Raffica","Se la chiedi il giorno della consegna, non ti risponde. Non l'ha ancora usato, non ha niente da dire.|Se scrivi lascia una recensione, non ti risponde. Gli stai chiedendo di scrivere un tema.|Se il link porta a una registrazione, non ti risponde. Hai messo un ostacolo davanti a un favore.|Se fai una domanda sola e precisa, ti risponde. Perché rispondere costa dieci secondi."],["Le tre domande","Ne scegli una in base a cosa vendi.|Abbigliamento: come ti sei trovato con la taglia?|Prodotto che si consuma: dopo quanto hai visto la differenza?|Oggetto: c'era qualcosa che non ti aspettavi?|E il momento è quando l'ha usato davvero. Due settimane per una crema, qualche giorno per una scarpa.",1],["↯ La riga","In questo momento c'è una persona ferma sulla tua scheda prodotto che non si decide. Le recensioni non servono a te. Servono a lei.",0,1],["Chiusura","Ed è per questo che una risposta come porto la M e ho preso la M, veste giusta vale più di dieci cinque stelle senza testo."],["CTA","Commenta RECENSIONI e ti mando le domande e i tempi per ogni tipo di prodotto."]],
   cap:["Le recensioni non servono a te. Servono a quello che sta guardando la tua scheda prodotto in questo momento e non si decide.","Questa è la parte che cambia tutto, perché cambia cosa chiedi.","Se pensi che servano a te, scrivi lascia una recensione e speri in cinque stelle. Se pensi che servano al prossimo, chiedi la cosa precisa che il prossimo vuole sapere. La taglia. Quanto dura. Se è come nelle foto.","E le risposte che arrivano non sono più tutto ok, consigliato. Sono porto una M e ho preso la M, veste giusta. Che è la frase che fa comprare qualcuno domani.","Una cosa che mi ero dimenticato di dire nel video: rispondi alle recensioni, anche a quelle da tre stelle. Soprattutto a quelle. Chi legge non guarda solo cosa dicono di te, guarda come reagisci quando qualcosa va storto. Perché è quello che succederà a lui se va storto.","Quante recensioni hai raccolto negli ultimi trenta giorni? Scrivi il numero qui sotto.","Commenta RECENSIONI e ti mando i testi che uso e quando mandarli."],
   tags:"#recensioni #ecommerce #shopify #socialproof #conversioni #dtc"},
 
  {n:13,day:"20",dow:"Dom",wk:4,t:"Non è che ti servono più clienti",
   kind:"Opinione",macro:"I clienti non tornano",struct:"La svolta",cta:"segui",kw:0,shot:0,warn:1,
+  gives:"Un conto solo da fare stasera, con la soglia",emo:"La corsa ferma",
   hook:"Non ti servono più clienti. Quelli che hai non tornano.",
-  beats:[["Problema","Un founder mi ha scritto questo: spendo quindicimila al mese in pubblicità e il fatturato è fermo. Aveva già alzato il budget. Aveva già cambiato creatività. Aveva già cambiato agenzia. Il fatturato restava fermo."],["La svolta","Poi abbiamo guardato una cosa sola. Quanti dei suoi clienti avevano comprato più di una volta. [INSERIRE IL DATO REALE]."],["La correzione","Vuol dire che quello che spendeva per trovare una persona se lo mangiava tutto sul primo ordine. Ogni volta.|Quindi più cresceva, più doveva comprare. E la pubblicità costa ogni anno di più.|Stava correndo per restare fermo. E intanto le persone che lo avevano già scelto erano lì, ferme, e non le sentiva nessuno."],["Lezione","Un cliente nuovo lo paghi. Un cliente che torna, no. È l'unico margine che nessuno ti può alzare di prezzo."],["CTA","Seguimi, parlo solo di questo."]],
+  beats:[["Problema","Un founder mi ha scritto questo: spendo quindicimila al mese in pubblicità e il fatturato è fermo. Aveva già alzato il budget. Aveva già cambiato creatività. Aveva già cambiato agenzia."],["La svolta","Poi abbiamo guardato un numero solo. Quanti dei suoi clienti avevano comprato più di una volta. [INSERIRE IL DATO REALE]."],["La correzione","Vuol dire che quello che spendeva per trovare una persona se lo mangiava tutto sul primo ordine. Ogni volta.|Quindi più cresceva, più doveva comprare. E la pubblicità costa ogni anno di più."],["↯ La riga","Stava correndo per restare fermo. E intanto le persone che lo avevano già scelto erano lì, ferme, e non le sentiva nessuno.",0,1],["Da fare stasera","Fai quel conto anche tu. Un numero solo: quanti dei tuoi clienti hanno comprato più di una volta. Se è sotto il venti per cento, non ti serve più budget. Ti serve smettere di perdere quelli che hai già pagato.",1],["CTA","Seguimi, parlo solo di questo."]],
   cap:["Quel founder aveva ragione su una cosa: gli servivano più clienti. Solo che li aveva già.","Erano nel database, avevano comprato una volta, e non li aveva più sentiti nessuno.","Questa parte me la sono tenuta per la didascalia, perché nel video suonava troppo comoda detta da uno che fa questo di mestiere.","Comprare clienti nuovi è l'unica cosa che sembra crescita. Ha un numero che sale, una dashboard che si muove, una leva da tirare. Riattivare quelli che hai già non ha niente di tutto questo. Non c'è un grafico che ti fa sentire bravo il giorno dopo.","Però c'è una differenza che a un certo punto diventa impossibile da ignorare: la pubblicità costa di più ogni anno, il tuo database no. Anzi, ogni anno è più grande.","Non è che le ads non servono. Servono. Ma se il fondo del secchio è bucato, ogni euro in più che ci metti dentro esce da lì.","Tu quanti dei tuoi clienti hanno comprato più di una volta? Se il numero non ce l'hai a portata di mano, è già una risposta."],
   tags:"#retention #ecommerce #shopify #ltv #emailmarketing #dtc",
-  note:"Il dato va sostituito con un numero vero. Se non ce l'hai, taglia il beat della svolta e gira con la struttura meglio e peggio. Un numero inventato in un contenuto di opinione è l'unico errore che questo pubblico non perdona."}
+  note:"Il dato va sostituito con un numero vero. Se non ce l'hai, taglia il beat della svolta e gira con la struttura meglio e peggio."}
 ];
 
-/* ---- persisted "girato" state ---- */
 const KEY="mailift-mese1-girato";
 let done={};
 try{ done=JSON.parse(localStorage.getItem(KEY)||"{}") }catch(e){ done={} }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(done)) }catch(e){} }
 const isShot = d => (d.n in done) ? done[d.n] : !!d.shot;
-
 const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 
-/* ---- month grid ---- */
 function grid(){
   const g=document.getElementById("month");
   let h='<div></div>'+["Lunedì","Mercoledì","Venerdì","Domenica"].map(d=>`<div class="gh">${d}</div>`).join("");
@@ -489,7 +430,6 @@ function grid(){
   g.innerHTML=h;
 }
 
-/* ---- cards ---- */
 let filter="all";
 function match(d){
   if(filter==="all") return true;
@@ -514,9 +454,11 @@ function render(){
       h+=`<div class="week-head"><h2>Settimana ${wk}</h2><span>${days[0].day} → ${days[3].day}</span></div>`;
     }
     const shot=isShot(d);
-    const beats=d.beats.map(([k,v])=>
-      `<div class="beat"><dt>${esc(k)}</dt><dd>${v.split("|").map(p=>`<p>${esc(p)}</p>`).join("")}</dd></div>`
-    ).join("");
+    const beats=d.beats.map(b=>{
+      const [k,v,script,heat]=b;
+      const cls=heat?"beat heat":(script?"beat script":"beat");
+      return `<div class="${cls}"><dt>${esc(k)}</dt><dd>${v.split("|").map(p=>`<p>${esc(p)}</p>`).join("")}</dd></div>`;
+    }).join("");
     const cap=d.cap.map(p=>`<p>${esc(p)}</p>`).join("")+`<p class="tagline">${esc(d.tags)}</p>`;
 
     h+=`<article class="card ${d.warn?"is-warn":""} ${shot?"is-shot":""}" id="c${d.n}">
@@ -525,7 +467,7 @@ function render(){
         <div class="head">
           <div class="tags">
             <span class="tag">${esc(d.struct)}</span>
-            <span class="tag t-plain">${esc(d.kind)}</span>
+            <span class="tag t-heat">${esc(d.emo)}</span>
             <span class="tag t-plain">${esc(d.macro)}</span>
             <span class="tag ${d.kw?"":"t-plain"}">${esc(d.cta)}</span>
             ${d.warn?'<span class="tag t-warn">da verificare</span>':""}
@@ -535,6 +477,7 @@ function render(){
         </div>
         <label class="shot-toggle"><input type="checkbox" data-shot="${d.n}" ${shot?"checked":""}> girato</label>
       </div>
+      <div class="gives"><b>Cosa ti lascia</b><span>${esc(d.gives)}</span></div>
       <div class="card-body">
         <p class="hookline">${esc(d.hook)}</p>
         <dl>${beats}</dl>
@@ -549,7 +492,6 @@ function render(){
   feed.innerHTML=h;
 }
 
-/* ---- events ---- */
 document.addEventListener("click",e=>{
   const chip=e.target.closest(".chip");
   if(chip){

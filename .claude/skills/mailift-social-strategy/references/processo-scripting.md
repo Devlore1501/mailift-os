@@ -5,9 +5,59 @@ Come si scrive uno script che funziona, e come si capisce se è buono prima di g
 Nota su come si incastra con il resto: la **struttura a 8 beat** (`script-templates.md`) è lo scheletro del contenuto. Questo file è il **processo** per arrivarci e i **criteri di qualità** per valutarlo. Non sono alternative: prima si segue il processo, poi si verifica che il risultato regga i quattro principi qui sotto.
 
 ## Indice
-1. [I quattro principi di uno script che funziona](#i-quattro-principi)
-2. [Il processo in 6 passi](#il-processo-in-6-passi)
-3. [Partire da una reference](#partire-da-una-reference)
+1. [I due test](#i-due-test)
+2. [I quattro principi di uno script che funziona](#i-quattro-principi)
+3. [Il processo in 6 passi](#il-processo-in-6-passi)
+4. [Partire da una reference](#partire-da-una-reference)
+
+---
+
+## I due test
+
+Si applicano a **ogni script prima di girarlo**, e vengono prima dei quattro principi: un contenuto può essere chiaro, breve e senza concetti appesi e comunque non lasciare niente e non far sentire niente. In quel caso è corretto e inutile.
+
+### Test 1 · Cosa mi lascia nel concreto?
+
+> *Chi guarda deve poter dire una frase precisa che comincia con "adesso ho" oppure "domani faccio".*
+
+Non "ho capito che". Capire non è avere.
+
+| Non passa il test | Passa il test |
+|---|---|
+| "Manda un consiglio pratico" | Le tre righe esatte da copiare |
+| "Segmenta la lista" | Le condizioni da incollare, con le soglie |
+| "Metti un regalo sopra una soglia" | Scontrino medio più venti per cento, arrotondato per eccesso |
+| "Il bundle giusto per il tuo store" | Guarda gli ordini con due prodotti: i due che tornano di più |
+| "Chiedi le recensioni al momento giusto" | Le tre domande, una per tipo di prodotto |
+
+La forma più forte del test è **dare le parole esatte**. Un contenuto che consegna il testo da copiare non è più una lezione: è un modello. Le lezioni si guardano, i modelli si salvano.
+
+**Regola pratica:** ogni quick win deve consegnare almeno una di queste tre cose — *parole da copiare*, *un numero con la sua soglia*, *un gesto fisico da fare entro stasera*. Se non ne consegna nessuna, non è un quick win, è un'opinione travestita.
+
+**Il caso dell'opinione.** Un contenuto di consapevolezza non deve risolvere: è fatto apposta per lasciare un vuoto. Ma anche lì serve **una cosa sola** da fare — di solito un conto da fare stasera. Senza, quel giorno il pubblico non porta a casa niente e il contenuto vive solo del suo hook.
+
+### Test 2 · Cosa fa sentire?
+
+> *In quale punto preciso dello script chi guarda prova qualcosa? Se non sai indicarlo, non c'è.*
+
+Un contenuto tiepido non viene condiviso. Le informazioni si salvano; le emozioni si mandano a qualcuno.
+
+Le leve che funzionano con questo buyer, in ordine di resa:
+
+| Leva | Come suona | Quando usarla |
+|---|---|---|
+| **Il costo già sostenuto** | "Quelle persone le hai già pagate una volta" | La più affidabile. Funziona su chi ha un P&L in testa |
+| **Riconoscimento** | "Spendo quindicimila al mese e non so quanti clienti arrivino" | Apertura di un contenuto di esperienza |
+| **Vergogna leggera, mai umiliazione** | "Lo hai impostato tu, otto mesi fa, e dal computer funzionava" | Sempre con una via d'uscita subito dopo |
+| **Colpevole esterno** | "Chi te l'ha detto ti ha dato un consiglio che costa" | Toglie la colpa e la sposta. Alleato potente |
+| **Sollievo** | "Non è che sei lento. È che stai guardando il rubinetto invece del fondo" | Chiusura, dopo un beat duro |
+| **Fisicità** | "Mentre apre la scatola gli stai dicendo che ha pagato troppo" | La più condivisa. Rende visibile una cosa astratta |
+
+**Da evitare con questo ICP:** la paura generica ("stai buttando soldi!"), l'euforia, l'ammiccamento da guru. Chi fattura sei cifre al mese ha già sentito tutti e tre e li legge come venditore.
+
+**Dove va la leva emotiva.** Non nell'hook: l'hook accusa, e l'accusa è tensione, non emozione. La leva sta **subito dopo il valore**, quando chi guarda ha appena capito la cosa e non ha ancora deciso se ti crede. È il punto in cui un contenuto passa da utile a tuo.
+
+**Regola pratica:** in ogni script deve esserci **una riga sola** che non serve a spiegare niente. Se ogni riga fa lavoro informativo, il contenuto è un manuale.
 
 ---
 
