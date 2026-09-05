@@ -23,10 +23,21 @@
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
+/* Lo sfondo NON sta sul body: se il file viene incollato in un blocco custom
+   code (GHL, page builder, iframe) il body è quello della piattaforma e le
+   regole qui sotto perderebbero. `background-attachment:fixed` inoltre non
+   renderizza in modo affidabile su iOS Safari. Quindi: colore di base su html
+   E body (così non traspare mai il bianco del contenitore) e le sfumature su
+   un layer fisso dedicato, .pv-bg, che esiste sempre. */
+html{background:#0b1220}
 body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--font);line-height:1.55;
+  position:relative;min-height:100vh}
+.pv-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background:var(--bg);
   background-image:radial-gradient(900px 500px at 80% -10%,rgba(255,201,60,.14),transparent 60%),
-                   radial-gradient(700px 450px at -10% 10%,rgba(61,220,151,.10),transparent 60%);
-  background-attachment:fixed}
+                   radial-gradient(700px 450px at -10% 10%,rgba(61,220,151,.10),transparent 60%)}
+/* Il layer è a z-index -1: senza uno stacking context esplicito sui contenuti,
+   in alcuni browser finirebbe sopra al testo dentro contenitori trasparenti. */
+header,main,#quiz,footer{position:relative;z-index:1}
 img{max-width:100%;display:block}
 h1,h2,h3{line-height:1.18;margin:0 0 .5em;letter-spacing:-.02em}
 h1{font-size:clamp(28px,5.6vw,50px);font-weight:800}
@@ -143,6 +154,8 @@ footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--txt-mute
 </style>
 </head>
 <body>
+
+<div class="pv-bg" aria-hidden="true"></div>
 
 <header>
   <div class="wrap hd">
