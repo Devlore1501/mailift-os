@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calcolatore risparmio fotovoltaico — quanto risparmi davvero</title>
+<meta name="description" content="Rispondi a 8 domande e scopri in 60 secondi quanto puoi risparmiare in bolletta con un impianto fotovoltaico, quanti kW ti servono e in quanti anni rientri.">
+<meta name="robots" content="index,follow">
+<meta property="og:title" content="Quanto risparmi davvero con il fotovoltaico?">
+<meta property="og:description" content="8 domande, 60 secondi. Stima gratuita del risparmio, della taglia impianto e del tempo di rientro.">
+<meta property="og:type" content="website">
+<style>
+/* ---------- design tokens ---------- */
+:root{
+  --bg:#0b1220; --bg-soft:#111c30; --card:#16233c; --line:#24334f;
+  --txt:#eef3fb; --txt-dim:#a9b8d0; --txt-mute:#7d8ea9;
+  --acc:#ffc93c; --acc-2:#ffb01f; --acc-ink:#2a1e00;
+  --ok:#3ddc97; --warn:#ff8f6b;
+  --r:16px; --r-sm:10px;
+  --shadow:0 18px 50px rgba(0,0,0,.38);
+  --maxw:1080px;
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--font);line-height:1.55;
+  background-image:radial-gradient(900px 500px at 80% -10%,rgba(255,201,60,.14),transparent 60%),
+                   radial-gradient(700px 450px at -10% 10%,rgba(61,220,151,.10),transparent 60%);
+  background-attachment:fixed}
+img{max-width:100%;display:block}
+h1,h2,h3{line-height:1.18;margin:0 0 .5em;letter-spacing:-.02em}
+h1{font-size:clamp(28px,5.6vw,50px);font-weight:800}
+h2{font-size:clamp(22px,3.6vw,32px);font-weight:750}
+p{margin:0 0 1em}
+a{color:var(--acc)}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+.center{text-align:center}
+.dim{color:var(--txt-dim)}
+.mute{color:var(--txt-mute);font-size:13px}
+.hide{display:none !important}
+
+/* ---------- header ---------- */
+header{padding:18px 0;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;
+  background:rgba(11,18,32,.86);backdrop-filter:blur(10px)}
+.hd{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em}
+.logo .dot{width:26px;height:26px;border-radius:8px;background:linear-gradient(140deg,var(--acc),var(--acc-2));
+  display:grid;place-items:center;color:var(--acc-ink);font-size:15px}
+.hd .mute{display:none}
+@media(min-width:680px){.hd .mute{display:block}}
+
+/* ---------- hero ---------- */
+.hero{padding:56px 0 20px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(255,201,60,.12);
+  border:1px solid rgba(255,201,60,.3);color:var(--acc);padding:6px 12px;border-radius:999px;
+  font-size:13px;font-weight:650;margin-bottom:18px}
+.lead{font-size:clamp(16px,2.2vw,19px);color:var(--txt-dim);max-width:60ch}
+.hero-grid{display:grid;gap:32px}
+@media(min-width:940px){.hero-grid{grid-template-columns:1.15fr .85fr;align-items:center}}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  background:linear-gradient(140deg,var(--acc),var(--acc-2));color:var(--acc-ink);
+  border:0;border-radius:var(--r-sm);padding:16px 26px;font:inherit;font-weight:800;font-size:17px;
+  cursor:pointer;text-decoration:none;box-shadow:0 10px 26px rgba(255,201,60,.24);
+  transition:transform .12s ease,box-shadow .12s ease;width:100%}
+@media(min-width:560px){.btn{width:auto}}
+.btn:hover{transform:translateY(-1px);box-shadow:0 14px 32px rgba(255,201,60,.32)}
+.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.btn-ghost{background:transparent;color:var(--txt-dim);border:1px solid var(--line);box-shadow:none;font-weight:600}
+.btn-ghost:hover{color:var(--txt)}
+.trust{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:20px;font-size:14px;color:var(--txt-dim)}
+.trust span{display:flex;align-items:center;gap:7px}
+.tick{color:var(--ok);font-weight:800}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.hero-card{padding:24px}
+.stat-row{display:flex;justify-content:space-between;align-items:baseline;
+  padding:13px 0;border-bottom:1px dashed var(--line)}
+.stat-row:last-child{border:0}
+.stat-row b{font-size:22px;color:var(--acc)}
+.bars{display:flex;align-items:flex-end;gap:10px;height:110px;margin:8px 0 18px}
+.bars div{flex:1;border-radius:8px 8px 4px 4px;background:linear-gradient(180deg,#2c3e60,#1b2942)}
+.bars div.on{background:linear-gradient(180deg,var(--acc),var(--acc-2))}
+
+/* ---------- sezioni ---------- */
+section{padding:44px 0}
+.grid3{display:grid;gap:16px}
+@media(min-width:760px){.grid3{grid-template-columns:repeat(3,1fr)}}
+.tile{padding:22px}
+.tile h3{font-size:18px;margin-bottom:6px}
+.tile p{margin:0;color:var(--txt-dim);font-size:15px}
+.num{width:34px;height:34px;border-radius:10px;background:rgba(255,201,60,.14);color:var(--acc);
+  display:grid;place-items:center;font-weight:800;margin-bottom:12px}
+
+/* ---------- quiz ---------- */
+#quiz{padding:34px 0 60px}
+.qcard{padding:26px 22px;max-width:640px;margin:0 auto}
+@media(min-width:640px){.qcard{padding:34px}}
+.prog{height:7px;background:#0e1729;border-radius:999px;overflow:hidden;margin-bottom:8px}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc-2),var(--acc));
+  border-radius:999px;transition:width .3s ease}
+.pmeta{display:flex;justify-content:space-between;font-size:12.5px;color:var(--txt-mute);margin-bottom:22px}
+.qtitle{font-size:clamp(20px,3.4vw,26px);font-weight:750;margin:0 0 6px}
+.qhelp{color:var(--txt-dim);font-size:14.5px;margin:0 0 20px}
+.opts{display:grid;gap:10px}
+.opt{display:flex;align-items:center;gap:13px;width:100%;text-align:left;cursor:pointer;
+  background:#12203a;border:1.5px solid var(--line);color:var(--txt);
+  border-radius:var(--r-sm);padding:15px 16px;font:inherit;font-size:16px;transition:.14s}
+
+.opt:hover{border-color:#3a4d74;background:#152541}
+.opt.sel{border-color:var(--acc);background:rgba(255,201,60,.10)}
+.opt .em{font-size:20px;line-height:1;width:24px;text-align:center}
+.opt .sub{display:block;color:var(--txt-mute);font-size:13px;font-weight:400}
+.qnav{display:flex;gap:12px;margin-top:22px;align-items:center}
+.qnav .btn{flex:1 1 auto}
+.back{background:none;border:0;color:var(--txt-mute);font:inherit;font-size:14px;cursor:pointer;
+  padding:8px 2px;white-space:nowrap}
+.back:hover{color:var(--txt)}
+label.f{display:block;font-size:14px;font-weight:650;margin:14px 0 6px}
+input[type=text],input[type=email],input[type=tel]{width:100%;background:#0e1729;border:1.5px solid var(--line);
+  color:var(--txt);border-radius:var(--r-sm);padding:14px 15px;font:inherit;font-size:16px}
+input:focus{outline:none;border-color:var(--acc)}
+.err{color:var(--warn);font-size:13.5px;margin-top:6px}
+.consent{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:13.5px;color:var(--txt-dim)}
+.consent input{margin-top:3px;width:18px;height:18px;accent-color:var(--acc);flex:0 0 auto}
+.hp{position:absolute;left:-9999px;opacity:0;height:0;width:0}
+
+/* ---------- risultato ---------- */
+.result-head{text-align:center;margin-bottom:22px}
+.big{font-size:clamp(40px,9vw,62px);font-weight:850;color:var(--acc);letter-spacing:-.03em;line-height:1}
+.kpis{display:grid;gap:12px;margin:22px 0}
+@media(min-width:560px){.kpis{grid-template-columns:repeat(3,1fr)}}
+.kpi{background:#0f1b30;border:1px solid var(--line);border-radius:var(--r-sm);padding:16px;text-align:center}
+.kpi b{display:block;font-size:24px;color:var(--txt)}
+.kpi span{font-size:12.5px;color:var(--txt-mute)}
+table.brk{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 14px}
+table.brk td{padding:10px 0;border-bottom:1px dashed var(--line);color:var(--txt-dim)}
+table.brk td:last-child{text-align:right;color:var(--txt);font-weight:650;white-space:nowrap}
+.note{background:#0f1b30;border-left:3px solid var(--acc);padding:12px 14px;border-radius:8px;
+  font-size:13px;color:var(--txt-mute);margin-top:18px}
+.spin{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--acc);
+  border-radius:50%;animation:sp .8s linear infinite;margin:26px auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--txt-mute);font-size:13px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hd">
+    <div class="logo"><span class="dot">☀</span> SolarCheck</div>
+    <div class="mute">Stima gratuita · nessun obbligo · 60 secondi</div>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<main id="landing">
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">☀ Calcolatore indipendente 2026</div>
+      <h1>Quanto risparmi <em>davvero</em> con il fotovoltaico a casa tua?</h1>
+      <p class="lead">Rispondi a 8 domande sulla tua casa e sulla tua bolletta. In 60 secondi ottieni la
+        taglia dell'impianto che ti serve, il risparmio annuo stimato e in quanti anni rientri della spesa.
+        Numeri, non promesse.</p>
+      <button class="btn" data-start>Calcola il mio risparmio →</button>
+      <div class="trust">
+        <span><i class="tick">✓</i> Gratis e senza impegno</span>
+        <span><i class="tick">✓</i> Nessun venditore al telefono senza il tuo ok</span>
+        <span><i class="tick">✓</i> 60 secondi</span>
+      </div>
+    </div>
+    <div class="card hero-card">
+      <div class="mute">Esempio: villetta indipendente, bolletta 160 €/mese</div>
+      <div class="bars">
+        <div style="height:92%"></div><div style="height:88%"></div><div style="height:96%"></div>
+        <div class="on" style="height:38%"></div><div class="on" style="height:30%"></div><div class="on" style="height:34%"></div>
+      </div>
+      <div class="stat-row"><span class="dim">Spesa annua oggi</span><b>1.920 €</b></div>
+      <div class="stat-row"><span class="dim">Spesa annua stimata dopo</span><b>640 €</b></div>
+      <div class="stat-row"><span class="dim">Risparmio in 20 anni</span><b>~25.600 €</b></div>
+      <p class="mute" style="margin:14px 0 0">Esempio illustrativo. Il tuo risultato dipende da consumi, tetto e zona.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2 class="center">Come funziona</h2>
+    <p class="center dim" style="max-width:56ch;margin:0 auto 26px">Niente sopralluoghi a scatola chiusa e
+      niente preventivi gonfiati: prima i numeri, poi si decide.</p>
+    <div class="grid3">
+      <div class="card tile"><div class="num">1</div><h3>Rispondi al quiz</h3>
+        <p>8 domande su casa, tetto e bolletta. Nessun dato tecnico complicato.</p></div>
+      <div class="card tile"><div class="num">2</div><h3>Ricevi la stima</h3>
+        <p>Taglia impianto in kW, produzione annua, risparmio e anni di rientro, calcolati sulla tua zona.</p></div>
+      <div class="card tile"><div class="num">3</div><h3>Decidi tu</h3>
+        <p>Se il risultato ti convince, ti mettiamo in contatto con un installatore verificato della tua zona.</p></div>
+    </div>
+    <div class="center" style="margin-top:30px"><button class="btn" data-start>Inizia il calcolo →</button></div>
+  </div>
+</section>
+</main>
+
+<!-- ============ QUIZ ============ -->
+<section id="quiz" class="hide">
+  <div class="wrap">
+    <div class="card qcard">
+      <div class="prog"><i id="bar"></i></div>
+      <div class="pmeta"><span id="pstep">Domanda 1 di 8</span><span id="ptime">~60 secondi</span></div>
+      <div id="stage"></div>
+    </div>
+    <p class="center mute" style="margin-top:16px">I tuoi dati non vengono venduti a terzi.
+      Li usiamo solo per la stima e, se lo autorizzi, per metterti in contatto con un installatore.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>SolarCheck — strumento informativo di stima. Le cifre mostrate sono stime indicative basate sulle
+      risposte fornite e su valori medi di mercato; non costituiscono un preventivo né una consulenza fiscale.
+      Aliquote di detrazione e prezzi vanno verificati al momento dell'acquisto.</p>
+    <p style="margin:0">© <span id="yr"></span> · <a href="#" id="privacy-link">Privacy policy</a></p>
+  </div>
+</footer>
+
+<script>
+/* =====================================================================
+   SolarCheck — quiz di qualifica fotovoltaico B2C (single file, zero deps)
+   ---------------------------------------------------------------------
+   Il file è autonomo: si può servire da qualsiasi hosting statico.
+   L'unico punto da configurare prima del lancio è ENDPOINT (il Worker
+   workers/pv-lead-proxy.js), che smista il lead su GHL + Google Sheet.
+   Se ENDPOINT è vuoto il quiz funziona lo stesso: il lead resta in
+   localStorage e viene loggato in console (utile per test e preview).
+   ===================================================================== */
+
+const CFG = {
+  // URL del Cloudflare Worker (vedi workers/README.md). Vuoto = modalità test.
+  ENDPOINT: '',
+  // Pixel Meta: lasciare vuoto finché non c'è. Il CAPI lato Worker deduplica
+  // sullo stesso event_id, esattamente come sul funnel calcolatore.
+  META_PIXEL_ID: '',
+
+  // --- parametri economici (unico posto da aggiornare quando cambia il mercato) ---
+  PREZZO_KWH: 0.28,        // €/kWh pagati in bolletta (tutto incluso)
+  RITIRO_KWH: 0.10,        // €/kWh riconosciuti sull'energia immessa in rete
+  COSTO_KWP: 1750,         // € per kWp chiavi in mano, impianto residenziale
+  COSTO_KWH_BATT: 650,     // € per kWh di accumulo
+  DETRAZIONE: 0.50,        // quota detraibile (prima casa). Verificare l'aliquota vigente.
+  DEGRADO_20A: 0.93,       // resa media su 20 anni al netto del degrado pannelli
+};
+
+/* ---------- domande ---------- *
+ * Ogni step: {id, q, help, type, opts:[{v,label,sub,em,pt,...flag}]}
+ * `pt` = punti di qualifica. `stop:true` = squalifica dura (niente impianto possibile).
+ */
+const STEPS = [
+  { id:'immobile', q:'In che tipo di casa vivi?', help:'Serve a capire se il tetto è a tua disposizione.',
+    opts:[
+      {v:'Villetta indipendente', em:'🏡', pt:30},
+      {v:'Bifamiliare o villetta a schiera', em:'🏘️', pt:25},
+      {v:'Appartamento con tetto/lastrico di mia proprietà', em:'🏢', pt:15, maxKwp:3},
+      {v:'Appartamento in condominio (tetto comune)', em:'🏬', pt:0, stop:true,
+       sub:'Serve la delibera condominiale: non possiamo stimarlo qui'},
+      {v:'Capannone, ufficio o attività', em:'🏭', pt:20, b2b:true},
+    ]},
+  { id:'proprieta', q:'L\'immobile è di tua proprietà?', help:'Chi decide sull\'impianto deve essere chi possiede il tetto.',
+    opts:[
+      {v:'Sì, sono proprietario', em:'✅', pt:25},
+      {v:'È di un familiare / in comproprietà', em:'👥', pt:15},
+      {v:'Sono in affitto', em:'🔑', pt:0, stop:true, sub:'Serve l\'autorizzazione del proprietario'},
+    ]},
+  { id:'tetto', q:'Com\'è fatto il tuo tetto?', help:'Se non lo sai con certezza, scegli l\'ultima opzione: lo verifichiamo dopo.',
+    opts:[
+      {v:'A falda, con tegole o coppi', em:'🧱', pt:10},
+      {v:'A falda, in lamiera o guaina', em:'🪟', pt:10},
+      {v:'Piano / lastrico solare', em:'⬜', pt:8},
+      {v:'Non lo so con precisione', em:'🤔', pt:5},
+    ]},
+  { id:'bolletta', q:'Quanto spendi di luce, in media al mese?', help:'Prendi una bolletta recente: è il dato che pesa di più sul risultato.',
+    opts:[
+      {v:'Meno di 60 €',  em:'💡', pt:0,  euro:45,  low:true, sub:'Consumi bassi: il rientro sarebbe molto lungo'},
+      {v:'60 – 120 €',    em:'💡', pt:12, euro:90},
+      {v:'120 – 200 €',   em:'⚡', pt:20, euro:160},
+      {v:'200 – 350 €',   em:'⚡', pt:26, euro:270},
+      {v:'Oltre 350 €',   em:'🔥', pt:30, euro:430},
+    ]},
+  { id:'consumo', q:'Quando consumi di più?', help:'Il fotovoltaico produce di giorno: più consumi di giorno, più risparmi.',
+    opts:[
+      {v:'Soprattutto di giorno (casa abitata, smart working)', em:'🌞', pt:10, quota:0.45},
+      {v:'Un po\' di giorno, un po\' la sera',                  em:'🌤️', pt:8,  quota:0.35},
+      {v:'Soprattutto la sera e nel weekend',                   em:'🌙', pt:6,  quota:0.28},
+    ]},
+  { id:'batteria', q:'Ti interessa una batteria di accumulo?', help:'Immagazzina l\'energia prodotta di giorno per usarla la sera. Costa di più ma alza il risparmio.',
+    opts:[
+      {v:'Sì, la voglio nel preventivo', em:'🔋', pt:8, batt:true},
+      {v:'Da valutare in base al costo',  em:'⚖️', pt:6, batt:false},
+      {v:'No, solo pannelli',             em:'☀️', pt:4, batt:false},
+    ]},
+  { id:'cap', q:'Qual è il tuo CAP?', help:'Serve per calcolare l\'irraggiamento della tua zona e per trovare installatori vicini.',
+    type:'cap' },
+  { id:'quando', q:'Quando vorresti installarlo?', help:'Nessun impegno: ci serve solo per non farti perdere tempo.',
+    opts:[
+      {v:'Il prima possibile',            em:'🚀', pt:25},
+      {v:'Entro 1-3 mesi',                em:'📅', pt:18},
+      {v:'Fra 6 mesi o più',              em:'🗓️', pt:8},
+      {v:'Mi sto solo informando',        em:'👀', pt:2},
+    ]},
+];
+
+/* ---------- stato ---------- */
+const A = {};                 // risposte {id: opt|valore}
+let i = 0;                    // step corrente
+let stopped = null;           // opzione squalificante che ha interrotto il flusso
+const stage = document.getElementById('stage');
+const $ = (s,r=document)=>r.querySelector(s);
+// useGrouping:'always' — senza, l'italiano non separa i numeri a 4 cifre
+// ("1622 €" accanto a "17.000 €") e il risultato sembra sciatto.
+const fmt = new Intl.NumberFormat('it-IT',{maximumFractionDigits:0,useGrouping:'always'});
+const eur = n => fmt.format(Math.round(n))+' €';
+const num = n => fmt.format(Math.round(n));
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+/* ---------- attribuzione (UTM, click id, referrer) ---------- */
+const qs = new URLSearchParams(location.search);
+const ATTR = {
+  utm_source:qs.get('utm_source')||'', utm_medium:qs.get('utm_medium')||'',
+  utm_campaign:qs.get('utm_campaign')||'', utm_content:qs.get('utm_content')||'',
+  utm_term:qs.get('utm_term')||'', fbclid:qs.get('fbclid')||'', gclid:qs.get('gclid')||'',
+  landing_url:location.href.slice(0,500), referrer:document.referrer.slice(0,300),
+};
+const EVENT_ID = 'pv-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,9);
+
+/* ---------- avvio quiz ---------- */
+document.querySelectorAll('[data-start]').forEach(b => b.addEventListener('click', () => {
+  document.getElementById('landing').classList.add('hide');
+  document.getElementById('quiz').classList.remove('hide');
+  window.scrollTo({top:0,behavior:'instant'});
+  render();
+}));
+
+/* ---------- render ---------- */
+function progress(done, total, label){
+  $('#bar').style.width = Math.round(done/total*100)+'%';
+  $('#pstep').textContent = label;
+}
+
+function render(){
+  const s = STEPS[i];
+  progress(i, STEPS.length+1, `Domanda ${i+1} di ${STEPS.length}`);
+  $('#ptime').textContent = i === 0 ? '~60 secondi' : 'Mancano ' + (STEPS.length - i) + ' domande';
+
+  if (s.type === 'cap') return renderCap(s);
+
+  stage.innerHTML = `
+    <h2 class="qtitle">${s.q}</h2>
+    <p class="qhelp">${s.help}</p>
+    <div class="opts">${s.opts.map((o,k)=>`
+      <button class="opt${A[s.id]&&A[s.id].v===o.v?' sel':''}" data-k="${k}">
+        <span class="em">${o.em||''}</span>
+        <span>${o.v}${o.sub?`<span class="sub">${o.sub}</span>`:''}</span>
+      </button>`).join('')}</div>
+    ${i>0?'<div class="qnav"><button class="back">← Indietro</button></div>':''}`;
+
+  stage.querySelectorAll('.opt').forEach(b => b.addEventListener('click', () => {
+    const o = s.opts[+b.dataset.k];
+    A[s.id] = o;
+    if (o.stop){ stopped = {step:s, opt:o}; return renderStop(); }
+    next();
+  }));
+  const back = stage.querySelector('.back');
+  if (back) back.addEventListener('click', prev);
+}
+
+function renderCap(s){
+  stage.innerHTML = `
+    <h2 class="qtitle">${s.q}</h2>
+    <p class="qhelp">${s.help}</p>
+    <input type="tel" id="cap" inputmode="numeric" maxlength="5" placeholder="es. 24121"
+           value="${A.cap||''}" autocomplete="postal-code">
+    <div class="err hide" id="cap-err">Inserisci un CAP italiano valido (5 cifre).</div>
+    <div class="qnav">
+      <button class="btn" id="cap-ok">Continua →</button>
+      <button class="back">← Indietro</button>
+    </div>`;
+  const go = () => {
+    const v = ($('#cap').value||'').replace(/\D/g,'');
+    if (v.length !== 5){ $('#cap-err').classList.remove('hide'); return; }
+    A.cap = v; next();
+  };
+  $('#cap-ok').addEventListener('click', go);
+  $('#cap').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  stage.querySelector('.back').addEventListener('click', prev);
+  $('#cap').focus();
+}
+
+function next(){ i++; i < STEPS.length ? render() : renderForm(); }
+function prev(){ if (i>0){ i--; render(); } }
+
+/* ---------- percorso squalificato ---------- */
+function renderStop(){
+  progress(1,1,'Risultato');
+  $('#ptime').textContent = '';
+  stage.innerHTML = `
+    <h2 class="qtitle">Con queste condizioni la stima non sarebbe onesta</h2>
+    <p class="qhelp">${stopped.opt.sub||''}. Preferiamo dirtelo subito invece di mandarti
+      un venditore: senza la disponibilità del tetto un preventivo non ha basi reali.</p>
+    <p class="dim" style="font-size:15px">Se la situazione cambia — delibera condominiale approvata,
+      autorizzazione del proprietario, casa nuova — lasciaci la mail e ti avvisiamo con la guida
+      su come muoverti. Zero telefonate.</p>
+    <label class="f" for="se">La tua email (facoltativa)</label>
+    <input type="email" id="se" placeholder="nome@email.it" autocomplete="email">
+    <div class="qnav"><button class="btn" id="sok">Tienimi aggiornato</button>
+      <button class="back">← Indietro</button></div>
+    <div id="sdone"></div>`;
+  stage.querySelector('.back').addEventListener('click', () => { stopped=null; render(); });
+  $('#sok').addEventListener('click', async () => {
+    const email = ($('#se').value||'').trim();
+    if (!/^\S+@\S+\.\S+$/.test(email)){ $('#se').focus(); return; }
+    $('#sok').disabled = true; $('#sok').textContent = 'Invio…';
+    await invia({ email, full_name:'', phone:'', esito:'non-idoneo', score:0, fascia:'COLD' });
+    $('#sdone').innerHTML = '<p class="note">Fatto. Ti scriviamo solo quando c\'è qualcosa di utile.</p>';
+    $('#sok').textContent = 'Registrato ✓';
+  });
+}
+
+/* ---------- form contatti (gate del risultato) ---------- */
+function renderForm(){
+  progress(STEPS.length, STEPS.length+1, 'Ultimo passo');
+  $('#ptime').textContent = 'Il risultato è pronto';
+  const st = stima();
+  stage.innerHTML = `
+    <h2 class="qtitle">Il tuo calcolo è pronto</h2>
+    <p class="qhelp">Abbiamo dimensionato un impianto da <b>${st.kwp} kWp</b> sulla tua situazione.
+      Dicci dove mandarti il risultato completo: risparmio annuo, costo stimato e anni di rientro.</p>
+    <label class="f" for="nome">Nome e cognome</label>
+    <input type="text" id="nome" placeholder="Mario Rossi" autocomplete="name">
+    <label class="f" for="email">Email</label>
+    <input type="email" id="email" placeholder="nome@email.it" autocomplete="email">
+    <label class="f" for="tel">Telefono</label>
+    <input type="tel" id="tel" placeholder="333 1234567" autocomplete="tel">
+    <input class="hp" type="text" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <label class="consent"><input type="checkbox" id="privacy">
+      <span>Ho letto la <a href="#" id="pl2">privacy policy</a> e acconsento al trattamento dei miei dati
+        per ricevere la stima richiesta. *</span></label>
+    <label class="consent"><input type="checkbox" id="mkt" checked>
+      <span>Accetto di essere ricontattato da un installatore verificato della mia zona per un preventivo
+        gratuito. Posso revocare in qualsiasi momento.</span></label>
+    <div class="err hide" id="ferr"></div>
+    <div class="qnav"><button class="btn" id="go">Mostrami il risultato →</button>
+      <button class="back">← Indietro</button></div>
+    <p class="mute" style="margin-top:12px">Nessuno spam. Il numero serve all'installatore per fissare
+      il sopralluogo, non lo cediamo a call center.</p>`;
+  stage.querySelector('.back').addEventListener('click', () => { i = STEPS.length-1; render(); });
+  $('#go').addEventListener('click', submit);
+}
+
+function submit(){
+  const nome  = ($('#nome').value||'').trim();
+  const email = ($('#email').value||'').trim();
+  const tel   = ($('#tel').value||'').replace(/[^\d+]/g,'');
+  const err = m => { const e=$('#ferr'); e.textContent=m; e.classList.remove('hide'); };
+  if (nome.length < 3) return err('Inserisci nome e cognome.');
+  if (!/^\S+@\S+\.\S+$/.test(email)) return err('Controlla l\'indirizzo email.');
+  if (tel.replace(/\D/g,'').length < 9) return err('Inserisci un numero di telefono valido.');
+  if (!$('#privacy').checked) return err('Serve il consenso privacy per proseguire.');
+  $('#ferr').classList.add('hide');
+  $('#go').disabled = true; $('#go').textContent = 'Calcolo in corso…';
+
+  const st = stima(), sc = score();
+  const lead = {
+    full_name:nome, email, phone:tel,
+    website:($('#website').value||''),               // honeypot
+    marketing_ok:$('#privacy').checked, contatto_ok:$('#mkt').checked,
+    esito:'qualificato', score:sc.pt, fascia:sc.fascia, ...risposte(), ...st,
+  };
+  // Il risultato non deve mai dipendere dalla rete: mostro subito, invio in parallelo.
+  renderLoading();
+  invia(lead).finally(() => setTimeout(() => renderResult(st, sc), 500));
+}
+
+function renderLoading(){
+  progress(1,1,'Risultato');
+  $('#ptime').textContent = '';
+  stage.innerHTML = `<div class="spin"></div>
+    <p class="center dim">Sto calcolando produzione e risparmio per il CAP ${A.cap}…</p>`;
+}
+
+/* ---------- motore di calcolo ---------- */
+function zona(){
+  // Fascia di irraggiamento dedotta dalle prime due cifre del CAP.
+  // Valori kWh prodotti in un anno per ogni kWp installato (media impianto ben esposto).
+  const p = parseInt((A.cap||'99999').slice(0,2),10);
+  if (p <= 6)  return {n:'Centro', kwh:1350};   // 00-06 Lazio, Umbria
+  if (p <= 9)  return {n:'Sud e isole', kwh:1450};   // 07-09 Sardegna
+  if (p <= 46) return {n:'Nord', kwh:1150};    // 10-46 Piemonte→Emilia
+  if (p <= 69) return {n:'Centro', kwh:1330};  // 47-69 Romagna, Toscana, Marche, Abruzzo
+  return {n:'Sud e isole', kwh:1480};          // 70-98 Puglia→Sicilia
+}
+
+function stima(){
+  const z = zona();
+  const spesaAnno = (A.bolletta?.euro || 90) * 12;
+  const consumo   = spesaAnno / CFG.PREZZO_KWH;            // kWh/anno
+
+  // Taglia: copre il consumo annuo, arrotondata a 0,5 kWp e limitata al residenziale.
+  const tetto = A.immobile?.maxKwp || 8;
+  let kwp = Math.min(Math.max(Math.round((consumo / z.kwh) * 2) / 2, 2), tetto);
+
+  const produzione = kwp * z.kwh;
+  const batt  = !!A.batteria?.batt;
+  const kwhBatt = batt ? (kwp <= 4 ? 5 : 10) : 0;
+  // La batteria sposta consumo dalla sera al giorno: quota di autoconsumo più alta.
+  const quota = Math.min((A.consumo?.quota || 0.35) + (batt ? 0.30 : 0), 0.85);
+
+  const autoconsumo = Math.min(produzione * quota, consumo);
+  const immessa     = Math.max(produzione - autoconsumo, 0);
+  const risparmio   = autoconsumo * CFG.PREZZO_KWH + immessa * CFG.RITIRO_KWH;
+
+  const costo    = kwp * CFG.COSTO_KWP + kwhBatt * CFG.COSTO_KWH_BATT;
+  const netto    = costo * (1 - CFG.DETRAZIONE);
+  const payback  = risparmio > 0 ? netto / risparmio : 0;
+
+  return {
+    kwp:kwp.toFixed(1).replace('.0','').replace('.',','), kwp_num:kwp,
+    zona:z.n, prod_specifica:z.kwh,
+    spesa_anno:Math.round(spesaAnno), consumo_kwh:Math.round(consumo),
+    produzione_kwh:Math.round(produzione), autoconsumo_kwh:Math.round(autoconsumo),
+    quota_autoconsumo:Math.round(quota*100), batteria_kwh:kwhBatt,
+    risparmio_anno:Math.round(risparmio),
+    spesa_residua:Math.max(Math.round(spesaAnno - risparmio),0),
+    costo_impianto:Math.round(costo), costo_netto:Math.round(netto),
+    payback_anni:Math.round(payback*10)/10,
+    risparmio_20a:Math.round(risparmio*20*CFG.DEGRADO_20A),
+  };
+}
+
+function score(){
+  let pt = 0;
+  STEPS.forEach(s => { const o = A[s.id]; if (o && typeof o.pt === 'number') pt += o.pt; });
+  const fascia = pt >= 75 ? 'HOT' : pt >= 50 ? 'WARM' : 'COLD';
+  return {pt, fascia};
+}
+
+function risposte(){
+  const r = {cap:A.cap||''};
+  STEPS.forEach(s => { if (A[s.id] && A[s.id].v) r[s.id] = A[s.id].v; });
+  return r;
+}
+
+/* ---------- risultato ---------- */
+function renderResult(st, sc){
+  const bassa = !!A.bolletta?.low;
+  stage.innerHTML = `
+    <div class="result-head">
+      <p class="dim" style="margin:0 0 4px">Risparmio stimato ogni anno</p>
+      <div class="big">${eur(st.risparmio_anno)}</div>
+      <p class="dim" style="margin-top:6px">Impianto consigliato: <b>${st.kwp} kWp</b>${
+        st.batteria_kwh ? ` + batteria da ${st.batteria_kwh} kWh` : ''} · zona ${st.zona}</p>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><b>${st.payback_anni.toString().replace('.',',')} anni</b><span>rientro della spesa</span></div>
+      <div class="kpi"><b>${eur(st.risparmio_20a)}</b><span>risparmio in 20 anni</span></div>
+      <div class="kpi"><b>${st.quota_autoconsumo}%</b><span>energia autoconsumata</span></div>
+    </div>
+    <h3 style="font-size:17px;margin-bottom:2px">Come ci siamo arrivati</h3>
+    <table class="brk">
+      <tr><td>Spesa elettrica attuale</td><td>${eur(st.spesa_anno)}/anno</td></tr>
+      <tr><td>Consumo stimato</td><td>${num(st.consumo_kwh)} kWh/anno</td></tr>
+      <tr><td>Produzione dell'impianto (${st.prod_specifica} kWh per kWp)</td><td>${num(st.produzione_kwh)} kWh/anno</td></tr>
+      <tr><td>Di cui usata direttamente in casa</td><td>${num(st.autoconsumo_kwh)} kWh</td></tr>
+      <tr><td>Costo impianto chiavi in mano</td><td>${eur(st.costo_impianto)}</td></tr>
+      <tr><td>Dopo detrazione fiscale ${Math.round(CFG.DETRAZIONE*100)}%</td><td>${eur(st.costo_netto)}</td></tr>
+      <tr><td>Bolletta residua stimata</td><td>${eur(st.spesa_residua)}/anno</td></tr>
+    </table>
+    ${bassa ? `<p class="note">Con consumi sotto i 60 €/mese il rientro è lungo: valuta l'impianto
+      solo se prevedi di aumentare i consumi (auto elettrica, pompa di calore, climatizzazione).</p>` : ''}
+    <div style="margin-top:22px">
+      <button class="btn" id="cta">Voglio 3 preventivi dalla mia zona</button>
+      <p class="mute" style="margin-top:10px">Ti richiamiamo entro 24 ore lavorative per verificare
+        tetto ed esposizione. Nessun costo, nessun obbligo.</p>
+    </div>
+    <p class="note">Stima indicativa calcolata su valori medi di mercato (energia
+      ${CFG.PREZZO_KWH.toString().replace('.',',')} €/kWh, impianto ${num(CFG.COSTO_KWP)} €/kWp) e sulle
+      risposte fornite. Non è un preventivo: il dato definitivo dipende da esposizione, ombreggiamenti,
+      pratiche e dall'aliquota di detrazione vigente al momento della spesa.</p>`;
+  $('#cta').addEventListener('click', () => {
+    $('#cta').disabled = true;
+    $('#cta').textContent = 'Richiesta inviata ✓';
+    invia({ ...risposte(), ...stima(), full_name:'', email:'', phone:'',
+            esito:'richiesta-preventivi', score:sc.pt, fascia:sc.fascia, evento:'preventivi' });
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---------- invio lead ---------- */
+async function invia(dati){
+  const payload = { ...ATTR, ...dati, event_id:EVENT_ID, ts:new Date().toISOString(),
+                    fonte:'quiz-fotovoltaico' };
+  // Copia locale: se la rete fallisce il lead non evapora e si può recuperare.
+  try {
+    const box = JSON.parse(localStorage.getItem('pv_leads')||'[]');
+    box.push(payload); localStorage.setItem('pv_leads', JSON.stringify(box.slice(-20)));
+  } catch (_) {}
+
+  if (typeof fbq === 'function') {
+    fbq('track','Lead',{currency:'EUR',value:dati.fascia==='HOT'?10:dati.fascia==='WARM'?5:1},
+        {eventID:EVENT_ID});
+  }
+  if (!CFG.ENDPOINT){ console.info('[SolarCheck] ENDPOINT non configurato — lead solo locale:', payload); return; }
+  try {
+    const r = await fetch(CFG.ENDPOINT, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload),
+      keepalive:true,
+    });
+    if (!r.ok) console.warn('[SolarCheck] invio fallito', r.status);
+  } catch (e) { console.warn('[SolarCheck] invio non riuscito', e); }
+}
+
+// La privacy policy è linkata sia nel footer sia nel form generato a runtime:
+// un solo listener delegato copre entrambi.
+document.addEventListener('click', e => {
+  const a = e.target.closest('#privacy-link, #pl2');
+  if (!a) return;
+  e.preventDefault();
+  alert('Sostituisci questo link con l\'URL della privacy policy prima di mandare traffico.');
+});
+</script>
+</body>
+</html>

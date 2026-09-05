@@ -1,0 +1,13 @@
+name = "pv-lead-proxy"
+main = "pv-lead-proxy.js"
+compatibility_date = "2025-07-01"
+
+# Segreti (mai qui dentro):
+#   wrangler secret put GHL_API_KEY --config wrangler-pv.toml
+#   wrangler secret put GHL_LOCATION_ID --config wrangler-pv.toml
+#   wrangler secret put SHEET_WEBHOOK_URL --config wrangler-pv.toml
+#   wrangler secret put META_PIXEL_ID --config wrangler-pv.toml      # opzionale
+#   wrangler secret put META_CAPI_TOKEN --config wrangler-pv.toml    # opzionale
+#
+# Deploy:
+#   cd workers && wrangler deploy --config wrangler-pv.toml
