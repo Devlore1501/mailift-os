@@ -95,3 +95,90 @@ Prendere la struttura senza le prove produce una pagina che promette le stesse c
 3. I loghi dei clienti, con il permesso di usarli.
 
 Finché mancano, la pagina di Mailift regge meglio con meno blocchi e più onestà sul metodo che con la stessa impalcatura mezza vuota.
+
+---
+
+# Parte 2 — Il video letto insieme alla pagina
+
+Aggiunta dopo aver avuto la trascrizione completa della VSL e l'informazione che Vex incassa una setup fee tra i 4.000 e gli 8.000.
+
+## La contraddizione sta dentro il video, non tra video e pagina
+
+Nei primi venticinque secondi, il momento con la retention più alta di tutto il funnel:
+
+> "If my don't make more money, you pay nothing. Zero dollars. You're out nothing."
+
+Poi al minuto 3:01: "you owe us nothing. We eat the cost." Al minuto 12:49: "if our stuff doesn't beat what you have now, you get all of that for free."
+
+Tre volte, zero.
+
+Poi al minuto **13:33**, dentro il blocco obiezioni, quando è rimasto forse il dieci per cento di chi ha iniziato:
+
+> "Do I have to pay some upfront deposit? It depends on the complexity to be frank. Simple builds, we can often start without a deposit. Bigger brands with heavier builds, there is usually a deposit involved."
+
+La setup fee reale sta tra i 4.000 e gli 8.000. La promessa più forte del video sta al secondo venti, la sua smentita al minuto tredici. Chi arriva in call scopre lì il numero.
+
+Questa è la cosa più utile emersa da tutta l'analisi, per due motivi.
+
+**Primo:** la loro garanzia è più morbida di come suona, quindi la tua versione onesta non è più debole della loro. È più difendibile.
+
+**Secondo:** il tuo setup a 2.000–5.000 sta sotto la metà del loro. Dichiararlo entro il primo minuto invece che al tredicesimo diventa un vantaggio, non una concessione.
+
+## Il proof stack gira sulla metrica che il video stesso demolisce
+
+Il cuore argomentativo della VSL è che l'attribuzione Klaviyo non dimostra niente:
+
+> "Klaviyo attribution basically is participation trophy at this point." (06:47)
+> "If we can't prove we move the needle with real data, not Klaviyo attribution, you owe us nothing." (03:01)
+> "It's not a guess. It's not attributed revenue." (09:07)
+
+E le prove che porta, nello stesso video:
+
+> "Stern Setups who got thirty one percent email **attributed** revenue" (01:15)
+> "we've reached over twenty percent **attributed** revenue" (11:00)
+> "from zero percent email revenue to over twenty five percent **attributable** revenue" (11:17)
+
+Sulla landing, i sei casi before/after sono screenshot di dashboard Klaviyo, cioè la stessa metrica.
+
+Il video smonta il metro e poi usa quel metro come prova. Non è una discrepanza tra due asset diversi, è dentro lo stesso script a sei minuti di distanza.
+
+## L'assenza di criteri è venduta come semplicità
+
+Al minuto 00:45:
+
+> "There isn't some forty two page document with all these different criteria's you have to hit. It's just super simple and clear."
+
+Nessun punto del video dice per quanto tempo gira lo split test, quale soglia conta come vittoria, o chi decide. "If we can't prove we move the needle" lascia la valutazione al venditore.
+
+Su un brand da 100k$/mese, un holdout 50/50 sul tasso di riacquisto ha bisogno di mesi per dare un numero leggibile. Il video non lo affronta.
+
+**Qui c'è la tua apertura più concreta.** Loro presentano l'assenza di criteri come chiarezza. Tu puoi avere un criterio che sta in un paragrafo: baseline netta X, soglia X più un euro, calcolata escludendo ordini manuali, rimborsi e cancellati, verificabile da entrambi ogni mese. Semplice come la loro, ma con un numero dentro. La semplicità senza criterio la puoi battere solo con la semplicità con criterio, non con un contratto da quarantadue pagine.
+
+## Cosa nella struttura del video funziona e va preso
+
+**L'offerta prima dell'identità.** Nei primi cinquantasette secondi ci stanno: offerta, inversione del rischio, meccanismo, cosa chiede in cambio. Il qualificatore arriva al minuto uno, le prime tre prove con nomi e numeri al minuto 1:08. Chi parla si presenta al **minuto 3:57**, quasi quattro minuti dentro.
+
+La VSL italiana media fa il contrario e apre con "ciao, sono X e faccio Y da Z anni". Vale la pena testare questa apertura come quarta variante di hook, contro il controllo narrativo che ti ho scritto.
+
+**Il bivio al minuto 3:05.** "Se ti convince, il bottone è sotto. Se sei ancora indeciso, resta e ti spiego perché funziona." Lascia andare chi è pronto a comprare senza costringerlo ad altri dodici minuti, e trattiene lo scettico dandogli un motivo. È replicabile a costo zero.
+
+**Lo specchio dell'avatar al minuto 4:27.** "Provo a indovinare la situazione in cui sei: hai un carrello abbandonato, forse una welcome series, magari una o due post acquisto. L'ha impostato qualcuno a un certo punto e da allora gira così." Poi le frasi che i founder gli dicono in call, citate come le dicono loro. È esattamente l'uso che si può fare della tua banca voice-of-customer da 75 call, e tu quel materiale ce l'hai già.
+
+**Le quattro obiezioni nominate ad alta voce.** "Se sei arrivato fin qui e non hai prenotato, è perché hai delle obiezioni. Te le dico io." Il permesso esplicito di dubitare abbassa la difesa prima di rispondere.
+
+## Cosa nel video non funziona
+
+Sedici minuti con l'offerta ripetuta per intero tre volte, al minuto zero, al 9:16 e al 14:49. La terza è ridondante.
+
+Due analogie diverse per lo stesso identico punto: i tizi che girano il cartello davanti al ristorante (02:25) e l'insegna "aperto" (07:10). Una delle due basta.
+
+L'inglese ha errori ("what your email is capable for", "we've just haven't been able"). Converte lo stesso, il che dice una cosa utile: la rifinitura linguistica non è la variabile che decide.
+
+I due numeri portanti, 150 milioni e 200 brand, non hanno mai una fonte né un intervallo di date, né nel video né in pagina.
+
+## Le quattro cose da fare, in ordine
+
+1. **Dichiara il setup entro il primo minuto.** È il punto in cui li batti senza avere il loro track record. La frase da usare sta in `creative/offerta-mailift-copy.md`.
+2. **Metti una soglia scritta.** Baseline netta, criterio in un paragrafo, verificabile da entrambi. Batte l'assenza di criteri venduta come chiarezza.
+3. **Non usare mai revenue attribuita come prova.** Se attacchi il metro e poi lo usi, hai lo stesso buco loro. Le tue prove devono essere nette, con periodo e metodo dichiarati.
+4. **Testa l'apertura con l'offerta al posto della storia,** come quarta variante nel test degli hook.
