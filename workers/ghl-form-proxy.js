@@ -162,9 +162,18 @@ export default {
       if (v) customFields.push({ id, value: v.slice(0, MAX_FIELD_LEN) });
     }
 
+    // Da quale pagina arriva il lead. Le due landing hanno offerte diverse
+    // (calcolatore di stima vs candidatura all'audit head-to-head) e follow-up
+    // diversi, quindi devono restare distinguibili in GHL senza aprire i custom
+    // field. Whitelist stretta: questo valore finisce in un tag e nel `source`,
+    // e arriva dal client.
+    const origine = /^[a-z0-9-]{1,40}$/.test((d.origine || '').trim())
+      ? d.origine.trim()
+      : 'optin-calcolatore';
+
     // Tag di qualifica: permette di segmentare in GHL senza leggere il custom field.
     // Sotto soglia = lead reale ma non adatto al quiz (dati non attendibili sotto i 15k).
-    const tags = ['calcolatore-optin'];
+    const tags = [origine];
     if (d.fatturato) {
       tags.push(d.fatturato === FATTURATO_SOTTO_SOGLIA ? 'sotto-soglia' : 'qualificato');
     }
@@ -207,7 +216,7 @@ export default {
       // un riassunto leggibile dell'attribuzione, così si capisce da dove arriva
       // il lead senza aprire i custom field.
       source: [
-        'optin-calcolatore',
+        origine,
         [d.utm_source, d.utm_medium].filter(Boolean).join('/') || (d.referrer ? 'ref' : 'diretto'),
         d.utm_campaign ? `camp:${d.utm_campaign}` : '',
       ].filter(Boolean).join(' · ').slice(0, MAX_FIELD_LEN),

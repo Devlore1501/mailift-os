@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<!-- viewport-fit=cover: serve per env(safe-area-inset-*), altrimenti la sticky bar
+     finisce sotto la home-indicator negli iPhone con notch. Il traffico di questa
+     pagina arriva dagli stessi annunci della optin, quindi quasi tutto webview in-app. -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Audit Klaviyo gratuito: i tuoi flow contro i nostri, split 50/50 | Mailift</title>
+<meta name="description" content="Ricostruiamo i tuoi flow Klaviyo e li testiamo 50/50 contro quelli che hai adesso, sullo stesso traffico. La quota sul risultato la paghi solo se vincono i nostri. Per eCommerce Shopify da 25.000 euro/mese.">
+<meta name="robots" content="noindex">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Caricamento non bloccante: il link media="print" scarica il foglio senza
+     applicarlo, onload lo promuove a "all". Stessa tecnica della optin, stessi
+     4 pesi, cosi' il font e' gia' in cache per chi passa da una pagina all'altra. -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800;900&family=Playfair+Display:ital,wght@1,700&display=swap">
+<link rel="stylesheet" media="print" onload="this.media='all';this.onload=null"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800;900&family=Playfair+Display:ital,wght@1,700&display=swap">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800;900&family=Playfair+Display:ital,wght@1,700&display=swap"></noscript>
+
+<link rel="dns-prefetch" href="https://ghl-form-proxy.mailift.workers.dev">
+<link rel="preconnect" href="https://ghl-form-proxy.mailift.workers.dev" crossorigin>
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN TOKENS: identici a landing/optin-calcolatore.html.
+   Le due pagine vivono nello stesso funnel e devono sembrare
+   la stessa azienda anche a colpo d'occhio.
+   ═══════════════════════════════════════════════════════════════ */
+:root{
+  --navy-deep:#0F1825; --navy-mid:#121D2B; --navy-card:#1A2942; --navy-hover:#1F3354;
+  --gold:#FAB450; --gold-hi:#FFC873; --gold-hover:#e8a23a; --gold-dim:rgba(250,180,80,.10);
+  --gold-glow:rgba(250,180,80,.30);
+  --text-white:#F0F0EB; --text-muted:#93A4B8; --text-dim:#647a8f;
+  --border:rgba(255,255,255,.08); --border-gold:rgba(250,180,80,.20);
+  --bad:#e86a6a; --warn:#f5a623; --good:#4db67a;
+  --pill:9999px; --r-lg:20px; --r:14px; --r-sm:10px;
+  --shadow-card:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.22);
+  --shadow-lift:0 2px 4px rgba(0,0,0,.3), 0 20px 50px rgba(0,0,0,.42);
+  --sticky-h:84px;
+}
+/* Fallback con metriche allineate a Montserrat: senza, all'arrivo del font i
+   titoli vanno a capo diversamente e la pagina salta (CLS). Percentuali misurate
+   sui due font, un peso alla volta. */
+@font-face{font-family:'Montserrat fallback';font-weight:400;size-adjust:112.7%;
+  src:local('Arial'),local('Roboto'),local('Helvetica Neue')}
+@font-face{font-family:'Montserrat fallback';font-weight:700;size-adjust:110.2%;
+  src:local('Arial'),local('Roboto'),local('Helvetica Neue')}
+@font-face{font-family:'Montserrat fallback';font-weight:800;size-adjust:112.2%;
+  src:local('Arial'),local('Roboto'),local('Helvetica Neue')}
+@font-face{font-family:'Montserrat fallback';font-weight:900;size-adjust:114.3%;
+  src:local('Arial'),local('Roboto'),local('Helvetica Neue')}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Montserrat','Montserrat fallback',system-ui,-apple-system,sans-serif;
+  background:var(--navy-deep);color:var(--text-white);
+  line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+body.ml-noscroll{overflow:hidden}
+
+/* Incollata in GHL questa pagina vive dentro il DOM dell'host: le regole su
+   <body> non vincono e i wrapper bianchi restano visibili sotto le sezioni
+   trasparenti. Sfondo, colore e font stanno quindi su un elemento nostro.
+   Niente transform/filter qui: creerebbero un containing block e romperebbero
+   sticky bar e modale in position:fixed. */
+.ml-page{
+  background:var(--navy-deep);color:var(--text-white);
+  font-family:'Montserrat','Montserrat fallback',system-ui,-apple-system,sans-serif;
+  line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;
+  padding-bottom:calc(var(--sticky-h) + env(safe-area-inset-bottom,0px));
+}
+img{max-width:100%;height:auto;display:block}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4px}
+.skip-link{position:absolute;top:-48px;left:0;background:var(--gold);color:#0F1825;padding:10px 16px;font-weight:800;font-size:14px;z-index:10000;transition:top .2s}
+.skip-link:focus{top:0}
+
+.container{
+  max-width:900px;margin:0 auto;
+  padding-left:max(18px,env(safe-area-inset-left,0px));
+  padding-right:max(18px,env(safe-area-inset-right,0px));
+}
+.accent{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-weight:700}
+.gold{color:var(--gold)}
+.num{font-variant-numeric:tabular-nums;font-style:italic;font-weight:900;letter-spacing:-.02em}
+
+/* ─── Bottoni ─── */
+.btn-primary{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;min-height:56px;padding:16px 24px;
+  background:linear-gradient(180deg,var(--gold-hi),var(--gold));
+  color:#0F1825;font-weight:800;font-size:17px;line-height:1.25;letter-spacing:.005em;
+  border:none;border-radius:var(--pill);cursor:pointer;text-align:center;
+  box-shadow:0 2px 0 rgba(0,0,0,.12), 0 6px 22px var(--gold-glow);
+  transition:transform .12s ease, box-shadow .18s ease, filter .18s ease;
+}
+.btn-primary:hover{filter:brightness(1.04);box-shadow:0 2px 0 rgba(0,0,0,.12),0 10px 32px rgba(250,180,80,.45)}
+.btn-primary:active{transform:translateY(1px)}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed;box-shadow:none}
+.btn-arrow::after{content:"\2192";font-size:1.05em;font-weight:900}
+
+/* Blocco CTA ripetuto: su questa pagina la stessa azione torna 6 volte, quindi
+   e' un componente, non un caso singolo. */
+.cta{max-width:460px;margin:30px auto 0;text-align:center}
+.cta__micro{margin-top:11px;font-size:12px;color:var(--text-dim);line-height:1.5}
+.cta__micro strong{color:var(--text-muted);font-weight:700}
+
+/* ─── Barra di qualifica in cima (statica, non sticky) ─── */
+.offer-bar{
+  background:var(--gold);color:#0F1825;text-align:center;
+  padding:9px 16px;font-weight:700;font-size:12.5px;line-height:1.35;letter-spacing:.005em;
+}
+.offer-bar strong{font-weight:900}
+
+/* ═══════════════════════════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════════════════════════ */
+.hero{padding:20px 0 40px;text-align:center;position:relative;overflow:hidden}
+.hero::before{
+  content:'';position:absolute;top:-260px;left:50%;transform:translateX(-50%);
+  width:620px;height:620px;pointer-events:none;
+  background:radial-gradient(circle,rgba(250,180,80,.13) 0%,transparent 66%);
+}
+.hero > .container{position:relative}
+.hero__eyebrow{
+  display:inline-block;background:var(--gold-dim);border:1px solid var(--border-gold);
+  color:var(--gold);font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  padding:7px 13px;border-radius:var(--pill);margin-bottom:18px;line-height:1.3;
+}
+.hero h1{
+  font-size:clamp(29px,8.4vw,52px);font-weight:900;letter-spacing:-.03em;
+  line-height:1.1;margin-bottom:16px;text-wrap:balance;
+}
+.hero__sub{font-size:16px;color:var(--text-muted);max-width:52ch;margin-inline:auto;line-height:1.6;text-wrap:pretty}
+.hero__sub strong{color:var(--text-white);font-weight:700}
+.hero__excl{
+  margin-top:18px;font-size:12.5px;color:var(--text-dim);line-height:1.5;
+  max-width:46ch;margin-inline:auto;
+}
+
+/* ─── Striscia di prova sotto l'hero ─── */
+.proof{background:var(--navy-mid);border-block:1px solid var(--border);padding:22px 0}
+.proof__stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}
+.proof__num{font-size:clamp(21px,6vw,30px);line-height:1.05;color:var(--gold);font-weight:900;font-style:italic;font-variant-numeric:tabular-nums}
+.proof__lbl{font-size:11.5px;color:var(--text-muted);line-height:1.35;margin-top:5px}
+.proof__logos{background:#fff;border-radius:var(--r);padding:16px 14px;margin-top:20px}
+.proof__cap{font-size:11px;color:var(--text-dim);text-align:center;margin-top:10px;line-height:1.4}
+
+/* ═══════════════════════════════════════════════════════════════
+   SEZIONI
+   ═══════════════════════════════════════════════════════════════ */
+.section{padding:52px 0}
+.section--dark{background:var(--navy-mid)}
+/* content-visibility: il browser salta il layout di cio' che e' fuori schermo.
+   Su una pagina lunga come questa e' la voce che pesa di piu' sul primo render. */
+.section--defer{content-visibility:auto;contain-intrinsic-size:auto 620px}
+.section__eyebrow{
+  display:block;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:10px;
+}
+.section__title{
+  font-size:clamp(24px,6.6vw,38px);font-weight:900;letter-spacing:-.025em;
+  line-height:1.15;margin-bottom:12px;text-wrap:balance;
+}
+.section__lead{font-size:15px;color:var(--text-muted);max-width:58ch;line-height:1.6;text-wrap:pretty}
+.card{background:var(--navy-card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-card)}
+
+/* ─── Case study: screenshot Klaviyo prima/dopo ─── */
+.case{display:flex;flex-direction:column;gap:14px;margin-top:26px}
+.case-card{overflow:hidden;border-radius:var(--r)}
+.case-card__label{padding:9px 14px;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.case-card--before .case-card__label{background:rgba(232,106,106,.14);color:var(--bad)}
+.case-card--after  .case-card__label{background:rgba(77,182,122,.14);color:var(--good)}
+.case-card--extra  .case-card__label{background:rgba(250,180,80,.14);color:var(--gold)}
+.case-card__stat{padding:12px 14px;font-size:14px;font-weight:700;border-top:1px solid var(--border)}
+.case-card__stat span{display:block;font-size:12.5px;font-weight:400;color:var(--text-muted);margin-top:2px}
+.case-card__stat .up{display:inline;color:var(--good);font-weight:800}
+
+/* ─── Griglia dei risultati numerici (quota email sul fatturato) ─── */
+.res{display:grid;grid-template-columns:1fr;gap:9px;margin-top:24px}
+.res__row{
+  display:flex;align-items:center;gap:12px;padding:13px 15px;
+  background:var(--navy-card);border:1px solid var(--border);border-radius:var(--r-sm);
+}
+.res__pct{
+  flex-shrink:0;min-width:62px;text-align:center;
+  font-size:20px;font-weight:900;font-style:italic;color:var(--gold);
+  font-variant-numeric:tabular-nums;line-height:1;
+}
+.res__txt{font-size:13.5px;color:var(--text-muted);line-height:1.45;min-width:0}
+.res__txt strong{color:var(--text-white);font-weight:700}
+.res__note{font-size:11.5px;color:var(--text-dim);margin-top:14px;line-height:1.5}
+
+/* ─── Fasi dell'offerta ─── */
+.phase{margin-top:26px;display:flex;flex-direction:column;gap:14px}
+.phase__item{padding:20px 18px;border-radius:var(--r)}
+.phase__n{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:34px;height:34px;border-radius:50%;margin-bottom:12px;
+  background:var(--gold);color:#0F1825;font-weight:900;font-size:15px;font-variant-numeric:tabular-nums;
+}
+.phase__t{font-size:18px;font-weight:900;letter-spacing:-.015em;line-height:1.25;margin-bottom:8px}
+.phase__d{font-size:14px;color:var(--text-muted);line-height:1.65}
+.phase__d + .phase__d{margin-top:10px}
+.phase__list{list-style:none;display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
+.phase__list li{
+  font-size:12px;font-weight:700;color:var(--text-muted);
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  padding:6px 11px;border-radius:var(--pill);
+}
+.phase__io{
+  margin-top:14px;padding-top:13px;border-top:1px solid var(--border);
+  font-size:12.5px;color:var(--text-dim);line-height:1.55;
+}
+.phase__io b{color:var(--text-muted);font-weight:800}
+
+/* ─── Schema dello split 50/50 ─── */
+.split{margin-top:16px}
+.split__src{
+  text-align:center;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text-dim);padding:11px;border:1px dashed var(--border);border-radius:var(--r-sm);
+}
+.split__pipe{width:1px;height:18px;background:var(--border-gold);margin:0 auto}
+.split__arms{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.split__arm{padding:14px 12px;border-radius:var(--r-sm);text-align:center;border:1px solid var(--border);background:rgba(255,255,255,.03)}
+.split__arm--new{border-color:var(--border-gold);background:var(--gold-dim)}
+.split__pct{font-size:22px;font-weight:900;font-style:italic;color:var(--text-muted);line-height:1}
+.split__arm--new .split__pct{color:var(--gold)}
+.split__lbl{font-size:12px;color:var(--text-muted);margin-top:6px;line-height:1.4;font-weight:700}
+.split__foot{margin-top:12px;font-size:12.5px;color:var(--text-dim);line-height:1.55;text-align:center}
+
+/* ─── Blocchi impatto sul business ─── */
+.why{display:flex;flex-direction:column;gap:12px;margin-top:26px}
+.why__item{padding:19px 18px;border-radius:var(--r)}
+.why__t{font-size:16px;font-weight:900;letter-spacing:-.01em;margin-bottom:7px}
+.why__d{font-size:13.8px;color:var(--text-muted);line-height:1.65}
+.why__chain{
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px 6px;margin-top:13px;
+  font-size:12px;font-weight:800;color:var(--gold);
+}
+.why__chain span{background:var(--gold-dim);border:1px solid var(--border-gold);padding:6px 10px;border-radius:var(--pill);white-space:nowrap}
+/* La freccia sta dentro il pill che segue: se la riga va a capo, si porta
+   dietro la freccia invece di lasciarla appesa in fondo. */
+.why__chain span + span::before{content:"\2192  ";color:var(--text-dim);font-weight:700}
+.why__item--guard{border-color:var(--border-gold);background:linear-gradient(180deg,rgba(250,180,80,.10),rgba(250,180,80,.03))}
+
+/* ─── Elenco dei flow ─── */
+.flows{display:grid;grid-template-columns:1fr;gap:9px;margin-top:24px;counter-reset:fl}
+.flows__item{
+  display:flex;gap:13px;align-items:flex-start;padding:14px 15px;
+  background:var(--navy-card);border:1px solid var(--border);border-radius:var(--r-sm);
+}
+.flows__item::before{
+  counter-increment:fl;content:counter(fl,decimal-leading-zero);
+  flex-shrink:0;font-size:13px;font-weight:900;font-style:italic;color:var(--gold);
+  font-variant-numeric:tabular-nums;padding-top:1px;
+}
+.flows__n{font-size:14.5px;font-weight:800;line-height:1.35}
+.flows__d{font-size:13px;color:var(--text-muted);line-height:1.5;margin-top:3px}
+
+/* ─── Confronto con le agenzie generiche ─── */
+.cmp{margin-top:26px;display:flex;flex-direction:column;gap:10px}
+.cmp__row{border-radius:var(--r);overflow:hidden;border:1px solid var(--border);background:var(--navy-card)}
+.cmp__q{padding:11px 15px;font-size:11.5px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);border-bottom:1px solid var(--border)}
+.cmp__cells{display:grid;grid-template-columns:1fr}
+.cmp__cell{padding:13px 15px;font-size:13.5px;line-height:1.55}
+.cmp__cell--them{color:var(--text-muted);border-bottom:1px solid var(--border)}
+.cmp__cell--us{color:var(--text-white);background:rgba(250,180,80,.05)}
+.cmp__who{display:block;font-size:10.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
+.cmp__cell--them .cmp__who{color:var(--bad)}
+.cmp__cell--us .cmp__who{color:var(--gold)}
+
+/* ─── Chi c'e' dietro ─── */
+.founder{display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;margin-top:24px;padding:26px 20px;border-radius:var(--r-lg)}
+.founder__avatar{width:84px;height:84px;border-radius:50%;border:2px solid var(--border-gold);overflow:hidden;flex-shrink:0}
+.founder__avatar img{width:100%;height:100%;object-fit:cover}
+.founder__name{font-size:21px;font-weight:900;letter-spacing:-.01em}
+.founder__role{font-size:11.5px;font-weight:800;color:var(--gold);letter-spacing:.05em;text-transform:uppercase;margin-top:3px}
+.founder__bio{font-size:14.5px;color:var(--text-muted);line-height:1.65;margin-top:12px;max-width:52ch}
+.founder__bio + .founder__bio{margin-top:11px}
+.pillars{list-style:none;display:grid;grid-template-columns:1fr;gap:8px;margin-top:22px}
+.pillars li{
+  display:flex;gap:10px;align-items:baseline;padding:12px 14px;text-align:left;
+  background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--r-sm);
+  font-size:13.5px;color:var(--text-muted);line-height:1.5;
+}
+.pillars b{color:var(--text-white);font-weight:800;flex-shrink:0}
+
+/* ─── Obiezioni ─── */
+.faq{display:flex;flex-direction:column;gap:8px;margin-top:24px}
+.faq-item{border-radius:var(--r-sm);overflow:hidden;background:var(--navy-card);border:1px solid var(--border)}
+.faq-item__q{
+  width:100%;background:none;border:none;color:var(--text-white);text-align:left;cursor:pointer;
+  padding:17px 18px;font-size:14.5px;font-weight:700;line-height:1.4;
+  display:flex;justify-content:space-between;align-items:center;gap:14px;
+}
+.faq-item__q::after{content:"+";font-size:21px;color:var(--gold);flex-shrink:0;font-weight:400;transition:transform .2s}
+.faq-item.open .faq-item__q{color:var(--gold)}
+.faq-item.open .faq-item__q::after{transform:rotate(45deg)}
+.faq-item__a{display:none;padding:14px 18px 18px;font-size:13.5px;color:var(--text-muted);line-height:1.7;border-top:1px solid var(--border)}
+.faq-item.open .faq-item__a{display:block}
+
+/* ─── CTA finale ─── */
+.final{background:var(--navy-mid);border-top:1px solid var(--border-gold);padding:56px 0;text-align:center;position:relative;overflow:hidden}
+.final::before{
+  content:'';position:absolute;bottom:-240px;left:50%;transform:translateX(-50%);
+  width:560px;height:560px;pointer-events:none;
+  background:radial-gradient(circle,rgba(250,180,80,.10) 0%,transparent 68%);
+}
+.final > .container{position:relative}
+.final h2{font-size:clamp(26px,7.4vw,44px);font-weight:900;letter-spacing:-.025em;line-height:1.12;margin-bottom:14px;max-width:20ch;margin-inline:auto;text-wrap:balance}
+.final__sub{font-size:15px;color:var(--text-muted);margin-inline:auto;max-width:46ch;line-height:1.6}
+
+/* ─── Footer ─── */
+.footer{border-top:1px solid var(--border);padding:26px 0;text-align:center}
+.footer__logo{font-size:14px;font-weight:900;color:var(--gold);letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px}
+.footer__links{font-size:12px;color:var(--text-muted);margin-bottom:10px}
+.footer__links a{color:var(--text-muted);text-decoration:underline}
+.footer__copy{font-size:11.5px;color:var(--text-dim);line-height:1.6;max-width:64ch;margin-inline:auto}
+.footer__copy + .footer__copy{margin-top:8px}
+
+/* ─── Sticky bar ─── */
+.sticky{
+  position:fixed;left:0;right:0;bottom:0;z-index:900;
+  background:rgba(18,29,43,.98);border-top:1px solid var(--border-gold);
+  padding:12px max(16px,env(safe-area-inset-left,0px)) calc(12px + env(safe-area-inset-bottom,0px));
+  transform:translateY(110%);transition:transform .28s cubic-bezier(.22,.9,.3,1);
+  will-change:transform;
+}
+.sticky.visible{transform:translateY(0)}
+.sticky__inner{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:14px}
+.sticky__text{flex:1;min-width:0;font-size:12.5px;color:var(--text-muted);line-height:1.3}
+.sticky__text strong{display:block;color:var(--text-white);font-size:13.5px;font-weight:800;margin-bottom:1px}
+.sticky .btn-primary{width:auto;min-height:48px;padding:12px 20px;font-size:14.5px;flex-shrink:0}
+@media(max-width:379px){
+  .sticky__text{display:none}
+  .sticky .btn-primary{width:100%}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODALE DI CANDIDATURA
+   Stessi stili della optin: il componente e' gia' collaudato su
+   webview in-app, non aveva senso riscriverlo.
+   ═══════════════════════════════════════════════════════════════ */
+.ml-modal-overlay{
+  position:fixed;inset:0;background:rgba(6,11,18,.82);z-index:9000;display:none;
+  align-items:flex-start;justify-content:center;
+  padding:18px 12px calc(18px + env(safe-area-inset-bottom,0px));
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+}
+.ml-modal-overlay.open{display:flex}
+.ml-modal{
+  background:var(--navy-mid);border:1px solid var(--border-gold);border-radius:var(--r-lg);
+  padding:30px 20px 22px;max-width:460px;width:100%;margin:auto;position:relative;
+  box-shadow:var(--shadow-lift);animation:popupIn .2s cubic-bezier(.22,.9,.3,1);
+}
+@keyframes popupIn{from{opacity:0;transform:translateY(12px) scale(.99)}to{opacity:1;transform:none}}
+.ml-modal:focus{outline:none}
+/* area di tocco 44x44: a 24px si sbagliava il colpo */
+.ml-modal__close{
+  position:absolute;top:4px;right:6px;background:none;border:none;color:var(--text-muted);
+  font-size:26px;line-height:1;cursor:pointer;z-index:2;
+  min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;
+}
+.ml-modal__close:hover{color:var(--text-white)}
+.ml-progress{display:flex;gap:5px;justify-content:center;margin-bottom:16px}
+.ml-progress i{width:26px;height:4px;border-radius:3px;background:rgba(255,255,255,.14);transition:background .2s}
+.ml-progress i.on{background:var(--gold)}
+.ml-modal__eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:7px;text-align:center}
+.ml-modal__title{font-size:23px;font-weight:900;letter-spacing:-.022em;line-height:1.18;margin-bottom:6px;text-align:center;text-wrap:balance}
+.ml-modal__sub{font-size:13.5px;color:var(--text-muted);margin-bottom:20px;line-height:1.5;text-align:center;text-wrap:pretty}
+.ml-step[hidden]{display:none}
+.ml-choices{display:flex;flex-direction:column;gap:10px}
+.ml-choice{
+  position:relative;text-align:left;width:100%;
+  background:var(--navy-card);border:1px solid var(--border);border-radius:12px;
+  padding:15px 42px 15px 15px;min-height:56px;cursor:pointer;
+  transition:border-color .12s,background .12s,transform .12s;
+}
+.ml-choice:hover{border-color:var(--gold);background:var(--navy-hover)}
+.ml-choice:active{transform:scale(.99)}
+.ml-choice__t{display:block;font-size:15.5px;font-weight:700;color:var(--text-white);line-height:1.3}
+.ml-choice__s{display:block;font-size:12.5px;color:var(--text-muted);margin-top:3px;line-height:1.4}
+.ml-choice__arrow{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:var(--gold);font-size:19px;font-weight:700}
+.ml-choice--primary{border-color:var(--gold);background:linear-gradient(180deg,rgba(250,180,80,.17),rgba(250,180,80,.08));box-shadow:0 4px 18px rgba(250,180,80,.12)}
+.ml-choice--primary:hover{background:linear-gradient(180deg,rgba(250,180,80,.24),rgba(250,180,80,.12))}
+.ml-choice--secondary{background:transparent}
+.ml-choice--secondary:hover{background:var(--navy-card)}
+.ml-choice__tag{display:inline-block;background:var(--gold);color:#0F1825;font-size:9.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:var(--pill);margin-bottom:6px}
+.ml-choice--secondary .ml-choice__t{font-size:15px;color:var(--text-muted)}
+.ml-back{background:none;border:0;color:var(--text-muted);font-size:13px;cursor:pointer;padding:10px 8px 10px 0;min-height:44px;display:inline-flex;align-items:center}
+.ml-back:hover{color:var(--gold)}
+.ml-form{display:flex;flex-direction:column;gap:12px}
+.ml-form input[type=text],.ml-form input[type=email],.ml-form input[type=tel],.ml-form input[type=url]{
+  width:100%;background:var(--navy-card);border:1px solid var(--border);border-radius:var(--r-sm);
+  padding:14px 15px;font-family:inherit;font-size:16px; /* 16px: sotto, iOS zooma al focus */
+  color:var(--text-white);outline:none;transition:border-color .18s,box-shadow .18s;
+}
+.ml-form input::placeholder{color:var(--text-dim)}
+.ml-form input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(250,180,80,.14)}
+.ml-consent{
+  display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--text-dim);line-height:1.5;
+  padding:10px;margin:-10px;border:1px solid transparent;border-radius:var(--r-sm);
+  transition:border-color .18s,background .18s;cursor:pointer;
+}
+.ml-consent input{margin-top:2px;flex-shrink:0;accent-color:var(--gold);width:20px;height:20px}
+.ml-consent a{color:var(--gold);text-decoration:underline}
+.ml-consent__req{color:var(--gold);font-weight:800}
+/* Il bubble nativo della checkbox non compare nei webview in-app iOS:
+   l'errore va reso visibile nel DOM, altrimenti il tap "non fa niente". */
+.ml-consent--error{border-color:var(--bad);background:rgba(232,106,106,.10)}
+.ml-consent--error .ml-consent__req{color:var(--bad)}
+.ml-consent--error input{outline:2px solid var(--bad);outline-offset:2px}
+@keyframes mlShake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-3px)}40%,60%{transform:translateX(3px)}}
+.ml-shake{animation:mlShake .4s}
+.ml-form input.ml-invalid{border-color:var(--bad)}
+.ml-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.ml-err{display:none;color:var(--bad);font-size:13px;text-align:center;line-height:1.45}
+.ml-modal__micro{text-align:center;font-size:11.5px;color:var(--text-dim);margin-top:13px;line-height:1.45}
+/* Schermata di conferma: la candidatura non porta a un'altra pagina, quindi
+   la chiusura del ciclo deve avvenire qui dentro. */
+.ml-done{text-align:center}
+.ml-done__ico{
+  width:54px;height:54px;border-radius:50%;margin:0 auto 16px;
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+  background:rgba(77,182,122,.14);color:var(--good);
+}
+.ml-done__t{font-size:22px;font-weight:900;letter-spacing:-.02em;line-height:1.2;margin-bottom:10px}
+.ml-done__d{font-size:14px;color:var(--text-muted);line-height:1.65;text-wrap:pretty}
+.ml-done__d + .ml-done__d{margin-top:10px}
+
+/* ═══════════════════════════════════════════════════════════════
+   DESKTOP (tutto sopra e' scritto per il 375px)
+   ═══════════════════════════════════════════════════════════════ */
+@media(min-width:768px){
+  :root{--sticky-h:76px}
+  .container{padding-inline:24px}
+  .offer-bar{font-size:14px;padding:11px 20px}
+  .hero{padding:58px 0 66px}
+  .hero__eyebrow{font-size:12px;margin-bottom:24px}
+  .hero h1{margin-bottom:20px}
+  .hero__sub{font-size:18.5px;max-width:50ch}
+  .hero__excl{font-size:13.5px;margin-top:24px}
+  .section{padding:80px 0}
+  .section__lead{font-size:17px}
+  .cta{margin-top:38px}
+  .case{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .case--full{grid-column:1/-1}
+  .res{grid-template-columns:1fr 1fr;gap:12px}
+  .res__txt{font-size:14px}
+  .phase__item{padding:28px 30px}
+  .phase__t{font-size:21px}
+  .phase__d{font-size:15px}
+  .split__arms{gap:14px}
+  .why{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .why__item{padding:24px 22px}
+  .why__item--guard{grid-column:1/-1}
+  .flows{grid-template-columns:1fr 1fr;gap:12px}
+  /* Su desktop il confronto torna a due colonne affiancate: e' il formato in
+     cui la contrapposizione si legge davvero. */
+  .cmp__cells{grid-template-columns:1fr 1fr}
+  .cmp__cell--them{border-bottom:0;border-right:1px solid var(--border)}
+  .cmp__cell{font-size:14px;padding:16px 18px}
+  .founder{flex-direction:row;align-items:flex-start;text-align:left;gap:28px;padding:36px}
+  .founder__avatar{width:104px;height:104px}
+  .founder__name{font-size:26px}
+  .pillars{grid-template-columns:1fr 1fr}
+  .faq-item__q{font-size:15.5px;padding:19px 22px}
+  .faq-item__a{font-size:14.5px;padding:16px 22px 20px}
+  .final{padding:96px 0}
+  .final__sub{font-size:16.5px}
+  .ml-modal{padding:36px 32px 26px}
+  .ml-modal__title{font-size:26px}
+  .ml-modal__sub{font-size:14px}
+}
+
+/* L'eyebrow qualifica ed e' lungo: sotto i 420px va stretto invece che accorciato. */
+@media(max-width:420px){
+  .hero__eyebrow{font-size:10.5px;letter-spacing:.045em;padding:6px 11px}
+}
+
+/* Rotture reali verificate a 320px */
+@media(max-width:340px){
+  .container{padding-inline:14px}
+  .hero__eyebrow{font-size:10px;letter-spacing:.06em;padding:5px 11px}
+  .btn-primary{font-size:15.5px;padding:15px 16px}
+  .proof__stats{grid-template-columns:1fr;gap:14px}
+  .split__arms{grid-template-columns:1fr}
+  .res__pct{min-width:54px;font-size:18px}
+  .ml-modal{padding:24px 14px 18px}
+  .ml-modal__title{font-size:20px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{animation:none!important;transition:none!important}
+  .sticky{transition:none}
+}
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Salta al contenuto</a>
+
+<!-- Tutto dentro .ml-page: incollata in GHL non possiamo contare su <body>.
+     Ci stanno dentro anche sticky bar e modale, cosi' ereditano il font.
+     Restano position:fixed perche' .ml-page non crea containing block. -->
+<div class="ml-page">
+
+<!-- Pre-header di qualifica: filtra prima ancora del titolo -->
+<div class="offer-bar">Solo eCommerce Shopify con Klaviyo attivo, da <strong>25.000&euro;/mese</strong> in su</div>
+
+<main id="main">
+
+<!-- ══════════ HERO ══════════ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero__eyebrow">Accettiamo 2 nuovi partner al mese</div>
+    <h1>I tuoi flow Klaviyo contro i nostri, <span class="accent gold">50/50 sullo stesso traffico</span>. Il risultato lo paghi solo se vinciamo.</h1>
+    <p class="hero__sub">Si parte da un audit gratuito del tuo account: flow, campagne, segmenti, popup, deliverability, e la <strong>baseline degli ultimi 3 mesi</strong>, fissata prima di toccare qualsiasi cosa. Poi ricostruiamo i flow e li mettiamo in split contro i tuoi, dentro Klaviyo, dove i numeri li leggi anche tu.</p>
+
+    <div class="cta">
+      <button class="btn-primary btn-arrow ml-open" aria-haspopup="dialog">Richiedi l'audit Klaviyo gratuito</button>
+      <div class="cta__micro">Accesso in sola lettura + 30 minuti di call. <strong>2 posti al mese</strong>: quando finiscono si passa al mese successivo.</div>
+    </div>
+
+    <p class="hero__excl">Se fatturi sotto i 25.000&euro;/mese o non hai ancora Klaviyo installato, l'audit non ha abbastanza dati per dirti qualcosa di utile. Meglio non richiederlo adesso.</p>
+  </div>
+</section>
+
+<!-- ══════════ PROVA SINTETICA ══════════ -->
+<div class="proof">
+  <div class="container">
+    <div class="proof__stats">
+      <div><div class="proof__num">1M&euro;+</div><div class="proof__lbl">revenue generata via email per i brand seguiti</div></div>
+      <div><div class="proof__num">+174%</div><div class="proof__lbl">revenue da flow in 21 giorni sull'ultimo rebuild</div></div>
+      <div><div class="proof__num">28&ndash;70%</div><div class="proof__lbl">quota del fatturato generata dall'email nei loro account</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ CASE STUDY NUMERICI ══════════ -->
+<section class="section section--defer">
+  <div class="container">
+    <span class="section__eyebrow">Risultati</span>
+    <h2 class="section__title">Cosa cambia quando i flow vengono rifatti</h2>
+    <p class="section__lead">Screenshot presi dagli account Klaviyo dei brand che seguiamo. Nessun dato demo, nessuna slide ricostruita.</p>
+
+    <div class="case">
+      <div class="case-card card case-card--before">
+        <div class="case-card__label">Prima</div>
+        <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/us5X0gC74A4Hjpwvd83e/media/6a2fc2cdb9af5312bc38362f.png"
+             alt="Revenue da flow Klaviyo prima del rebuild" width="1200" height="600" loading="lazy" decoding="async">
+        <div class="case-card__stat">Revenue da flow: 1.240&euro;/mese<span>Flow attivi, mai ottimizzati dal giorno del setup</span></div>
+      </div>
+      <div class="case-card card case-card--after">
+        <div class="case-card__label">Dopo, 21 giorni</div>
+        <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/us5X0gC74A4Hjpwvd83e/media/6a2fc2cd1b95dbb2c2e3de76.png"
+             alt="Revenue da flow Klaviyo dopo il rebuild" width="1200" height="600" loading="lazy" decoding="async">
+        <div class="case-card__stat">Revenue da flow: <span class="up">3.410&euro;/mese, +174%</span><span>Stesso traffico, stessa lista, 3 flow riscritti</span></div>
+      </div>
+      <div class="case-card card case-card--extra case--full">
+        <div class="case-card__label">Incremento verificato su un secondo account</div>
+        <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/us5X0gC74A4Hjpwvd83e/media/e424c01c-4523-498c-97c0-6b14ddf85e0e.png"
+             alt="Secondo incremento di revenue email verificato in Klaviyo" width="1200" height="500" loading="lazy" decoding="async">
+      </div>
+    </div>
+
+    <div class="res">
+      <div class="res__row"><div class="res__pct num">70%</div><div class="res__txt"><strong>40k&pound; fatturati</strong>, di cui 28k&pound; da email e SMS</div></div>
+      <div class="res__row"><div class="res__pct num">69%</div><div class="res__txt"><strong>26k&euro; fatturati</strong>, di cui 18k&euro; da email e SMS</div></div>
+      <div class="res__row"><div class="res__pct num">47%</div><div class="res__txt"><strong>121k&euro; fatturati</strong>, di cui 57k&euro; da email e SMS</div></div>
+      <div class="res__row"><div class="res__pct num">40%</div><div class="res__txt"><strong>172k&euro; fatturati</strong>, di cui 68k&euro; da email e SMS</div></div>
+      <div class="res__row"><div class="res__pct num">38%</div><div class="res__txt"><strong>103k&euro; fatturati</strong>, di cui 39k&euro; da email e SMS</div></div>
+      <div class="res__row"><div class="res__pct num">31%</div><div class="res__txt"><strong>54k&euro; fatturati</strong>, di cui 17k&euro; da email e SMS</div></div>
+      <div class="res__row"><div class="res__pct num">28%</div><div class="res__txt"><strong>36k&euro; fatturati</strong>, di cui 10k&euro; da email e SMS</div></div>
+    </div>
+    <p class="res__note">Il riferimento di mercato per un eCommerce con una lista viva sta tra il 25% e il 40% del fatturato da email e SMS. Quando un account resta sotto il 10%, quella distanza sono ordini che il brand ha gi&agrave; pagato per acquisire e non sta incassando.</p>
+
+    <div class="cta">
+      <button class="btn-primary btn-arrow ml-open" aria-haspopup="dialog">Richiedi l'audit Klaviyo gratuito</button>
+      <div class="cta__micro">Il tuo numero arriva dall'audit, non da una stima.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ COME FUNZIONA ══════════ -->
+<section class="section section--dark section--defer">
+  <div class="container">
+    <span class="section__eyebrow">Il meccanismo</span>
+    <h2 class="section__title">Battiamo i tuoi flow attuali, oppure il test si chiude e non ci paghi il risultato</h2>
+    <p class="section__lead">Costruiamo il sistema di retention completo e la prova arriva prima della fattura, non dopo. Sono quattro passaggi.</p>
+
+    <div class="phase">
+      <div class="phase__item card">
+        <div class="phase__n">1</div>
+        <div class="phase__t">Audit completo del tuo Klaviyo</div>
+        <p class="phase__d">Entriamo nell'account in sola lettura e guardiamo tutto quello che tocca la revenue email, non solo i flow.</p>
+        <ul class="phase__list">
+          <li>Flow attivi</li><li>Campagne ultimi 90 giorni</li><li>Segmenti</li>
+          <li>Popup e form</li><li>Deliverability (DNS, DKIM, SPF, DMARC)</li><li>Occasioni non colte</li>
+        </ul>
+        <div class="phase__io"><b>Ti serve:</b> un accesso in sola lettura a Klaviyo.<br><b>Ti resta:</b> la mappa dei punti in cui il fatturato si perde e la baseline della revenue email degli ultimi 3 mesi, che diventa il metro con cui si giudica tutto il resto.</div>
+      </div>
+
+      <div class="phase__item card">
+        <div class="phase__n">2</div>
+        <div class="phase__t">Ricostruzione dei flow che perdono di pi&ugrave;</div>
+        <p class="phase__d">Riscriviamo da zero i flow che l'audit segnala come pi&ugrave; deboli: struttura, tempi di attesa, condizioni di uscita, copy e grafiche. Il lavoro lo facciamo noi, tu approvi prima che vada live.</p>
+        <p class="phase__d">Quanti flow dipende da cosa manca davvero nel tuo account. Nessun brand ha bisogno di otto flow nuovi tutti insieme.</p>
+        <div class="phase__io"><b>Ti serve:</b> un'ora per l'approvazione dei testi.<br><b>Ti resta:</b> i flow nuovi restano tuoi, anche se dopo il test decidi di gestirli internamente.</div>
+      </div>
+
+      <div class="phase__item card">
+        <div class="phase__n">3</div>
+        <div class="phase__t">Split test 50/50 contro i tuoi flow</div>
+        <p class="phase__d">I flow ricostruiti non sostituiscono i tuoi: gli si affiancano. Chi entra nel trigger viene diviso a met&agrave;, una parte riceve la tua versione, l'altra la nostra.</p>
+        <div class="split">
+          <div class="split__src">Chi entra nel flow</div>
+          <div class="split__pipe" aria-hidden="true"></div>
+          <div class="split__arms">
+            <div class="split__arm">
+              <div class="split__pct num">50%</div>
+              <div class="split__lbl">I tuoi flow, come sono adesso</div>
+            </div>
+            <div class="split__arm split__arm--new">
+              <div class="split__pct num">50%</div>
+              <div class="split__lbl">I flow ricostruiti da noi</div>
+            </div>
+          </div>
+          <p class="split__foot">Stesso periodo, stesso traffico, stesso tipo di cliente. Stagionalit&agrave;, promo e picchi di ads colpiscono i due bracci allo stesso modo, quindi la differenza che resta &egrave; attribuibile ai flow.</p>
+        </div>
+        <div class="phase__io"><b>Quanto dura:</b> finch&eacute; i due bracci non hanno abbastanza ingressi per essere confrontati. La soglia la fissiamo sui tuoi volumi durante l'audit, prima di partire, non a test avviato.</div>
+      </div>
+
+      <div class="phase__item card">
+        <div class="phase__n">4</div>
+        <div class="phase__t">Come veniamo pagati</div>
+        <p class="phase__d">Un fee di gestione ridotto, pi&ugrave; una quota sulla sola revenue incrementale sopra la baseline fissata nell'audit e scritta nel contratto.</p>
+        <p class="phase__d">L'incrementale si calcola sulla revenue Klaviyo netta, con fuori gli ordini manuali, i rimborsi e i cancellati. Se i flow ricostruiti non superano i tuoi nello split, non c'&egrave; incrementale e la quota non scatta.</p>
+        <div class="phase__io"><b>Regola che ci diamo in preventivo:</b> il costo resta sotto un mese della revenue incrementale stimata nell'audit. Se i conti non tornano, te lo diciamo durante l'audit e non ti proponiamo niente.</div>
+      </div>
+    </div>
+
+    <div class="cta">
+      <button class="btn-primary btn-arrow ml-open" aria-haspopup="dialog">Richiedi l'audit Klaviyo gratuito</button>
+      <div class="cta__micro">30 minuti sul tuo account. <strong>2 posti al mese.</strong></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ PERCHE' LA RETENTION ══════════ -->
+<section class="section section--defer">
+  <div class="container">
+    <span class="section__eyebrow">Cosa muove davvero</span>
+    <h2 class="section__title">I flow non spostano solo la revenue email</h2>
+    <p class="section__lead">Spostano il numero di volte che un cliente torna, quanto vale nel tempo e quanto puoi permetterti di pagarlo in acquisizione.</p>
+
+    <div class="why">
+      <div class="why__item card">
+        <div class="why__t">Pi&ugrave; clienti tornano a comprare</div>
+        <p class="why__d">Replenishment, post purchase e winback attaccano il momento preciso in cui il cliente sparisce: il prodotto sta finendo, l'ordine &egrave; arrivato e nessuno gli ha detto altro, sono passati 90 giorni dall'ultimo acquisto.</p>
+      </div>
+      <div class="why__item card">
+        <div class="why__t">Ogni cliente vale di pi&ugrave;</div>
+        <p class="why__d">Il secondo e il terzo ordine costano zero in acquisizione. Quando il tasso di riacquisto sale, sale il valore che ogni cliente genera nella sua vita con il brand, e sale su tutta la base clienti che hai gi&agrave; pagato.</p>
+      </div>
+      <div class="why__item card">
+        <div class="why__t">E le ads iniziano a respirare</div>
+        <p class="why__d">Con un valore per cliente pi&ugrave; alto puoi permetterti un costo di acquisizione pi&ugrave; alto. Torni a comprare traffico che oggi lasci ai concorrenti perch&eacute; a quel CPA non chiudeva.</p>
+        <div class="why__chain"><span>Valore cliente</span><span>CPA sostenibile</span><span>Budget ads</span></div>
+      </div>
+      <div class="why__item card why__item--guard">
+        <div class="why__t">La garanzia sta nel test, non in una promessa</div>
+        <p class="why__d">Il confronto avviene sul tuo traffico e sui tuoi clienti, nello stesso periodo. Se i flow ricostruiti non generano pi&ugrave; revenue dei tuoi, la quota sul risultato non scatta e il test si chiude: quello che hai speso resta il fee di gestione, e i flow nuovi restano comunque nel tuo account.</p>
+      </div>
+    </div>
+
+    <div class="cta">
+      <button class="btn-primary btn-arrow ml-open" aria-haspopup="dialog">Richiedi l'audit Klaviyo gratuito</button>
+      <div class="cta__micro">Gratuito e senza impegno. L'audit resta tuo anche se non lavoriamo insieme.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FLOW CHE POSSIAMO RICOSTRUIRE ══════════ -->
+<section class="section section--dark section--defer">
+  <div class="container">
+    <span class="section__eyebrow">Deliverable</span>
+    <h2 class="section__title">I flow che possiamo ricostruire</h2>
+    <p class="section__lead">Durante l'audit decidiamo quali servono al tuo brand e in che ordine. Si parte sempre da quelli che nel tuo account stanno lasciando pi&ugrave; soldi indietro.</p>
+
+    <div class="flows">
+      <div class="flows__item"><div><div class="flows__n">Welcome</div><div class="flows__d">Chi si iscrive ha appena alzato la mano: qui si decide se comprer&agrave; ora o mai pi&ugrave;.</div></div></div>
+      <div class="flows__item"><div><div class="flows__n">Carrello abbandonato</div><div class="flows__d">Prodotto scelto, carrello pieno, acquisto non concluso. Il recupero pi&ugrave; diretto che esista.</div></div></div>
+      <div class="flows__item"><div><div class="flows__n">Checkout abbandonato</div><div class="flows__d">Dati inseriti e pagamento non completato: intenzione altissima, sequenza spesso assente.</div></div></div>
+      <div class="flows__item"><div><div class="flows__n">Browse abandonment</div><div class="flows__d">Ha guardato una scheda prodotto e se n'&egrave; andato senza aggiungere niente.</div></div></div>
+      <div class="flows__item"><div><div class="flows__n">Post purchase</div><div class="flows__d">Il momento di massima fiducia: qui nasce il secondo ordine, oppure non nasce.</div></div></div>
+      <div class="flows__item"><div><div class="flows__n">Replenishment</div><div class="flows__d">Il prodotto sta finendo. Arrivare prima del concorrente vale l'intero riacquisto.</div></div></div>
+      <div class="flows__item"><div><div class="flows__n">Winback</div><div class="flows__d">Clienti fermi da mesi che il brand ha gi&agrave; pagato una volta e non sta pi&ugrave; contattando.</div></div></div>
+      <div class="flows__item"><div><div class="flows__n">Cross-sell</div><div class="flows__d">Il prodotto giusto proposto a chi ha gi&agrave; comprato quello complementare.</div></div></div>
+    </div>
+
+    <div class="cta">
+      <button class="btn-primary btn-arrow ml-open" aria-haspopup="dialog">Richiedi l'audit Klaviyo gratuito</button>
+      <div class="cta__micro">L'audit dice quali di questi ti mancano e quanto ti stanno costando.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CONFRONTO ══════════ -->
+<section class="section section--defer">
+  <div class="container">
+    <span class="section__eyebrow">Il confronto</span>
+    <h2 class="section__title">Mailift e le agenzie email generiche</h2>
+    <p class="section__lead">Sei domande da fare a chiunque ti proponga di occuparsi della tua email, noi compresi.</p>
+
+    <div class="cmp">
+      <div class="cmp__row">
+        <div class="cmp__q">Chi mette le mani nell'account</div>
+        <div class="cmp__cells">
+          <div class="cmp__cell cmp__cell--them"><span class="cmp__who">Agenzia generica</span>Un junior con venti o trenta account da seguire, che vede il tuo Klaviyo mezz'ora a settimana.</div>
+          <div class="cmp__cell cmp__cell--us"><span class="cmp__who">Mailift</span>Due nuovi partner al mese, seguiti da chi ha costruito il metodo. Il tetto sui posti esiste per questo.</div>
+        </div>
+      </div>
+      <div class="cmp__row">
+        <div class="cmp__q">Cosa consegnano ogni mese</div>
+        <div class="cmp__cells">
+          <div class="cmp__cell cmp__cell--them"><span class="cmp__who">Agenzia generica</span>Campagne. I flow restano quelli installati il primo mese e nessuno li riapre pi&ugrave;.</div>
+          <div class="cmp__cell cmp__cell--us"><span class="cmp__who">Mailift</span>Flow ricostruiti e testati, calendario campagne, segmenti che si aggiornano con la base clienti.</div>
+        </div>
+      </div>
+      <div class="cmp__row">
+        <div class="cmp__q">Come decidono cosa fare</div>
+        <div class="cmp__cells">
+          <div class="cmp__cell cmp__cell--them"><span class="cmp__who">Agenzia generica</span>Best practice lette da qualche parte e sensazioni sul cosa funziona nel tuo settore.</div>
+          <div class="cmp__cell cmp__cell--us"><span class="cmp__who">Mailift</span>Split test 50/50 dentro il tuo Klaviyo. Se il test dice che avevamo torto, si cambia versione.</div>
+        </div>
+      </div>
+      <div class="cmp__row">
+        <div class="cmp__q">Cosa c'&egrave; nel report</div>
+        <div class="cmp__cells">
+          <div class="cmp__cell cmp__cell--them"><span class="cmp__who">Agenzia generica</span>Aperture, click, iscritti in crescita. Numeri che salgono anche quando il fatturato non si muove.</div>
+          <div class="cmp__cell cmp__cell--us"><span class="cmp__who">Mailift</span>Revenue attribuita netta, con fuori ordini manuali, rimborsi e cancellati, confrontata con la baseline.</div>
+        </div>
+      </div>
+      <div class="cmp__row">
+        <div class="cmp__q">Come vengono pagati</div>
+        <div class="cmp__cells">
+          <div class="cmp__cell cmp__cell--them"><span class="cmp__who">Agenzia generica</span>Fee fisso pieno, che il canale cresca o resti fermo dov'era.</div>
+          <div class="cmp__cell cmp__cell--us"><span class="cmp__who">Mailift</span>Fee ridotto pi&ugrave; una quota sulla sola revenue incrementale sopra baseline. Niente incrementale, niente quota.</div>
+        </div>
+      </div>
+      <div class="cmp__row">
+        <div class="cmp__q">Cosa resta dopo sei mesi</div>
+        <div class="cmp__cells">
+          <div class="cmp__cell cmp__cell--them"><span class="cmp__who">Agenzia generica</span>Una lista abituata agli sconti, che apre solo quando c'&egrave; una percentuale nell'oggetto.</div>
+          <div class="cmp__cell cmp__cell--us"><span class="cmp__who">Mailift</span>Flow che vendono ogni giorno anche nelle settimane in cui non mandi nemmeno una campagna.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta">
+      <button class="btn-primary btn-arrow ml-open" aria-haspopup="dialog">Richiedi l'audit Klaviyo gratuito</button>
+      <div class="cta__micro">Le stesse sei domande falle anche a noi, in call.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CHI C'E' DIETRO ══════════ -->
+<section class="section section--dark section--defer">
+  <div class="container">
+    <span class="section__eyebrow">Chi c'&egrave; dietro</span>
+    <h2 class="section__title">Chi mette le mani nel tuo account</h2>
+    <div class="founder card">
+      <div class="founder__avatar">
+        <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/us5X0gC74A4Hjpwvd83e/media/69884cb10a7fd176fb22f7df.png"
+             alt="Lorenzo Baretta, founder di Mailift" width="208" height="208" loading="lazy" decoding="async">
+      </div>
+      <div>
+        <div class="founder__name">Lorenzo Baretta</div>
+        <div class="founder__role">Email Revenue Strategist &middot; Founder Mailift</div>
+        <p class="founder__bio">Cinque anni dentro l'eCommerce prima di fondare Mailift. In ogni account che aprivo si ripeteva la stessa scena: budget su budget in acquisizione, e una lista di clienti gi&agrave; pagati che riceveva due newsletter al mese e uno sconto a Natale.</p>
+        <p class="founder__bio">Mailift lavora solo su Shopify e Klaviyo, e solo sul backend. Oltre 1M&euro; di revenue generata via email per i brand seguiti. Il metodo interno si chiama Email Profit System e sta su cinque pilastri.</p>
+        <ul class="pillars">
+          <li><b>01</b><span>Revenue Leak Audit: quanto la lista dovrebbe generare e quanto genera davvero.</span></li>
+          <li><b>02</b><span>Automated Flows: i flow che valgono in media il 70% della revenue email.</span></li>
+          <li><b>03</b><span>Campaign Engine: calendario editoriale con la regola 80/20 tra contenuto e promozione.</span></li>
+          <li><b>04</b><span>Advanced Segmentation: nuovi clienti, VIP, inattivi, chi ha comprato una volta sola.</span></li>
+          <li><b>05</b><span>List Growth: popup, quiz e lead magnet che fanno lavorare due volte il traffico che gi&agrave; paghi.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ OBIEZIONI ══════════ -->
+<section class="section section--defer">
+  <div class="container">
+    <span class="section__eyebrow">Prima di candidarti</span>
+    <h2 class="section__title">Le domande che arrivano sempre</h2>
+    <div class="faq">
+      <div class="faq-item">
+        <button class="faq-item__q" type="button" aria-expanded="false" onclick="toggleFaq(this)">Le email le facciamo gi&agrave;. Perch&eacute; dovremmo rifarle?</button>
+        <div class="faq-item__a">Apri Klaviyo e guarda che percentuale del fatturato degli ultimi 90 giorni arriva da email e SMS. Sopra il 25% il tuo canale funziona e non ti serviamo. Sotto il 10%, il problema non &egrave; che non mandi email: &egrave; che i flow attuali non stanno lavorando. Lo split test serve esattamente a stabilire quale delle due versioni incassa di pi&ugrave;, senza doverci credere sulla parola.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-item__q" type="button" aria-expanded="false" onclick="toggleFaq(this)">Come funziona lo split test dentro Klaviyo?</button>
+        <div class="faq-item__a">Klaviyo permette di far convivere due versioni dello stesso flow e di dividere chi entra nel trigger. Met&agrave; dei profili percorre la tua versione, met&agrave; la nostra, nello stesso periodo. A fine test si confrontano revenue per destinatario e ordini generati dai due bracci.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-item__q" type="button" aria-expanded="false" onclick="toggleFaq(this)">Quanto dura il test?</button>
+        <div class="faq-item__a">Dipende da quanti profili entrano ogni settimana nei flow che tocchiamo. Con pochi ingressi la differenza tra i due bracci non &egrave; leggibile e chiudere il test in anticipo servirebbe solo a farci pagare. La soglia di ingressi la fissiamo sui tuoi volumi durante l'audit e la scriviamo prima di partire.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-item__q" type="button" aria-expanded="false" onclick="toggleFaq(this)">Devo dare accesso al mio account?</button>
+        <div class="faq-item__a">Per l'audit basta un accesso in sola lettura, che revochi quando vuoi. Per costruire i flow serve un accesso operativo, e in quella fase c'&egrave; gi&agrave; un contratto tra noi. Quello che vediamo nel tuo account resta tra noi in entrambi i casi.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-item__q" type="button" aria-expanded="false" onclick="toggleFaq(this)">Quanto costa?</button>
+        <div class="faq-item__a">Un fee di gestione ridotto pi&ugrave; una quota sulla revenue incrementale sopra la baseline. La cifra esatta dipende da quanti flow vanno rifatti e da quante lingue gestisci, quindi esce dall'audit e non da questa pagina. La regola che ci diamo: il costo resta sotto un mese della revenue incrementale stimata. Se non ci sta, non ti proponiamo niente.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-item__q" type="button" aria-expanded="false" onclick="toggleFaq(this)">E se il mio brand non &egrave; adatto?</button>
+        <div class="faq-item__a">Te lo diciamo in call e finisce l&igrave;. L'audit resta tuo con dentro i punti da sistemare, anche se lo implementi con il tuo team o con un'altra agenzia. Su due posti al mese non abbiamo interesse a prendere progetti che sappiamo gi&agrave; di non poter far vincere.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CTA FINALE ══════════ -->
+<section class="final">
+  <div class="container">
+    <h2>Il test dice chi ha ragione. <span class="accent gold">Tanto vale farlo</span></h2>
+    <p class="final__sub">Trenta minuti sul tuo account Klaviyo e un numero: quanto vale la distanza tra ci&ograve; che i tuoi flow incassano oggi e ci&ograve; che dovrebbero incassare. Se poi vuoi recuperarla con noi si parte, altrimenti il piano resta tuo.</p>
+    <div class="cta">
+      <button class="btn-primary btn-arrow ml-open" aria-haspopup="dialog">Richiedi l'audit Klaviyo gratuito</button>
+      <div class="cta__micro">Confidenziale: quello che vediamo nel tuo account non esce da l&igrave;. <strong>2 posti al mese.</strong></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__logo">MAILIFT</div>
+    <div class="footer__links"><a href="https://mailift.com/privacy" target="_blank" rel="noopener">Privacy policy</a></div>
+    <div class="footer__copy">&copy; 2026 Mailift Srl &middot; P.IVA 18160018008</div>
+    <div class="footer__copy">Questo sito non fa parte di Facebook o di Meta Platforms Inc. e non &egrave; approvato da Meta in alcun modo. I risultati mostrati provengono da account reali e possono variare da brand a brand.</div>
+  </div>
+</footer>
+
+<!-- ══════════ STICKY BAR ══════════ -->
+<div class="sticky" id="stickyBar">
+  <div class="sticky__inner">
+    <div class="sticky__text"><strong>Audit Klaviyo gratuito</strong>2 posti al mese</div>
+    <button class="btn-primary btn-arrow ml-open" aria-haspopup="dialog">Richiedi</button>
+  </div>
+</div>
+
+<!-- ══════════ MODALE DI CANDIDATURA ══════════ -->
+<div class="ml-modal-overlay" id="mlModal" role="dialog" aria-modal="true" aria-labelledby="mlModalTitle" aria-hidden="true">
+  <div class="ml-modal" tabindex="-1">
+    <button type="button" class="ml-modal__close" id="mlClose" aria-label="Chiudi">&times;</button>
+    <div class="ml-progress" id="mlProgress" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+
+    <!-- STEP 1 -->
+    <div class="ml-step" data-step="1">
+      <div class="ml-modal__eyebrow" id="mlStep1Eyebrow">Step 1 di 3</div>
+      <div class="ml-modal__title" id="mlModalTitle">Per chi richiedi l'audit?</div>
+      <div class="ml-modal__sub">Scegli un'opzione per continuare</div>
+      <div class="ml-choices">
+        <button type="button" class="ml-choice ml-choice--primary" data-value="Per il mio brand Ecommerce">
+          <span class="ml-choice__tag">In target</span>
+          <span class="ml-choice__t">Per il mio brand eCommerce</span>
+          <span class="ml-choice__s">Sono il founder o gestisco lo store</span>
+          <span class="ml-choice__arrow">&rarr;</span>
+        </button>
+        <button type="button" class="ml-choice ml-choice--secondary" data-value="Per i miei clienti">
+          <span class="ml-choice__t">Per i miei clienti</span>
+          <span class="ml-choice__s">Sono un'agenzia, un freelance o un consulente</span>
+          <span class="ml-choice__arrow">&rarr;</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP FATTURATO
+         I valori devono combaciare CARATTERE PER CARATTERE con le picklistOptions
+         del campo GHL RADIO "Quale e' il tuo attuale fatturato Mensile? 1"
+         (id bW87MPPTFNr51QBtNZmG): en-dash U+2013, nessuno spazio prima di
+         "€/mese". Sono le stesse fasce della optin e del quiz: landing, quiz e
+         CRM devono parlare una lingua sola. -->
+    <div class="ml-step" data-step="rev" hidden>
+      <button type="button" class="ml-back" data-back="1">&larr; Indietro</button>
+      <div class="ml-modal__eyebrow">Step 2 di 3</div>
+      <div class="ml-modal__title">Quanto fattura il tuo store al mese?</div>
+      <div class="ml-modal__sub">Sotto i 25.000&euro;/mese lo split test non ha abbastanza ingressi per dare un risultato leggibile</div>
+      <div class="ml-choices">
+        <button type="button" class="ml-choice ml-rev" data-value="Meno di 10.000€/mese" data-qualified="0">
+          <span class="ml-choice__t">Meno di 10.000 &euro; / mese</span><span class="ml-choice__arrow">&rarr;</span>
+        </button>
+        <button type="button" class="ml-choice ml-rev" data-value="10.000 – 25.000€/mese" data-qualified="0">
+          <span class="ml-choice__t">10.000 &ndash; 25.000 &euro; / mese</span><span class="ml-choice__arrow">&rarr;</span>
+        </button>
+        <button type="button" class="ml-choice ml-rev" data-value="25.000 – 50.000€/mese" data-qualified="1">
+          <span class="ml-choice__t">25.000 &ndash; 50.000 &euro; / mese</span><span class="ml-choice__arrow">&rarr;</span>
+        </button>
+        <button type="button" class="ml-choice ml-rev" data-value="50.000 – 100.000€/mese" data-qualified="1">
+          <span class="ml-choice__t">50.000 &ndash; 100.000 &euro; / mese</span><span class="ml-choice__arrow">&rarr;</span>
+        </button>
+        <button type="button" class="ml-choice ml-rev" data-value="100.000 – 300.000€/mese" data-qualified="1">
+          <span class="ml-choice__t">100.000 &ndash; 300.000 &euro; / mese</span><span class="ml-choice__arrow">&rarr;</span>
+        </button>
+        <button type="button" class="ml-choice ml-rev" data-value="Oltre 300.000€/mese" data-qualified="1">
+          <span class="ml-choice__t">Oltre 300.000 &euro; / mese</span><span class="ml-choice__arrow">&rarr;</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP DATI -->
+    <div class="ml-step" data-step="2" hidden>
+      <button type="button" class="ml-back" id="mlBack">&larr; Indietro</button>
+      <div class="ml-modal__eyebrow" id="mlDataEyebrow">Step 3 di 3</div>
+      <div class="ml-modal__title">Dove ti rispondiamo</div>
+      <div class="ml-modal__sub" id="mlEcho">Ti scriviamo per fissare i 30 minuti di audit</div>
+      <form id="mlForm" class="ml-form" novalidate>
+        <input name="full_name" type="text" placeholder="Nome e cognome" autocomplete="name" enterkeyhint="next">
+        <input name="email" type="email" required placeholder="La tua email" autocomplete="email" inputmode="email" enterkeyhint="next">
+        <!-- Il telefono e' richiesto: su due posti al mese il primo contatto
+             avviene via WhatsApp, e un lead senza numero si ferma li'. -->
+        <input name="phone" type="tel" required placeholder="Telefono (WhatsApp)" autocomplete="tel" inputmode="tel" enterkeyhint="go">
+        <input type="hidden" name="per_chi" id="mlPerChi">
+        <input type="hidden" name="fatturato" id="mlFatturato">
+        <input type="hidden" name="origine" id="mlOrigine">
+        <input type="hidden" name="utm_source" id="mlUtmSource">
+        <input type="hidden" name="utm_medium" id="mlUtmMedium">
+        <input type="hidden" name="utm_campaign" id="mlUtmCampaign">
+        <input type="hidden" name="utm_content" id="mlUtmContent">
+        <input type="hidden" name="utm_term" id="mlUtmTerm">
+        <input type="hidden" name="landing_url" id="mlLandingUrl">
+        <input type="hidden" name="referrer" id="mlReferrer">
+        <!-- Segnali per la Conversions API lato Worker: senza, il match di Meta
+             si regge solo sull'email e l'attribuzione si degrada. -->
+        <input type="hidden" name="fbclid" id="mlFbclid">
+        <label class="ml-consent" id="mlConsentBox"><input type="checkbox" name="consent" id="mlConsent" required aria-describedby="mlErr"><span><span class="ml-consent__req">*</span> Acconsento a ricevere comunicazioni da Mailift, anche via email, SMS e WhatsApp, secondo la <a href="https://mailift.com/privacy" target="_blank" rel="noopener">privacy policy</a>. <span class="ml-consent__req">(obbligatorio)</span></span></label>
+        <input class="ml-hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button type="submit" class="btn-primary btn-arrow">Invia la candidatura</button>
+        <p id="mlErr" class="ml-err" role="alert" aria-live="assertive"></p>
+      </form>
+      <div class="ml-modal__micro">Nessun accesso richiesto adesso &middot; l'audit &egrave; confidenziale</div>
+    </div>
+
+    <!-- CONFERMA -->
+    <div class="ml-step ml-done" data-step="done" hidden>
+      <div class="ml-done__ico" aria-hidden="true">&#10003;</div>
+      <div class="ml-done__t">Candidatura ricevuta</div>
+      <p class="ml-done__d">Il passo successivo sono 30 minuti insieme sul tuo account Klaviyo. Ti scriviamo ai contatti che hai lasciato per fissarli.</p>
+      <p class="ml-done__d">Nel frattempo, un numero utile da portare in call: apri Klaviyo e guarda che percentuale del fatturato degli ultimi 90 giorni arriva da email e SMS. &Egrave; il punto da cui partiamo.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /.ml-page -->
+
+<script>
+/* ——— Sticky bar ———
+   Riferimento: il blocco CTA dell'hero. La barra compare solo quando quella CTA
+   esce dallo schermo, cosi' non ci sono due inviti all'azione contemporanei.
+   Listener passivo con throttle rAF invece di IntersectionObserver: una lettura
+   per frame, ma comportamento identico su tutti i webview. */
+(function(){
+  var bar=document.getElementById('stickyBar');
+  var ancora=document.querySelector('.hero .cta');
+  if(!bar||!ancora) return;
+  var pending=false;
+  function valuta(){
+    pending=false;
+    var b=ancora.getBoundingClientRect();
+    bar.classList.toggle('visible', b.bottom<0 || b.top>window.innerHeight);
+  }
+  function onScroll(){if(!pending){pending=true;requestAnimationFrame(valuta);}}
+  window.addEventListener('scroll',onScroll,{passive:true});
+  window.addEventListener('resize',onScroll,{passive:true});
+  valuta();
+})();
+
+/* ——— Obiezioni ——— */
+function toggleFaq(btn){
+  var item=btn.parentElement,open=item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(function(i){
+    i.classList.remove('open');
+    var q=i.querySelector('.faq-item__q');if(q)q.setAttribute('aria-expanded','false');
+  });
+  if(!open){item.classList.add('open');btn.setAttribute('aria-expanded','true');}
+}
+
+/* ——— Candidatura: modale a 3 step → Worker → GHL ——— */
+(function(){
+  // ↓↓↓ CONFIG ↓↓↓
+  var PROXY  = 'https://ghl-form-proxy.mailift.workers.dev';  // stesso Worker della optin
+  /* `origine` viaggia fino al Worker, che la usa come tag e come `source` sul
+     contatto GHL. Serve a separare in CRM i lead di questa pagina da quelli del
+     calcolatore: le due offerte sono diverse e il follow-up pure. */
+  var ORIGINE = 'apply-headtohead';
+  /* Dove mandare chi ha finito. Vuoto = resta nella modale sulla schermata di
+     conferma. Quando il calendario GHL per gli audit e' pronto, incolla qui il
+     link e il redirect si attiva da solo. */
+  var NEXT_URL = '';
+  // ↑↑↑ CONFIG ↑↑↑
+
+  function track(name,params){params=params||{};try{if(window.gtag)gtag('event',name,params);}catch(e){}try{if(window.fbq)fbq('trackCustom',name,params);}catch(e){}try{if(window.clarity){clarity('event',name);Object.keys(params).forEach(function(k){clarity('set',k,String(params[k]));});}}catch(e){}}
+
+  function leggiCookie(nome){
+    var m=document.cookie.match('(^|;\\s*)'+nome.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'=([^;]*)');
+    return m?decodeURIComponent(m[2]):'';
+  }
+  /* Id condiviso fra pixel browser e Conversions API: e' la chiave con cui Meta
+     deduplica. randomUUID manca nei webview piu' vecchi, quindi c'e' un ripiego. */
+  function nuovoEventId(){
+    try{ if(window.crypto&&crypto.randomUUID) return crypto.randomUUID(); }catch(_){}
+    return 'ml-'+Date.now()+'-'+Math.random().toString(16).slice(2,10);
+  }
+
+  var modal=document.getElementById('mlModal'),dialog=modal.querySelector('.ml-modal');
+  var closeBtn=document.getElementById('mlClose');
+  var steps=modal.querySelectorAll('.ml-step'),progress=document.getElementById('mlProgress');
+  var perChi=document.getElementById('mlPerChi'),echo=document.getElementById('mlEcho');
+  var fatturatoInp=document.getElementById('mlFatturato');
+  var step1Eyebrow=document.getElementById('mlStep1Eyebrow'),dataEyebrow=document.getElementById('mlDataEyebrow');
+
+  document.getElementById('mlOrigine').value=ORIGINE;
+
+  /* ——— Attribuzione (UTM) ———
+     GHL popola `attributionSource` solo col proprio tracciamento e ignora in
+     silenzio quello che gli mandi via API: gli UTM se li porta il Worker su
+     custom field dedicati. First-touch in sessionStorage, cosi' l'attribuzione
+     sopravvive ai cambi di URL; i webview in-app possono bloccare lo storage,
+     quindi c'e' il ripiego sui parametri correnti. */
+  var attribution=(function(){
+    var p=new URLSearchParams(location.search);
+    var ora={
+      utm_source:p.get('utm_source')||'',
+      utm_medium:p.get('utm_medium')||'',
+      utm_campaign:p.get('utm_campaign')||p.get('utm_id')||'',
+      utm_content:p.get('utm_content')||'',
+      utm_term:p.get('utm_term')||'',
+      landing_url:location.href,
+      referrer:document.referrer||'',
+      fbclid:p.get('fbclid')||''
+    };
+    try{
+      var salvato=JSON.parse(sessionStorage.getItem('ml_attr')||'null');
+      if(salvato&&salvato.utm_source)return salvato;
+      if(ora.utm_source||ora.utm_campaign)sessionStorage.setItem('ml_attr',JSON.stringify(ora));
+    }catch(_){}
+    return ora;
+  })();
+  var CAMPI_ATTR={mlUtmSource:'utm_source',mlUtmMedium:'utm_medium',mlUtmCampaign:'utm_campaign',
+    mlUtmContent:'utm_content',mlUtmTerm:'utm_term',mlLandingUrl:'landing_url',mlReferrer:'referrer',
+    mlFbclid:'fbclid'};
+  Object.keys(CAMPI_ATTR).forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.value=attribution[CAMPI_ATTR[id]]||'';
+  });
+
+  /* La domanda sul fatturato salta per le agenzie: la fascia chiesta a loro
+     finirebbe nello stesso campo GHL del brand e sporcherebbe i segmenti. */
+  var flow=['1','rev','2'],qualified=null;
+  function buildFlow(isEcom){
+    flow=isEcom?['1','rev','2']:['1','2'];
+    progress.innerHTML=new Array(flow.length+1).join('<i></i>');
+    if(step1Eyebrow)step1Eyebrow.textContent='Step 1 di '+flow.length;
+    if(dataEyebrow)dataEyebrow.textContent='Step '+flow.length+' di '+flow.length;
+  }
+  function goStep(id){
+    steps.forEach(function(s){s.hidden=(s.getAttribute('data-step')!==String(id));});
+    var idx=flow.indexOf(String(id));
+    progress.hidden=(String(id)==='done');
+    progress.querySelectorAll('i').forEach(function(d,i){d.classList.toggle('on',i<=idx);});
+    try{modal.scrollTop=0;}catch(_){}
+  }
+
+  var ultimoFocus=null;
+  window.openPopup=function(){
+    ultimoFocus=document.activeElement;
+    qualified=null;fatturatoInp.value='';perChi.value='';
+    buildFlow(true);goStep(1);
+    modal.classList.add('open');modal.setAttribute('aria-hidden','false');
+    document.body.classList.add('ml-noscroll');dialog.focus();
+    track('apply_popup_open',{});
+  };
+  function closeModal(){
+    modal.classList.remove('open');modal.setAttribute('aria-hidden','true');
+    document.body.classList.remove('ml-noscroll');
+    try{if(ultimoFocus&&ultimoFocus.focus)ultimoFocus.focus();}catch(_){}
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.ml-open'),function(b){b.addEventListener('click',window.openPopup);});
+  closeBtn.addEventListener('click',closeModal);
+  modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});
+  document.addEventListener('keydown',function(e){
+    if(!modal.classList.contains('open'))return;
+    if(e.key==='Escape'){closeModal();return;}
+    /* focus trap: senza, con la tastiera si esce dalla modale e si continua a
+       navigare la pagina sotto, che resta nel tab order */
+    if(e.key!=='Tab')return;
+    var f=modal.querySelectorAll('button:not([hidden]),input:not([type=hidden]),a[href]');
+    var vis=Array.prototype.filter.call(f,function(el){return el.offsetParent!==null;});
+    if(!vis.length)return;
+    var primo=vis[0],ultimo=vis[vis.length-1];
+    if(e.shiftKey&&document.activeElement===primo){e.preventDefault();ultimo.focus();}
+    else if(!e.shiftKey&&document.activeElement===ultimo){e.preventDefault();primo.focus();}
+  });
+
+  /* Step 1: per chi */
+  Array.prototype.forEach.call(modal.querySelectorAll('.ml-step[data-step="1"] .ml-choice'),function(c){
+    c.addEventListener('click',function(){
+      var v=c.getAttribute('data-value');perChi.value=v;
+      var isEcom=(v!=='Per i miei clienti');
+      echo.textContent=isEcom?'Ti scriviamo per fissare i 30 minuti di audit':'Ti scriviamo per capire su quali account lavorate';
+      buildFlow(isEcom);
+      track('apply_audience_selected',{audience:v});
+      if(isEcom){goStep('rev');}
+      else{goStep(2);var n=document.querySelector('#mlForm input[name=full_name]');if(n)n.focus();}
+    });
+  });
+
+  /* Step fatturato: nessuno viene bloccato qui. Chi e' sotto soglia arriva
+     comunque in GHL col tag giusto, cosi' il follow-up puo' proporgli il setup
+     one-off invece di scartarlo. */
+  Array.prototype.forEach.call(modal.querySelectorAll('.ml-rev'),function(c){
+    c.addEventListener('click',function(){
+      fatturatoInp.value=c.getAttribute('data-value');
+      qualified=(c.getAttribute('data-qualified')==='1');
+      track('apply_revenue_selected',{fatturato:fatturatoInp.value,qualified:qualified?1:0});
+      try{if(window.clarity)clarity('set','fatturato',fatturatoInp.value);}catch(_){}
+      goStep(2);
+      var n=document.querySelector('#mlForm input[name=full_name]');if(n)n.focus();
+    });
+  });
+
+  /* Indietro */
+  Array.prototype.forEach.call(modal.querySelectorAll('.ml-back'),function(b){
+    b.addEventListener('click',function(){
+      var target=b.getAttribute('data-back');
+      if(target){goStep(target);return;}
+      goStep(flow[flow.indexOf('2')-1]);
+    });
+  });
+
+  var f=document.getElementById('mlForm'),err=document.getElementById('mlErr');if(!f)return;
+  var emailInp=f.querySelector('[name=email]'),phoneInp=f.querySelector('[name=phone]');
+  var consent=document.getElementById('mlConsent'),consentBox=document.getElementById('mlConsentBox');
+
+  function showErr(msg){err.textContent=msg;err.style.display='block';}
+  function clearErr(){err.style.display='none';err.textContent='';}
+
+  /* Validazione a mano, non reportValidity(): nei webview in-app iOS il bubble
+     nativo di una checkbox non viene mostrato e l'utente tocca il bottone senza
+     capire perche' non succede niente. Qui l'errore sta sempre nel DOM. */
+  function validate(){
+    clearErr();
+    emailInp.classList.remove('ml-invalid');phoneInp.classList.remove('ml-invalid');
+    consentBox.classList.remove('ml-consent--error','ml-shake');
+    if(!emailInp.value.trim()||!emailInp.checkValidity()){
+      emailInp.classList.add('ml-invalid');emailInp.setAttribute('aria-invalid','true');
+      showErr('Inserisci un indirizzo email valido.');
+      try{emailInp.focus();}catch(_){}
+      track('apply_validation_error',{field:'email'});
+      return false;
+    }
+    emailInp.setAttribute('aria-invalid','false');
+    // Solo il conteggio delle cifre: i formati validi sono troppi per una regex,
+    // e un falso negativo qui costa un lead.
+    if((phoneInp.value.match(/\d/g)||[]).length<8){
+      phoneInp.classList.add('ml-invalid');phoneInp.setAttribute('aria-invalid','true');
+      showErr('Inserisci un numero di telefono valido.');
+      try{phoneInp.focus();}catch(_){}
+      track('apply_validation_error',{field:'phone'});
+      return false;
+    }
+    phoneInp.setAttribute('aria-invalid','false');
+    if(!consent.checked){
+      consentBox.classList.add('ml-consent--error');
+      consent.setAttribute('aria-invalid','true');
+      showErr('Per continuare devi accettare la privacy policy.');
+      void consentBox.offsetWidth;consentBox.classList.add('ml-shake');   // riavvia l'animazione a click ripetuti
+      try{consentBox.scrollIntoView({block:'nearest',behavior:'smooth'});}catch(_){}
+      track('apply_validation_error',{field:'consent'});
+      return false;
+    }
+    consent.setAttribute('aria-invalid','false');
+    return true;
+  }
+  consent.addEventListener('change',function(){if(consent.checked){consentBox.classList.remove('ml-consent--error','ml-shake');clearErr();}});
+  emailInp.addEventListener('input',function(){emailInp.classList.remove('ml-invalid');});
+  phoneInp.addEventListener('input',function(){phoneInp.classList.remove('ml-invalid');});
+
+  f.addEventListener('submit',async function(e){
+    e.preventDefault();
+    if(!perChi.value){goStep(1);return;}
+    if(!validate())return;
+    var btn=f.querySelector('button[type=submit]'),label=btn.textContent;btn.disabled=true;btn.textContent='Invio…';
+    var d=Object.fromEntries(new FormData(f).entries());
+    /* Segnali per la Conversions API lato Worker: senza `_fbp`/`_fbc` il match
+       si regge solo sull'email. `_fbc` spesso manca nei webview in-app, li' il
+       Worker lo ricostruisce dal fbclid. */
+    d.event_id=nuovoEventId();
+    d.fbp=leggiCookie('_fbp');
+    d.fbc=leggiCookie('_fbc');
+    try{
+      var r=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+      if(!r.ok)throw new Error('proxy');
+      var isEcom=(d.per_chi!=='Per i miei clienti');
+      var isQualified=isEcom&&(qualified===null?true:qualified);
+      if(window.gtag)gtag('event','generate_lead',{audience:d.per_chi,fatturato:d.fatturato||'n/d',qualified:isQualified?1:0,origine:ORIGINE});
+      if(window.clarity){clarity('event','apply_lead');clarity('set','audience',d.per_chi);clarity('set','qualified',String(isQualified));}
+      /* Lead a Meta per ogni candidatura: a questi volumi restringere l'evento
+         ai soli qualificati lascerebbe l'ad set senza segnale. La qualita'
+         viaggia nel `value` (qualificato=10, non=1), pronta per il giorno in cui
+         si passa a value optimization senza toccare questo codice.
+         eventID identico a quello mandato al Worker: Meta deduplica browser e CAPI. */
+      if(window.fbq)fbq('track','Lead',{value:isQualified?10:1,currency:'EUR'},{eventID:d.event_id});
+      if(NEXT_URL){window.location.href=NEXT_URL;return;}
+      goStep('done');
+    }catch(_){btn.disabled=false;btn.textContent=label;showErr('Ops, qualcosa è andato storto. Riprova tra un attimo.');}
+  });
+})();
+</script>
+
+</body>
+</html>
