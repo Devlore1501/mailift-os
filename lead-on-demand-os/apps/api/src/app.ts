@@ -47,7 +47,7 @@ export const STAFF_ROLES: Role[] = ["SUPER_ADMIN", "MANAGER", "OPERATOR"];
 
 export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
   const app = Fastify({ logger: process.env.NODE_ENV !== "test" && process.env.LOG !== "silent" ? { level: process.env.LOG_LEVEL ?? "info" } : false });
-  await app.register(cors, { origin: deps.config.corsOrigin.split(",").map((s) => s.trim()), credentials: true });
+  await app.register(cors, { origin: deps.config.corsOrigin.split(",").map((s) => s.trim()), credentials: true, methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"], allowedHeaders: ["Content-Type", "Authorization", "x-api-key", "x-webhook-secret", "x-event-id"] });
 
   app.decorateRequest("ctx", null as unknown as Ctx);
   app.addHook("onRequest", async (req) => {

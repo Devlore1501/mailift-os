@@ -221,3 +221,12 @@ describe("territori e replacement", () => {
     expect(late.message).toMatch(/terminato/);
   });
 });
+
+describe("domande facoltative", () => {
+  it("una domanda facoltativa saltata non viene riproposta", () => {
+    const answers = { interested: "true", owner: "true", property_type: "villa", roof_available: "true", monthly_bill: 120, annual_kwh: "" };
+    expect(nextQuestion(PV_RESIDENTIAL_TEMPLATE, answers)?.key).toBe("household_size");
+    const mandatoryEmpty = { interested: "true", owner: "true", property_type: "villa", roof_available: "true", monthly_bill: "" };
+    expect(nextQuestion(PV_RESIDENTIAL_TEMPLATE, mandatoryEmpty)?.key).toBe("monthly_bill");
+  });
+});

@@ -1,6 +1,6 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import { clients, leads, replacementRequests, type DbOrTx } from "@lod/db";
-import { checkReplacementSla, type ReplacementReason } from "@lod/core";
+import { checkReplacementSla, REPLACEMENT_REASON_LABELS, type ReplacementReason } from "@lod/core";
 import { audit } from "../lib/audit.js";
 import type { Ctx } from "../lib/context.js";
 import { conflict, forbidden, notFound } from "../lib/errors.js";
@@ -42,12 +42,12 @@ export async function requestReplacement(ctx: Ctx, leadId: string, input: Replac
         createdAt: ctx.now(),
       })
       .returning();
-    await setLeadStatusTx(ctx, tx, leadId, "REPLACEMENT_REQUESTED", `Sostituzione richiesta: ${input.reason}${sla.allowed ? "" : " (fuori SLA, apertura manuale)"}`);
+    await setLeadStatusTx(ctx, tx, leadId, "REPLACEMENT_REQUESTED", `Sostituzione richiesta: ${REPLACEMENT_REASON_LABELS[input.reason]}${sla.allowed ? "" : " (fuori SLA, apertura manuale)"}`);
     await notify(tx, {
       event: "REPLACEMENT_REQUESTED",
       severity: "warning",
       title: `${client?.tradeName ?? "Cliente"} richiede la sostituzione del lead ${lead.code}`,
-      body: `Motivo: ${input.reason}${input.note ? `. ${input.note}` : ""}`,
+      body: `Motivo: ${REPLACEMENT_REASON_LABELS[input.reason]}${input.note ? `. ${input.note}` : ""}`,
       leadId,
       clientId: lead.clientId,
       dedupeKey: `repl-req:${req!.id}`,

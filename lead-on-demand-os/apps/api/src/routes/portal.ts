@@ -70,7 +70,7 @@ export async function registerPortalRoutes(app: FastifyInstance) {
     const appts = (await apptSvc.listAppointments(req.ctx)).filter((a) => a.leadId === lead.id);
     const outcomes = await req.ctx.db.query.salesOutcomes.findMany({ where: (o, { eq }) => eq(o.leadId, lead.id), orderBy: (o, { desc }) => desc(o.createdAt) });
     const timeline = lead.history.filter((h) => ["ASSIGNED", "DELIVERED", "APPOINTMENT_BOOKED", "REPLACEMENT_REQUESTED", "REPLACEMENT_APPROVED", "REPLACEMENT_REJECTED", "CLOSED_WON", "CLOSED_LOST"].includes(h.toStatus));
-    return { ...portalLead(lead), answers: lead.answers, notes: lead.notes, timeline, replacementSla: sla, replacements, appointments: appts, outcomes };
+    return { ...portalLead(lead), answers: lead.answers, answersDisplay: lead.answersDisplay, notes: lead.notes, timeline, replacementSla: sla, replacements, appointments: appts, outcomes };
   });
 
   app.post("/portal/leads/:id/replacement", { preHandler: guard }, async (req, reply) => {

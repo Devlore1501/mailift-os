@@ -15,6 +15,7 @@ import {
   assertTransition,
   computeScore,
   evaluateCriteria,
+  formatAnswers,
   evaluateDuplicate,
   nextAttemptStatus,
   nextQuestion,
@@ -266,7 +267,9 @@ export async function getLead(ctx: Ctx, id: string, db: DbOrTx = ctx.db) {
   const answersMap: Answers = {};
   for (const a of answers) answersMap[a.questionKey] = a.value as Answers[string];
   const visibleNotes = ctx.user?.role === "CLIENT" ? notes.filter((n) => n.visibleToClient) : notes;
-  return { ...lead, answers: answersMap, history, notes: visibleNotes, client };
+  const tpl = await resolveTemplate(db, lead.vertical, lead.leadType);
+  const answersDisplay = formatAnswers((tpl?.template as QualificationTemplate | undefined) ?? null, answersMap);
+  return { ...lead, answers: answersMap, answersDisplay, history, notes: visibleNotes, client };
 }
 
 export interface LeadListFilter {

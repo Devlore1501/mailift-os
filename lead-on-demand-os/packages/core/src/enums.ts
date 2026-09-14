@@ -88,6 +88,17 @@ export const REPLACEMENT_REASONS = [
 ] as const;
 export type ReplacementReason = (typeof REPLACEMENT_REASONS)[number];
 
+export const REPLACEMENT_REASON_LABELS: Record<ReplacementReason, string> = {
+  NUMBER_NOT_EXISTING: "Numero inesistente",
+  NEVER_INTERESTED: "Persona mai interessata",
+  OUT_OF_TERRITORY: "Fuori territorio",
+  DUPLICATE: "Duplicato",
+  NOT_OWNER: "Non proprietario",
+  FAKE_DATA: "Dati falsi",
+  CRITERIA_NOT_MET: "Criteri concordati non rispettati",
+  OTHER: "Altro",
+};
+
 export const SALES_OUTCOMES = [
   "CONTACTED",
   "APPOINTMENT",

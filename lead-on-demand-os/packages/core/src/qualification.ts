@@ -38,7 +38,10 @@ export function nextQuestion(template: QualificationTemplate, answers: Answers):
     const q = findQuestion(template, key);
     if (!q) return null;
     const answer = answers[q.key];
-    if (answer === undefined || answer === null || answer === "") return q;
+    const hasKey = Object.prototype.hasOwnProperty.call(answers, q.key);
+    // Una domanda facoltativa "saltata" viene salvata con valore vuoto e non viene riproposta.
+    if (!hasKey || answer === undefined) return q;
+    if ((answer === null || answer === "") && q.required !== false) return q;
     let next: string | null | undefined = q.next;
     if (q.type === "single" && q.options) {
       const opt = q.options.find((o) => o.value === String(answer));
@@ -178,4 +181,40 @@ export function computeScore(config: ScoreConfig, answers: Answers, criteriaPass
   else if (score >= t.review) category = "REVIEW";
   else category = "NOT_QUALIFIED";
   return { score, maxScore, category, breakdown };
+}
+
+export interface FormattedAnswer {
+  key: string;
+  question: string;
+  value: AnswerValue;
+  label: string; // valore leggibile (etichetta dell'opzione, "Sì"/"No", numero, testo)
+}
+
+// Rende leggibili le risposte per portale e schede: testo della domanda ed etichetta dell'opzione.
+export function formatAnswers(template: QualificationTemplate | null, answers: Answers): FormattedAnswer[] {
+  const out: FormattedAnswer[] = [];
+  const seen = new Set<string>();
+  const toLabel = (q: Question | undefined, v: AnswerValue): string => {
+    if (v === null || v === undefined || v === "") return "";
+    if (Array.isArray(v)) return v.map((x) => q?.options?.find((o) => o.value === x)?.label ?? x).join(", ");
+    const opt = q?.options?.find((o) => o.value === String(v));
+    if (opt) return opt.label;
+    if (v === true || v === "true") return "Sì";
+    if (v === false || v === "false") return "No";
+    return String(v);
+  };
+  if (template) {
+    for (const q of template.questions) {
+      if (!Object.prototype.hasOwnProperty.call(answers, q.key)) continue;
+      seen.add(q.key);
+      const v = answers[q.key] ?? null;
+      if (v === null || v === "") continue;
+      out.push({ key: q.key, question: q.text, value: v, label: toLabel(q, v) });
+    }
+  }
+  for (const [k, v] of Object.entries(answers)) {
+    if (seen.has(k) || v === null || v === "") continue;
+    out.push({ key: k, question: k, value: v, label: toLabel(undefined, v) });
+  }
+  return out;
 }
