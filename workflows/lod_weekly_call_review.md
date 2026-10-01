@@ -199,14 +199,23 @@ confronto con target. Poi Lorenzo li fissa.
 
 Un CRM esterno non è previsto: pipeline, workflow, CAPI e task sono già in GHL.
 
+## Stato GHL verificato (1 ottobre 2026, sola lettura)
+
+- Location: "Fotovoltaico On demand", fuso orario impostato su Europe/Amsterdam (non Europe/Rome: attenzione agli orari dei task e dei messaggi automatici).
+- Pipeline `LOD Sales Process` (`TCEs0rbrDtxjBchAUPdx`), 5 stage: New Lead, Contacted, Fissata call, Proposal Sent, Closed. Mancano gli stati intermedi della KB (firmato, attesa pagamento, pagato, attivo): vanno tracciati con campi personalizzati, non con stage, a meno di modificare la pipeline.
+- Opportunità: 40 in totale. Open: New Lead 3, Contacted 11, Fissata call 10, Proposal Sent 2. Lost: Contacted 6, Fissata call 2, Proposal Sent 4 (12 in tutto). Won: 2 in Closed. Per le 12 perse il motivo non è registrato in nessun campo, quindi il recupero storico dipende dalle trascrizioni.
+- Campi personalizzati già presenti (6): fatturato annuo, Cliente Installatore, segmento su cui lavorano, persone che si occupano di vendita/preventivi, Ruolo in azienda, Proprietario Lead. Nessun campo per esito, motivo, obiezione o data di ricontatto.
+- Tag già presenti: solo 7, nessuno con la convenzione `lod-won-*` / `lod-lost-*`.
+- Registrazioni e trascrizioni delle chiamate: gli endpoint rispondono sulle chiamate di tipo `TYPE_CALL`. Il contenuto e la qualità delle trascrizioni vanno ancora controllati su un campione.
+
 ## Prerequisiti aperti
 
-- Nome della pipeline GHL LOD e dei suoi stage.
 - Creazione dei campi personalizzati in GHL (a mano o via API, con scope dedicato).
 - `tools/ghl_client.py` non scrive ancora i campi personalizzati: serve una funzione
   `set_custom_fields` che usi gli ID dei campi una volta creati.
 - Conferma che tutte le call di vendita LOD siano registrate su Fathom.
-- Verifica con il token GHL dell'accesso a registrazioni e trascrizioni delle chiamate di prequalifica.
+- Controllo su un campione della qualità delle trascrizioni GHL delle chiamate di prequalifica.
+- Decisione sul fuso orario della location (Amsterdam contro Roma).
 - Struttura del database Notion (proprietà e nome) e pagina padre dove crearlo.
 - Testi del recap e del messaggio a +1 giorno, da approvare prima dell'automazione.
 - Approvazione della cadenza di follow-up e della lista motivi.
