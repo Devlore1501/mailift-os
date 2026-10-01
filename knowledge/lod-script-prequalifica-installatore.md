@@ -3,11 +3,13 @@
 Fonte: testo fornito da Lorenzo Baretta il 1 ottobre 2026. Trascritto senza modifiche.
 Uso: griglia di valutazione per `workflows/lod_weekly_call_review.md`.
 
-Attenzione: il passo 5 riporta prezzi (890 e 1.490 euro più IVA per 10 contatti) che
-non coincidono con la decisione del 25 settembre 2026 della knowledge base
-(10 lead a 100 euro residenziale e 160 euro aziende, cioè 1.000 e 1.600 euro di
-imponibile). La knowledge base indica 890 e 1.490 come proposte non approvate.
-Da confermare con Lorenzo prima di usare il copione come riferimento.
+Nota di Lorenzo (1 ottobre 2026): nella pratica il passo 5 non presenta un'offerta.
+Lorenzo dichiara le fasce di prezzo per capire se il servizio ha senso per
+l'installatore, e presenta l'offerta solo se c'è interesse. I prezzi scritti nel
+passo 5 (890 e 1.490 euro più IVA per 10 contatti) non sono quindi quelli usati
+in chiamata. Nota per la verifica: la knowledge base indica 890 e 1.490 come
+proposte non approvate; la decisione del 25 settembre per 10 lead è 100 euro
+(residenziale) e 160 euro (aziende).
 
 ---
 

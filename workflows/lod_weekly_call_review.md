@@ -134,14 +134,14 @@ Testo completo in [knowledge/lod-script-prequalifica-installatore.md](../knowled
 | 2 Motivo | Domanda sul perché cerca il servizio ora; se generica, come acquisisce oggi; se ha già comprato lead, com'è andata |
 | 3 Capacità | Numero di persone di vendita confrontato col modulo, chi richiama, rapidità, lavori al mese gestibili |
 | 4 Cosa riceverà | Spiegazione di prequalifica senza promettere appuntamenti; campagne a carico LOD; domanda di conferma |
-| 5 Investimento | Formula di ingresso con prezzo, IVA e pagamento anticipato dichiarati; nessun impegno richiesto |
+| 5 Fascia di prezzo | Dichiara la fascia per capire se ha senso per l'installatore; l'offerta si presenta solo se è interessato. Con fascia fuori dal range ufficiale o senza dire IVA e pagamento anticipato, segnalare |
 | 6 Decisore | Chiede se decide da solo o con un socio; se serve, fissa l'orario con tutti |
-| 7 Appuntamento | Riassume l'esigenza, durata circa 35 minuti, due opzioni di giorno e ora |
+| 7 Appuntamento | Solo se interessato: riassume l'esigenza, durata circa 35 minuti, due opzioni di giorno e ora. Senza interesse il passo non si applica |
 | 8 Conferma | Giorno, ora, partecipanti, email dell'invito; chiede di tenere pronti i dati sulle richieste gestite |
 
 Cose da segnalare a parte: frasi non previste dal copione che contengono
 numeri o promesse (esempio visto: "su 10 lead ti do 7–8 appuntamenti"), e
-prezzi diversi da quello del passo 5.
+fasce di prezzo fuori dal range ufficiale.
 
 Filtri: solo chiamate di almeno 60 secondi e con contatto presente nella
 pipeline `LOD Sales Process`. Le brevi chiamate di coordinamento interno
@@ -253,7 +253,7 @@ Un CRM esterno non è previsto: pipeline, workflow, CAPI e task sono già in GHL
 - `tools/ghl_client.py` non scrive ancora i campi personalizzati: serve una funzione
   `set_custom_fields` che usi gli ID dei campi una volta creati.
 - Conferma che tutte le call di vendita LOD siano registrate su Fathom.
-- Prezzi del passo 5 del copione (890 e 1.490 euro più IVA per 10 contatti) in conflitto con la decisione del 25 settembre della KB (1.000 e 1.600 euro di imponibile): Lorenzo deve dire quale vale.
+- Fasce di prezzo ufficiali da usare in prequalifica (residenziale e aziendale), per segnalare le deviazioni.
 - Titoli Fathom da uniformare: una call del 30 settembre (Marco Mochi, tema fotovoltaico) non ha "LOD" nel titolo.
 - Decisione sul fuso orario della location (Amsterdam contro Roma).
 - Struttura del database Notion (proprietà e nome) e pagina padre dove crearlo.
