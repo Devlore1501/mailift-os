@@ -1,4 +1,6 @@
-# Questionario di onboarding su GHL, cliente lead gen B2B
+# Questionario di onboarding, cliente lead gen B2B
+
+Decisione del 01/10/2026: il questionario vive su Google Forms (script `tools/gforms_onboarding_lead_gen.gs`), non su GHL, per non riempire il CRM di campi usati una volta sola. Questo file resta la specifica delle domande. Le parti sui custom field `ob_` e sul form GHL non si applicano più; di GHL restano utili solo i workflow di invio e promemoria (tag, task, pipeline), che non richiedono campi.
 
 Sostituisce la call di setup. Deriva da `clients/mida-energy/onboarding-form-lead-gen-ppl.md`. Il cliente compila in 10–12 minuti da telefono; la call resta solo se scatta una delle condizioni della sezione "Quando serve ancora una call".
 
