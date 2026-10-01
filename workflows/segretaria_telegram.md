@@ -98,18 +98,15 @@ oggi?", "ricordami di...".
      allegati)
    - Limite messaggio Telegram: 4096 char. Se la risposta è più lunga,
      spezzare in più messaggi o creare un file `.md` allegato.
-4. **`tools/agent_runner.py`** — wrapper Claude Agent SDK:
-   - Inizializza un'istanza dell'Agent SDK con:
-     - System prompt = contenuto di `Claude.md`
-     - Working dir = root del progetto
-     - Tool/MCP abilitati: gli stessi che hai oggi (Notion, Gmail, GCal,
-       Klaviyo, Gamma, ecc.)
-     - Modello: `claude-opus-4-6` per task complessi, `claude-haiku-4-5` per
-       quelli semplici (decide il bot a runtime in base alla lunghezza/parole
-       chiave)
-   - Gestione stato conversazione: per Fase 1, **stateless** — ogni messaggio
-     è una nuova "sessione". Memoria persistente sopravvive comunque tramite
-     il sistema memorie esistente.
+4. **`tools/agent_runner.py`** — wrapper sul binario `claude` di Claude Code
+   (`claude --print` via subprocess, senza Agent SDK):
+   - cwd = root del progetto, quindi carica `Claude.md`; il contesto Telegram
+     arriva con `--append-system-prompt`
+   - Modello scelto da `choose_model`: `claude-opus-4-6` con `/opus` o parole
+     chiave trigger, `claude-haiku-4-5` altrimenti (`/haiku` forza Haiku)
+   - Conversazione continuata con `--session-id` / `--resume` finché il bot
+     resta acceso; il riavvio azzera la sessione. Memoria persistente
+     sopravvive tramite il sistema memorie esistente.
 5. **Avvio manuale**: `python tools/telegram_bot.py` da terminale, lo lasci
    girare in background o sotto `tmux`/`screen`. Non automatizzare ancora.
 

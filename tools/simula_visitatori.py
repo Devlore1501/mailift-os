@@ -76,19 +76,31 @@ PERSONE = [
         "Non comprerebbe mai, ma scarica volentieri.")),
 ]
 
-SCHEMA_COLPO = """Rispondi SOLO con JSON valido, nient'altro:
-{"resta": true|false,
- "cosa_ho_capito": "in una frase, cosa offre questa pagina secondo te",
- "e_per_me": true|false,
- "reazione": "la tua reazione istintiva in una frase, con le tue parole",
- "cosa_mi_ferma": "l'attrito principale, o null se nessuno"}"""
+def _schema(campi: dict) -> dict:
+    """JSON schema per l'output strutturato. `campi`: nome -> (tipo, descrizione)."""
+    return {
+        "type": "object",
+        "properties": {k: {"type": t, "description": d} for k, (t, d) in campi.items()},
+        "required": list(campi),
+        "additionalProperties": False,
+    }
 
-SCHEMA_PAGINA = """Rispondi SOLO con JSON valido, nient'altro:
-{"lascia_email": true|false,
- "fiducia_1_5": 1-5,
- "obiezione_principale": "la cosa che piu' ti trattiene",
- "cosa_ha_convinto": "l'elemento piu' persuasivo, o null",
- "cosa_toglierei": "l'elemento piu' debole o fastidioso"}"""
+
+SCHEMA_COLPO = _schema({
+    "resta": ("boolean", "continui a guardare la pagina"),
+    "cosa_ho_capito": ("string", "in una frase, cosa offre questa pagina secondo te"),
+    "e_per_me": ("boolean", "ti senti il destinatario"),
+    "reazione": ("string", "la tua reazione istintiva in una frase, con le tue parole"),
+    "cosa_mi_ferma": ("string", "l'attrito principale; stringa vuota se nessuno"),
+})
+
+SCHEMA_PAGINA = _schema({
+    "lascia_email": ("boolean", "lasceresti la tua email"),
+    "fiducia_1_5": ("integer", "fiducia da 1 a 5"),
+    "obiezione_principale": ("string", "la cosa che piu' ti trattiene"),
+    "cosa_ha_convinto": ("string", "l'elemento piu' persuasivo; stringa vuota se nessuno"),
+    "cosa_toglierei": ("string", "l'elemento piu' debole o fastidioso"),
+})
 
 
 def testo_da_html(html: str) -> tuple[str, str]:
@@ -116,18 +128,15 @@ def testo_da_html(html: str) -> tuple[str, str]:
     return pulisci(fold_html), pulisci(resto_html)
 
 
-def chiedi(client, sistema: str, utente: str) -> dict:
+def chiedi(client, sistema: str, utente: str, schema: dict) -> dict:
     r = client.messages.create(
         model=MODELLO, max_tokens=700, system=sistema,
         messages=[{"role": "user", "content": utente}],
+        output_config={"format": {"type": "json_schema", "schema": schema}},
     )
-    testo = r.content[0].text.strip()
-    m = re.search(r"\{.*\}", testo, flags=re.S)
-    if not m:
-        return {"errore": testo[:200]}
     try:
-        return json.loads(m.group(0))
-    except json.JSONDecodeError as e:
+        return json.loads(r.content[0].text)
+    except json.JSONDecodeError as e:  # risposta troncata da max_tokens
         return {"errore": f"JSON non valido: {e}"}
 
 
@@ -166,13 +175,13 @@ def main() -> None:
         colpo = chiedi(client, sistema,
                        "Questa e' la PRIMA schermata. L'hai guardata due secondi, "
                        "non hai ancora scorso nulla.\n\n"
-                       f"---\n{fold}\n---\n\n" + SCHEMA_COLPO)
+                       f"---\n{fold}\n---", SCHEMA_COLPO)
 
         pagina = None
         if colpo.get("resta") and not args.solo_fold:
             pagina = chiedi(client, sistema,
                             "Hai deciso di continuare. Ecco il resto della pagina.\n\n"
-                            f"---\n{resto[:9000]}\n---\n\n" + SCHEMA_PAGINA)
+                            f"---\n{resto[:9000]}\n---", SCHEMA_PAGINA)
 
         risultati.append((p, colpo, pagina))
 

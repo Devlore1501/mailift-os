@@ -45,13 +45,27 @@ from simula_visitatori import PERSONE  # unica definizione degli avatar
 
 MODELLO = os.environ.get("ANTHROPIC_MODEL") or "claude-sonnet-4-5"
 
-SCHEMA = """Rispondi SOLO con JSON valido, nient'altro:
-{"fermo_scroll": true|false,
- "cliccherei": true|false,
- "cosa_promette": "cosa offre secondo te, in una frase",
- "per_chi_e": "che tipo di persona pensi sia il destinatario",
- "reazione": "il tuo pensiero istintivo, con le tue parole",
- "cosa_non_va": "cosa ti frena o ti insospettisce, o null"}"""
+SCHEMA = {
+    "type": "object",
+    "properties": {
+        "fermo_scroll": {"type": "boolean", "description": "ti fermi sulla sponsorizzata"},
+        "cliccherei": {"type": "boolean", "description": "cliccheresti"},
+        "cosa_promette": {"type": "string", "description": "cosa offre secondo te, in una frase"},
+        "per_chi_e": {"type": "string", "description": "che tipo di persona pensi sia il destinatario"},
+        "reazione": {"type": "string", "description": "il tuo pensiero istintivo, con le tue parole"},
+        "cosa_non_va": {"type": "string", "description": "cosa ti frena o ti insospettisce; stringa vuota se nulla"},
+    },
+    "required": ["fermo_scroll", "cliccherei", "cosa_promette", "per_chi_e", "reazione", "cosa_non_va"],
+    "additionalProperties": False,
+}
+
+
+def _json_o_errore(r) -> dict:
+    """Parsa la risposta strutturata; se e' troncata da max_tokens riporta l'errore."""
+    try:
+        return json.loads(r.content[0].text)
+    except json.JSONDecodeError as e:
+        return {"errore": str(e)}
 
 MIME = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
         ".webp": "image/webp", ".gif": "image/gif"}
@@ -86,26 +100,11 @@ def chiedi(client, persona, img_b64, mime):
         model=MODELLO, max_tokens=600, system=sistema,
         messages=[{"role": "user", "content": [
             {"type": "image", "source": {"type": "base64", "media_type": mime, "data": img_b64}},
-            {"type": "text", "text": SCHEMA},
+            {"type": "text", "text": "Come reagisci a questa sponsorizzata?"},
         ]}],
+        output_config={"format": {"type": "json_schema", "schema": SCHEMA}},
     )
-    testo = r.content[0].text.strip()
-    m = re.search(r"\{.*\}", testo, flags=re.S)
-    if not m:
-        return {"errore": testo[:160]}
-    try:
-        return json.loads(m.group(0))
-    except json.JSONDecodeError as e:
-        return {"errore": str(e)}
-
-
-SCHEMA_COPY = """Rispondi SOLO con JSON valido, nient'altro:
-{"fermo_scroll": true|false,
- "cliccherei": true|false,
- "cosa_promette": "cosa offre secondo te, in una frase",
- "per_chi_e": "che tipo di persona pensi sia il destinatario",
- "reazione": "il tuo pensiero istintivo, con le tue parole",
- "cosa_non_va": "cosa ti frena o ti insospettisce, o null"}"""
+    return _json_o_errore(r)
 
 
 def leggi_varianti(percorso: Path) -> list[dict]:
@@ -131,16 +130,11 @@ def chiedi_copy(client, persona, v):
         "Rispondi come faresti davvero: quasi tutte le sponsorizzate si scorrono via."
     )
     testo = (f"TITOLO: {v['titolo']}\n\n{v['corpo']}\n\n"
-             "[link: calcolatore gratuito, 2 minuti]\n\n" + SCHEMA_COPY)
+             "[link: calcolatore gratuito, 2 minuti]")
     r = client.messages.create(model=MODELLO, max_tokens=600, system=sistema,
-                               messages=[{"role": "user", "content": testo}])
-    m = re.search(r"\{.*\}", r.content[0].text.strip(), flags=re.S)
-    if not m:
-        return {"errore": "no json"}
-    try:
-        return json.loads(m.group(0))
-    except json.JSONDecodeError as e:
-        return {"errore": str(e)}
+                               messages=[{"role": "user", "content": testo}],
+                               output_config={"format": {"type": "json_schema", "schema": SCHEMA}})
+    return _json_o_errore(r)
 
 
 def main() -> None:

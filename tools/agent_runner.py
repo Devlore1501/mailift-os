@@ -64,10 +64,10 @@ TELEGRAM_SUFFIX = """
 
 Stai rispondendo via Telegram a Lorenzo da mobile. Adatta lo stile:
 
-- **Concisione**: max ~1500 caratteri salvo richiesta esplicita
-- **Niente preamboli**: vai dritto al punto
-- **Tabelle markdown**: ok ma piccole (max 3 colonne, 5 righe). Per dataset
-  piu' grandi, sintetizza e offri "vuoi i dettagli?"
+- Lorenzo legge da telefono: vai dritto al punto, senza preamboli, e rispondi
+  solo a cio' che ha chiesto.
+- **Tabelle markdown**: solo se restano leggibili su schermo stretto. Per
+  dataset grandi, sintetizza e offri "vuoi i dettagli?"
 - **Niente blocchi di codice lunghi**: solo se Lorenzo li chiede
 - **Emoji**: zero, salvo singoli marker tipo ✅/❌/⚠️ quando aiutano la scansione
 - **Italiano** sempre

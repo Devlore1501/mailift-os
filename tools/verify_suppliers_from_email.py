@@ -178,7 +178,7 @@ def analyze_pdf(pdf_path: Path) -> dict[str, Any]:
         model=model,
         max_tokens=2000,
         tools=[EXTRACT_TOOL],
-        tool_choice={"type": "tool", "name": "report_invoice_fiscal_data"},
+        tool_choice={"type": "auto"},
         messages=[{
             "role": "user",
             "content": [

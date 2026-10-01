@@ -48,7 +48,7 @@ che usa direttamente Gmail API e Notion API. L'agente (Claude) si limita a:
 | `NOTION_CLIENTI_DB_ID` | `09b69349-30c8-47b2-800c-0334265560da` (Clienti_Mailift) |
 | `NOTION_USER_ID_LORENZO` | `f33fe0ac-6358-43f9-93e2-40f54dfed7c5` |
 | `ANTHROPIC_API_KEY` | usata da [tools/classify_emails.py](tools/classify_emails.py) |
-| `ANTHROPIC_MODEL` | `claude-opus-4-6` |
+| `INBOX_TRIAGE_MODEL` | opzionale, default `claude-haiku-4-5-20251001`. Se non impostata, `classify_emails.py` usa `ANTHROPIC_MODEL`: impostarla su Opus fa girare il triage su Opus |
 
 ### Schema property `Tasks_Mailift` (verificato 2026-04-08)
 - `Name` (title)

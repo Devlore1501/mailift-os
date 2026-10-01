@@ -38,7 +38,7 @@ Per ogni email ricevuta devi assegnare UNA categoria fra:
 - ACTION = richiede risposta, decisione, conferma, firma, approvazione, scadenza. Genera task in Notion.
 - VIP    = email da mittente in whitelist VIP. Si comporta come ACTION (per ora la whitelist e' vuota, quindi questa categoria sara' rara).
 
-REGOLE DI CLASSIFICAZIONE (in ordine, prima che fa match vince):
+REGOLE DI CLASSIFICAZIONE (in ordine, vince la prima che fa match; le eccezioni elencate sotto TIE-BREAK prevalgono su tutte):
 1. Se header List-Unsubscribe presente E mittente non e' un cliente Mailift conosciuto -> probabile PROMO.
 2. Mittenti tipici PROMO: newsletter, mailchimp, sendgrid, hubspot, klaviyo, mailerlite, instagram, facebook, linkedin updates, tiktok, learnn, learnn team, plaud, mailsuite daily report, infobusiness/marketing newsletter italiani.
 3. Subject con pattern marketing ("offerta", "% sconto", "ultimo giorno", "black friday", "saldi", emoji marketing) -> PROMO se non c'e' richiesta esplicita.
@@ -49,7 +49,7 @@ REGOLE DI CLASSIFICAZIONE (in ordine, prima che fa match vince):
 
 TIE-BREAK:
 - In dubbio tra PROMO e INFO -> INFO. Mai archiviare per errore.
-- In dubbio tra INFO e ACTION -> classifica come ACTION ma imposta `confidence: low`. Non promuovere ad ACTION se Lorenzo e' solo admin delegato su account cliente — in quel caso e' INFO. Quando sei incerto, preferisci INFO a meno che l'azione non sia inequivocabilmente rivolta a Lorenzo in prima persona.
+- In dubbio tra INFO e ACTION -> INFO, a meno che l'azione sia inequivocabilmente rivolta a Lorenzo in prima persona: in quel caso ACTION con `confidence: low`. Se Lorenzo e' solo admin delegato su un account cliente, e' sempre INFO.
 - Email di calendar invite (calendar-notification@google.com) -> INFO.
 - Email di OTP / verifica / 2FA -> INFO.
 - Email di sistema (GitHub, CI, status pages) -> INFO. Promuovere ad ACTION solo se richiede intervento esplicito.
@@ -157,7 +157,7 @@ def _classify_batch(client, model: str, emails: list[dict], account_label: str, 
         max_tokens=16000,
         system=SYSTEM_PROMPT,
         tools=[_build_tool_schema()],
-        tool_choice={"type": "tool", "name": "report_email_classification"},
+        tool_choice={"type": "auto"},
         messages=[{"role": "user", "content": user_prompt}],
     )
 

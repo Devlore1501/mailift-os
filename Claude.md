@@ -62,7 +62,7 @@ tools/          # Python scripts for deterministic execution
 workflows/      # Markdown SOPs defining what to do and how
 clients/        # Contesto aggiornato per ogni cliente (README + trascrizioni call)
 knowledge/      # Knowledge base Mailift (posizionamento, listino, copy sito)
-.env            # API keys and environment variables (NEVER store secrets anywhere else)
+.env            # API keys e variabili d'ambiente; i tool leggono prima ~/.secrets/mailift/.env e usano questo come fallback. Nessun segreto altrove
 credentials.json, token.json  # Google OAuth (gitignored)
 ```
 
@@ -85,9 +85,8 @@ Poi: `git add clients/ && git commit -m "Call <cliente> YYYY-MM-DD" && git push`
 
 ## Knowledge graph (graphify)
 
-Il repo ha un knowledge graph costruito con `/graphify .` in `graphify-out/`
-(graph.json, GRAPH_REPORT.md, graph.html). Copre codice, README/call clienti,
-knowledge base e asset — **consultalo prima di rispondere a memoria** su:
+Se in locale esiste `graphify-out/` (non versionato, generato con `/graphify .`),
+consultalo prima di rispondere a memoria su:
 - storico/pattern di un cliente o prospect specifico
 - relazioni cross-cliente (obiezioni ricorrenti, pricing simile, ecc.)
 - architettura o relazioni tra file di codice
@@ -158,7 +157,7 @@ Il tuo ruolo è **eseguire task operativi** in autonomia, senza aspettare confer
 | Comunicazione | Gmail, WhatsApp (360dialog) | ✅ Gmail via API ([tools/gmail_client.py](tools/gmail_client.py)). WhatsApp non integrato. |
 | Calendario | Google Calendar | ✅ Python client [tools/gcal_client.py](tools/gcal_client.py) (richiede `python tools/gcal_oauth_setup.py` una volta) |
 | Documenti | Notion, Google Drive | ✅ Notion via API completa ([tools/notion_tasks.py](tools/notion_tasks.py)): list/create/update/batch close. Drive non ancora wired. |
-| Analisi call | Fathom → AI → GHL → Gamma | ⚠️ Fathom: ingestion manuale (paste trascrizione). Gamma: ✅ MCP. GHL: TODO. |
+| Analisi call | Fathom → AI → GHL → Gamma | ✅ Fathom: import in batch ([tools/fathom_batch_import.py](tools/fathom_batch_import.py)) o paste trascrizione ([tools/process_call.py](tools/process_call.py)). Gamma: ✅ MCP. GHL: client disponibile ([tools/ghl_client.py](tools/ghl_client.py): `add_note`, `create_task`). |
 | Fatturazione | Fatture in Cloud | ✅ Tool dedicato (`tools/fic_client.py`) |
 
 ## Aree di Competenza

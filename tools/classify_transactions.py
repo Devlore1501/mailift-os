@@ -134,7 +134,7 @@ def classify_split(transactions: list[dict]) -> tuple[list[dict], list[dict]]:
         max_tokens=16000,
         system=SYSTEM_PROMPT,
         tools=[tool],
-        tool_choice={"type": "tool", "name": "report_autofatture"},
+        tool_choice={"type": "auto"},
         messages=[
             {
                 "role": "user",

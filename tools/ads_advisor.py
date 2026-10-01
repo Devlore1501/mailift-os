@@ -269,9 +269,9 @@ PRODOTTI (per revenue):
 Analizza i dati e produci un report strutturato con:
 
 1. **STATO ACCOUNT** (1-2 righe): salute generale, segnale principale
-2. **AZIONI PRIORITARIE** (max 5, ordinate per impatto): ogni azione deve avere:
+2. **AZIONI PRIORITARIE** (quelle che contano davvero, ordinate per impatto): ogni azione deve avere:
    - Priorità: 🔴 URGENTE / 🟡 IMPORTANTE / 🟢 OTTIMIZZAZIONE
-   - Titolo breve (max 8 parole)
+   - Titolo breve
    - Cosa fare esattamente (concreta, attuabile oggi)
    - Perché (il dato che la motiva)
 3. **ANALISI CREATIVE**: quali annunci scalare, quali killare, pattern vincenti
