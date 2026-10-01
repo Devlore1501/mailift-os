@@ -209,7 +209,6 @@ function aggiungiDomanda_(form, d) {
     case 'g':
       item = form.addGridItem();
       item.setRows(d.righe).setColumns(CRITERIO_);
-      item.setRequireLimitOneResponsePerColumn(false);
       break;
     default:
       throw new Error('Tipo domanda sconosciuto: ' + d.t);
