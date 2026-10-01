@@ -117,12 +117,31 @@ Per ogni call, segnalare se compare uno di questi punti, con timestamp Fathom:
 Chiamata in uscita di Lorenzo verso l'installatore che ha compilato il modulo,
 prima della discovery. Per ogni chiamata trascritta in GHL:
 
-- **Copione seguito**: conferma della richiesta, segmento (residenziale o aziendale), zona, persone che gestiscono i lead, rapidità di richiamo, volume atteso, spiegazione del servizio, prezzo, passaggio alla call successiva. Il copione di riferimento va indicato da Lorenzo.
+- **Copione seguito**: griglia degli 8 passi sotto, ognuno segnato come seguito, parziale o saltato.
 - **Esito**: call di discovery fissata, non fissata con motivo, non raggiunto, da richiamare con data.
 - **Motivo di mancato passaggio**: stessa lista chiusa dei motivi di perdita.
 - **Dati da correggere**: confronto tra quanto dichiarato nel modulo e quanto detto in chiamata (esempio visto: modulo con 2–5 persone di vendita, in chiamata 2).
 - **Promesse fatte**: stessa lista del controllo promesse.
 - **Passaggio a discovery**: chiamate che portano a una call fissata / chiamate di prequalifica completate.
+
+### Griglia del copione
+
+Testo completo in [knowledge/lod-script-prequalifica-installatore.md](../knowledge/lod-script-prequalifica-installatore.md).
+
+| Passo | Punto da verificare |
+|---|---|
+| 1 Apertura | Presentazione, motivo della chiamata, domanda "hai quattro minuti?"; se non può parlare, orario preciso concordato |
+| 2 Motivo | Domanda sul perché cerca il servizio ora; se generica, come acquisisce oggi; se ha già comprato lead, com'è andata |
+| 3 Capacità | Numero di persone di vendita confrontato col modulo, chi richiama, rapidità, lavori al mese gestibili |
+| 4 Cosa riceverà | Spiegazione di prequalifica senza promettere appuntamenti; campagne a carico LOD; domanda di conferma |
+| 5 Investimento | Formula di ingresso con prezzo, IVA e pagamento anticipato dichiarati; nessun impegno richiesto |
+| 6 Decisore | Chiede se decide da solo o con un socio; se serve, fissa l'orario con tutti |
+| 7 Appuntamento | Riassume l'esigenza, durata circa 35 minuti, due opzioni di giorno e ora |
+| 8 Conferma | Giorno, ora, partecipanti, email dell'invito; chiede di tenere pronti i dati sulle richieste gestite |
+
+Cose da segnalare a parte: frasi non previste dal copione che contengono
+numeri o promesse (esempio visto: "su 10 lead ti do 7–8 appuntamenti"), e
+prezzi diversi da quello del passo 5.
 
 Filtri: solo chiamate di almeno 60 secondi e con contatto presente nella
 pipeline `LOD Sales Process`. Le brevi chiamate di coordinamento interno
@@ -234,7 +253,7 @@ Un CRM esterno non è previsto: pipeline, workflow, CAPI e task sono già in GHL
 - `tools/ghl_client.py` non scrive ancora i campi personalizzati: serve una funzione
   `set_custom_fields` che usi gli ID dei campi una volta creati.
 - Conferma che tutte le call di vendita LOD siano registrate su Fathom.
-- Copione di riferimento della prequalifica dell'installatore, da indicare a Lorenzo.
+- Prezzi del passo 5 del copione (890 e 1.490 euro più IVA per 10 contatti) in conflitto con la decisione del 25 settembre della KB (1.000 e 1.600 euro di imponibile): Lorenzo deve dire quale vale.
 - Titoli Fathom da uniformare: una call del 30 settembre (Marco Mochi, tema fotovoltaico) non ha "LOD" nel titolo.
 - Decisione sul fuso orario della location (Amsterdam contro Roma).
 - Struttura del database Notion (proprietà e nome) e pagina padre dove crearlo.
