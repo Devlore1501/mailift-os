@@ -30,7 +30,7 @@ MOTIVI = MOTIVI_PERDITA + MOTIVI_CHIUSURA
 
 ESITI = [
     "call-fissata", "proposta-inviata", "firmato-attesa-pagamento", "pagato",
-    "rinviato", "non-chiuso", "perso", "non-raggiunto", "da-verificare",
+    "rinviato", "non-chiuso", "perso", "non-raggiunto", "no-show", "da-verificare",
 ]
 
 # (nome campo, tipo GHL, opzioni)
