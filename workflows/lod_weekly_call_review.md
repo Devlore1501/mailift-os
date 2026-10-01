@@ -89,7 +89,8 @@ Un motivo primario, uno secondario opzionale, più una frase di contesto.
 | `garanzia-risultati` | Voleva una garanzia su appuntamenti o vendite che non diamo |
 | `organico-pieno` | Ha già abbastanza richieste (caso Sunpark) |
 | `silenzio-post-call` | Ha promesso di firmare o inviare documenti, poi è sparito |
-| `fuori-target` | Segmento o profilo non servito |
+| `fuori-target` | Segmento, profilo o dimensione non serviti |
+| `concorrente` | Ha scelto un'altra agenzia o una soluzione interna |
 
 Motivi di chiusura: `test-basso-rischio` (pacchetto da 10), `esclusiva`,
 `prequalifica-telefonica`, `prezzo`, `fiducia-persona`, `urgenza-reale`,
@@ -199,16 +200,24 @@ oltre quanto detto in call, prezzo e IVA espliciti, pagamento anticipato.
 
 ## Scheda GHL
 
-Campi personalizzati da creare (nomi proposti):
+Schema definito in [tools/lod_ghl_schema.py](../tools/lod_ghl_schema.py), 19 campi
+di contatto con prefisso "LOD": esito, stato firma, stato pagamento, motivo
+primario e secondario, obiezione, tre voti, passi prequalifica, promesse a
+rischio, pacchetto, zona, data e tipo ricontatto, data e tipo dell'ultima call,
+link registrazione, affidabilità dell'analisi.
 
-`lod_esito`, `lod_stato_firma`, `lod_stato_pagamento`, `lod_motivo_primario`,
-`lod_motivo_secondario`, `lod_obiezione`, `lod_pacchetto` (segmento, quantità,
-prezzo, IVA), `lod_zona`, `lod_voto_call`, `lod_promesse_a_rischio`,
-`lod_data_ricontatto`, `lod_tipo_ricontatto`, `lod_link_fathom`.
+Tag: `lod-esito-<esito>`, `lod-motivo-<motivo>`, `lod-cohort-AAAA-MM` (mese di
+creazione dell'opportunità), `lod-promesse-da-controllare`, `lod-da-ricontattare`.
+Nota: una sola per review, che inizia con "LOD review AAAA-MM-GG", con riassunto
+fattuale, motivo, obiezione, promesse da controllare e punti da verificare.
+Task: uno per ogni contatto con ricontatto da fare; la scadenza solo se concordata
+in call o confermata da Lorenzo.
 
-Tag: `lod-won-{codice}`, `lod-lost-{codice}`, `lod-cohort-{YYYY}-{MM}`.
-Nota: riassunto fattuale, distinzione tra proposto e accettato, link Fathom.
-Task: uno per ogni non chiuso, alla data di ricontatto.
+Scrittura: `python tools/lod_review_apply.py review.json` mostra l'anteprima;
+`--apply` scrive solo i record con `"approved": true`, salta note e task già
+presenti, e va provato prima su un solo contatto (`--only ID`) perché il formato
+dei campi data va verificato alla prima scrittura. Il file JSON contiene dati dei
+prospect e non va committato.
 
 Collegamento call → contatto (KB sezione 19): solo con identificativo verificato
 o match univoco su email degli invitati o appuntamento GHL. La sola vicinanza
@@ -244,6 +253,9 @@ Un CRM esterno non è previsto: pipeline, workflow, CAPI e task sono già in GHL
 - Pipeline `LOD Sales Process` (`TCEs0rbrDtxjBchAUPdx`), 5 stage: New Lead, Contacted, Fissata call, Proposal Sent, Closed. Mancano gli stati intermedi della KB (firmato, attesa pagamento, pagato, attivo): vanno tracciati con campi personalizzati, non con stage, a meno di modificare la pipeline.
 - Opportunità: 40 in totale. Open: New Lead 3, Contacted 11, Fissata call 10, Proposal Sent 2. Lost: Contacted 6, Fissata call 2, Proposal Sent 4 (12 in tutto). Won: 2 in Closed. Per le 12 perse il motivo non è registrato in nessun campo, quindi il recupero storico dipende dalle trascrizioni.
 - Campi personalizzati già presenti (6): fatturato annuo, Cliente Installatore, segmento su cui lavorano, persone che si occupano di vendita/preventivi, Ruolo in azienda, Proprietario Lead. Nessun campo per esito, motivo, obiezione o data di ricontatto.
+- Note automatiche già presenti: un flusso GHL scrive un riassunto AI dopo le chiamate di prequalifica, e le call Fathom vengono incollate come nota con link alla registrazione. La nota "LOD review" si aggiunge a queste e non le sostituisce.
+- Il contatto "PREZZI" in New Lead non è un prospect: contiene il listino interno del 17 settembre (privato 80 senza qualifica e 120 con; aziende 160 e 200; sconto di 10 euro se firmano subito). È superato dalla decisione del 25 settembre e va escluso dalle metriche.
+- Stage "Closed" con stato won su 2 contatti: uno ha firmato e atteso il pagamento (Mida/Ambra), l'altro (Testanera) risulta solo con contratto da inviare. Va deciso se Closed significa firmato o pagato: la definizione di questo workflow è pagato.
 - Tag già presenti: solo 7, nessuno con la convenzione `lod-won-*` / `lod-lost-*`.
 - Registrazioni e trascrizioni delle chiamate: gli endpoint rispondono sulle chiamate di tipo `TYPE_CALL`. Il contenuto e la qualità delle trascrizioni vanno ancora controllati su un campione.
 

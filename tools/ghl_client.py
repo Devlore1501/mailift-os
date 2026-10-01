@@ -15,6 +15,7 @@ Funzioni esposte:
 - add_note(contact_id, body)                   → dict
 - add_tags(contact_id, tags)                   → dict
 - remove_tag(contact_id, tag)                  → dict
+- list_custom_fields / create_custom_field / set_custom_fields (campi personalizzati)
 
 Usato da workflows/discovery_call_processing.md (post-call: find/create lead,
 classifica HOT/WARM/COLD via tag, aggiunge note briefing).
@@ -325,6 +326,46 @@ def find_workflow_by_name(name: str) -> dict | None:
         if name_lower in wf.get("name", "").lower():
             return wf
     return None
+
+
+# ─── Custom fields ───────────────────────────────────────────────────────────
+
+
+def list_custom_fields(model: str = "contact") -> list[dict]:
+    """Lista i campi personalizzati della location. Read-only."""
+    data = _request(
+        "GET", f"/locations/{LOCATION_ID}/customFields", params={"model": model}
+    )
+    return data.get("customFields", [])
+
+
+def create_custom_field(
+    name: str,
+    data_type: str,
+    options: list[str] | None = None,
+    model: str = "contact",
+) -> dict:
+    """Crea un campo personalizzato. Side-effect: scrive su GHL.
+
+    data_type: TEXT, LARGE_TEXT, NUMERICAL, DATE, SINGLE_OPTIONS, ...
+    """
+    payload: dict[str, Any] = {"name": name, "dataType": data_type, "model": model}
+    if options:
+        payload["options"] = options
+    return _request(
+        "POST", f"/locations/{LOCATION_ID}/customFields", json=payload
+    ).get("customField", {})
+
+
+def set_custom_fields(contact_id: str, values: dict[str, Any]) -> dict:
+    """Imposta valori di campi personalizzati su un contatto. Side-effect.
+
+    values: {field_id: valore}. I campi non indicati restano invariati.
+    """
+    payload = {
+        "customFields": [{"id": fid, "field_value": val} for fid, val in values.items()]
+    }
+    return _request("PUT", f"/contacts/{contact_id}", json=payload)
 
 
 # ─── Tags ────────────────────────────────────────────────────────────────────
