@@ -1,9 +1,15 @@
 # Lead on Demand: review settimanale delle call
 
-> Copre due tipi di call: la **vendita agli installatori** (Lorenzo come
-> closer, registrata su Fathom) e la **prequalifica telefonica ai lead finali**
-> (script S4 della knowledge base, registrata in GHL). Per le discovery call
-> Mailift eCommerce vedi [discovery_call_processing.md](discovery_call_processing.md).
+> Copre il percorso di vendita agli **installatori**, in tre momenti:
+>
+> 1. **Prequalifica** dell'installatore che ha compilato il modulo: chiamata di
+>    Lorenzo registrata in GHL (funzione attiva dal 28 settembre 2026).
+> 2. **Discovery e vendita**: call su Meet registrate in Fathom, con "LOD" nel titolo.
+> 3. **Contatti non registrati**: si leggono solo le note della scheda GHL.
+>
+> La prequalifica telefonica ai lead finali (script S4 della knowledge base) è
+> un altro flusso, oggi non registrato, e resta fuori da questa review. Per le
+> discovery call Mailift eCommerce vedi [discovery_call_processing.md](discovery_call_processing.md).
 >
 > Fonte delle regole commerciali: `Lead_on_Demand_knowledge_base_AI.md` (v1.0,
 > 1 ottobre 2026). In caso di dubbio su prezzi, esclusiva o promesse prevale
@@ -14,15 +20,17 @@
 | Tema | Decisione |
 |---|---|
 | Scopo della review | Migliorare la vendita, giudicare la qualità dei prospect, controllare le promesse fatte |
-| Perimetro | Vendita agli installatori più prequalifica ai lead finali |
+| Perimetro | Prequalifica dell'installatore (GHL), discovery e vendita (Fathom, titolo con "LOD"), note GHL per ciò che non è registrato |
 | Follow-up automatico | Invio automatico solo per recap post call e messaggio a +1 giorno; il resto passa da Lorenzo |
 | Canali | Email e SMS da GHL, più telefonata manuale. WhatsApp escluso per ora |
 | Scritture su GHL | Anteprima e conferma di Lorenzo prima di ogni scrittura |
 | Output | Notion: database con una riga per call più pagina di sintesi settimanale |
 | Giorno | Venerdì pomeriggio |
 | Target numerici | Baseline di 4 settimane, poi li fissa Lorenzo |
-| Prequalifica, cosa valutare | Rispetto dello script, motivi di scarto, tasso di qualifica, promesse fatte al lead |
-| Fonte audio prequalifica | Registrazioni delle chiamate GHL (accesso via API da verificare) |
+| Prequalifica, cosa valutare | Rispetto del copione, motivi di scarto, tasso di passaggio a discovery, promesse fatte |
+| Fonte audio prequalifica | Registrazioni e trascrizioni delle chiamate GHL: accesso via API verificato il 1 ottobre 2026 |
+| Fonte discovery e vendita | Fathom, riunioni con "LOD" nel titolo |
+| Call senza registrazione | Solo le note della scheda GHL |
 
 ## Obiettivo
 
@@ -104,20 +112,32 @@ Per ogni call, segnalare se compare uno di questi punti, con timestamp Fathom:
 - servizio senza chiamata di prequalifica
 - verifica SMS o consegna istantanea come funzioni già attive
 
-## Review della prequalifica telefonica
+## Review della prequalifica dell'installatore (chiamate GHL)
 
-Riferimento: script S4 (KB sezione 11) per le aziende, KB sezione 10 per il
-residenziale. Per ogni chiamata registrata in GHL:
+Chiamata in uscita di Lorenzo verso l'installatore che ha compilato il modulo,
+prima della discovery. Per ogni chiamata trascritta in GHL:
 
-- **Rispetto dello script**: sequenza seguita (conferma richiesta, azienda e sede, spesa energia, proprietà, copertura, amianto, motivazione, decisori, disponibilità al confronto tecnico).
-- **Esito e motivo di scarto**: qualificato, da verificare, non qualificato con motivo, non raggiunto. Mancata risposta e incompatibilità restano stati diversi.
-- **Tasso di qualifica**: qualificati / lead chiamati, per coorte e campagna.
-- **Promesse al lead**: risparmio garantito (l'80% non è ammesso), impianto gratuito, finanziamento approvato, incentivi, appuntamento già fissato, preventivo.
-- **Applicazione delle regole**: soglia indicativa di 1.000 euro/mese per le aziende, amianto segnalato e non promesso, bolletta non inviata come non causa di scarto.
+- **Copione seguito**: conferma della richiesta, segmento (residenziale o aziendale), zona, persone che gestiscono i lead, rapidità di richiamo, volume atteso, spiegazione del servizio, prezzo, passaggio alla call successiva. Il copione di riferimento va indicato da Lorenzo.
+- **Esito**: call di discovery fissata, non fissata con motivo, non raggiunto, da richiamare con data.
+- **Motivo di mancato passaggio**: stessa lista chiusa dei motivi di perdita.
+- **Dati da correggere**: confronto tra quanto dichiarato nel modulo e quanto detto in chiamata (esempio visto: modulo con 2–5 persone di vendita, in chiamata 2).
+- **Promesse fatte**: stessa lista del controllo promesse.
+- **Passaggio a discovery**: chiamate che portano a una call fissata / chiamate di prequalifica completate.
 
-Prerequisito: verificare con il token GHL se l'API espone registrazioni e
-trascrizioni delle chiamate. Se non le espone, si ripiega sui dati inseriti dal
-qualificatore (esito, motivo, note) e il punto "promesse al lead" resta scoperto.
+Filtri: solo chiamate di almeno 60 secondi e con contatto presente nella
+pipeline `LOD Sales Process`. Le brevi chiamate di coordinamento interno
+(calendario, orari) vanno escluse.
+
+Dal 28 al 1 ottobre 2026 risultano 36 chiamate in uscita, 25 completate, 12 di
+almeno 60 secondi e 11 con trascrizione.
+
+## Contatti senza registrazione (note GHL)
+
+Sulle 40 opportunità della pipeline, 31 hanno almeno una nota (63 note in
+totale). La lunghezza mediana è di 79 caratteri, quindi la maggior parte sono
+promemoria brevi e non resoconti. Regola: se nelle note non emergono esito e
+motivo, il motivo resta `non-determinabile` e Lorenzo riceve una domanda a
+risposta rapida invece di una deduzione. Non si inventa un motivo.
 
 ## Cadenza di follow-up
 
@@ -181,7 +201,7 @@ calendario o dal contenuto della call.
 
 Venerdì pomeriggio.
 
-1. Elenco call di vendita da Fathom e chiamate di prequalifica da GHL.
+1. Elenco delle riunioni Fathom con "LOD" nel titolo e delle chiamate GHL della settimana (almeno 60 secondi, contatto in pipeline). Una riunione LOD senza "LOD" nel titolo sfugge: Lorenzo controlla l'elenco.
 2. Per ogni call: trascrizione, estrazione di esito, stato, motivo, obiezione, voti, promesse a rischio. Per la prequalifica, le voci della relativa sezione.
 3. Abbinamento al contatto GHL; casi ambigui in coda per Lorenzo.
 4. Anteprima delle scritture su GHL, una per call. Lorenzo conferma prima di ogni scrittura.
@@ -214,7 +234,8 @@ Un CRM esterno non è previsto: pipeline, workflow, CAPI e task sono già in GHL
 - `tools/ghl_client.py` non scrive ancora i campi personalizzati: serve una funzione
   `set_custom_fields` che usi gli ID dei campi una volta creati.
 - Conferma che tutte le call di vendita LOD siano registrate su Fathom.
-- Controllo su un campione della qualità delle trascrizioni GHL delle chiamate di prequalifica.
+- Copione di riferimento della prequalifica dell'installatore, da indicare a Lorenzo.
+- Titoli Fathom da uniformare: una call del 30 settembre (Marco Mochi, tema fotovoltaico) non ha "LOD" nel titolo.
 - Decisione sul fuso orario della location (Amsterdam contro Roma).
 - Struttura del database Notion (proprietà e nome) e pagina padre dove crearlo.
 - Testi del recap e del messaggio a +1 giorno, da approvare prima dell'automazione.
