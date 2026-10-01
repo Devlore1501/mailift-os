@@ -134,7 +134,7 @@ Testo completo in [knowledge/lod-script-prequalifica-installatore.md](../knowled
 | 2 Motivo | Domanda sul perché cerca il servizio ora; se generica, come acquisisce oggi; se ha già comprato lead, com'è andata |
 | 3 Capacità | Numero di persone di vendita confrontato col modulo, chi richiama, rapidità, lavori al mese gestibili |
 | 4 Cosa riceverà | Spiegazione di prequalifica senza promettere appuntamenti; campagne a carico LOD; domanda di conferma |
-| 5 Fascia di prezzo | Dichiara la fascia per capire se ha senso per l'installatore; l'offerta si presenta solo se è interessato. Con fascia fuori dal range ufficiale o senza dire IVA e pagamento anticipato, segnalare |
+| 5 Fascia di prezzo | Dichiara la fascia per capire se ha senso per l'installatore; l'offerta si presenta solo se è interessato. Fasce ufficiali (Lorenzo, 1 ottobre 2026): residenziale 100–130 euro a lead, aziende 150–200 euro e oltre. Segnalare una fascia diversa o l'assenza di IVA e pagamento anticipato quando si passa all'offerta |
 | 6 Decisore | Chiede se decide da solo o con un socio; se serve, fissa l'orario con tutti |
 | 7 Appuntamento | Solo se interessato: riassume l'esigenza, durata circa 35 minuti, due opzioni di giorno e ora. Senza interesse il passo non si applica |
 | 8 Conferma | Giorno, ora, partecipanti, email dell'invito; chiede di tenere pronti i dati sulle richieste gestite |
@@ -253,7 +253,7 @@ Un CRM esterno non è previsto: pipeline, workflow, CAPI e task sono già in GHL
 - `tools/ghl_client.py` non scrive ancora i campi personalizzati: serve una funzione
   `set_custom_fields` che usi gli ID dei campi una volta creati.
 - Conferma che tutte le call di vendita LOD siano registrate su Fathom.
-- Fasce di prezzo ufficiali da usare in prequalifica (residenziale e aziendale), per segnalare le deviazioni.
+- Conferma che la fascia aziende "200+" non abbia un tetto da dichiarare.
 - Titoli Fathom da uniformare: una call del 30 settembre (Marco Mochi, tema fotovoltaico) non ha "LOD" nel titolo.
 - Decisione sul fuso orario della location (Amsterdam contro Roma).
 - Struttura del database Notion (proprietà e nome) e pagina padre dove crearlo.

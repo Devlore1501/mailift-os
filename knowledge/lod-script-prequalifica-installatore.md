@@ -11,6 +11,10 @@ in chiamata. Nota per la verifica: la knowledge base indica 890 e 1.490 come
 proposte non approvate; la decisione del 25 settembre per 10 lead è 100 euro
 (residenziale) e 160 euro (aziende).
 
+Fasce dichiarate in chiamata, indicate da Lorenzo: residenziale 100–130 euro a lead,
+aziende 150–200 euro e oltre. Coerenti con i riferimenti della knowledge base
+(test a 100 e 160, aziende 150–200 nel recap del 29 settembre).
+
 ---
 
 **1. Apertura**
