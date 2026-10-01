@@ -132,12 +132,38 @@ def existing_keys() -> set[str]:
     return {c.get("fieldKey", "") for c in r.json().get("customFields", [])}
 
 
-def create(key: str, name: str, data_type: str, options: list[str] | None) -> requests.Response:
+FOLDER_NAME = "Onboarding lead gen"
+
+
+def get_or_create_folder() -> str:
+    """Cartella custom field del contatto (l'API la crea con documentType=folder)."""
+    r = requests.get(
+        f"{BASE_URL}/locations/{LOCATION_ID}/customFields",
+        params={"model": "contact"},
+        headers=headers(),
+        timeout=30,
+    )
+    r.raise_for_status()
+    for c in r.json().get("customFields", []):
+        if c.get("documentType") == "folder" and c.get("name") == FOLDER_NAME:
+            return c["id"]
+    r = requests.post(
+        f"{BASE_URL}/locations/{LOCATION_ID}/customFields",
+        json={"name": FOLDER_NAME, "model": "contact", "documentType": "folder"},
+        headers=headers(),
+        timeout=30,
+    )
+    r.raise_for_status()
+    return r.json()["customFieldFolder"]["id"]
+
+
+def create(key: str, name: str, data_type: str, options: list[str] | None, folder_id: str) -> requests.Response:
     body: dict = {
         "name": name,
         "dataType": data_type,
         "model": "contact",
         "fieldKey": key,
+        "parentId": folder_id,
     }
     if options:
         body["options"] = options
@@ -162,12 +188,13 @@ def main() -> int:
     todo = [f for f in FIELDS if f"contact.{f[0]}" not in have]
     print(f"{len(FIELDS)} campi in specifica, {len(FIELDS) - len(todo)} già presenti, {len(todo)} da creare")
 
+    folder_id = "" if args.dry_run or not todo else get_or_create_folder()
     failed = 0
     for key, name, dtype, opts in todo:
         if args.dry_run:
             print(f"  [dry-run] {key} ({dtype})")
             continue
-        r = create(key, name, dtype, opts)
+        r = create(key, name, dtype, opts, folder_id)
         if r.ok:
             print(f"  creato  {key} ({dtype})")
         else:
