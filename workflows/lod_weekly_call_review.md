@@ -1,13 +1,28 @@
 # Lead on Demand: review settimanale delle call
 
-> Copre le call di vendita agli **installatori** (Lorenzo come closer). Le
-> telefonate di prequalifica ai lead finali (script S4 della knowledge base) sono
-> un altro flusso e restano fuori da questa review. Per le discovery call Mailift
-> eCommerce vedi [discovery_call_processing.md](discovery_call_processing.md).
+> Copre due tipi di call: la **vendita agli installatori** (Lorenzo come
+> closer, registrata su Fathom) e la **prequalifica telefonica ai lead finali**
+> (script S4 della knowledge base, registrata in GHL). Per le discovery call
+> Mailift eCommerce vedi [discovery_call_processing.md](discovery_call_processing.md).
 >
 > Fonte delle regole commerciali: `Lead_on_Demand_knowledge_base_AI.md` (v1.0,
 > 1 ottobre 2026). In caso di dubbio su prezzi, esclusiva o promesse prevale
 > quel documento, non questo.
+
+## Decisioni di Lorenzo (1 ottobre 2026)
+
+| Tema | Decisione |
+|---|---|
+| Scopo della review | Migliorare la vendita, giudicare la qualità dei prospect, controllare le promesse fatte |
+| Perimetro | Vendita agli installatori più prequalifica ai lead finali |
+| Follow-up automatico | Invio automatico solo per recap post call e messaggio a +1 giorno; il resto passa da Lorenzo |
+| Canali | Email e SMS da GHL, più telefonata manuale. WhatsApp escluso per ora |
+| Scritture su GHL | Anteprima e conferma di Lorenzo prima di ogni scrittura |
+| Output | Notion: database con una riga per call più pagina di sintesi settimanale |
+| Giorno | Venerdì pomeriggio |
+| Target numerici | Baseline di 4 settimane, poi li fissa Lorenzo |
+| Prequalifica, cosa valutare | Rispetto dello script, motivi di scarto, tasso di qualifica, promesse fatte al lead |
+| Fonte audio prequalifica | Registrazioni delle chiamate GHL (accesso via API da verificare) |
 
 ## Obiettivo
 
@@ -15,6 +30,7 @@
 2. Per ogni call, registrare **perché** è stata chiusa o persa, da una lista fissa.
 3. Scrivere esito, motivo e data di ricontatto nella scheda GHL del contatto.
 4. Far partire da quei dati il follow-up e la riattivazione, senza dipendere dalla memoria.
+5. Valutare anche il lavoro di prequalifica (sezione dedicata sotto).
 
 ## Definizione di "chiuso"
 
@@ -88,6 +104,21 @@ Per ogni call, segnalare se compare uno di questi punti, con timestamp Fathom:
 - servizio senza chiamata di prequalifica
 - verifica SMS o consegna istantanea come funzioni già attive
 
+## Review della prequalifica telefonica
+
+Riferimento: script S4 (KB sezione 11) per le aziende, KB sezione 10 per il
+residenziale. Per ogni chiamata registrata in GHL:
+
+- **Rispetto dello script**: sequenza seguita (conferma richiesta, azienda e sede, spesa energia, proprietà, copertura, amianto, motivazione, decisori, disponibilità al confronto tecnico).
+- **Esito e motivo di scarto**: qualificato, da verificare, non qualificato con motivo, non raggiunto. Mancata risposta e incompatibilità restano stati diversi.
+- **Tasso di qualifica**: qualificati / lead chiamati, per coorte e campagna.
+- **Promesse al lead**: risparmio garantito (l'80% non è ammesso), impianto gratuito, finanziamento approvato, incentivi, appuntamento già fissato, preventivo.
+- **Applicazione delle regole**: soglia indicativa di 1.000 euro/mese per le aziende, amianto segnalato e non promesso, bolletta non inviata come non causa di scarto.
+
+Prerequisito: verificare con il token GHL se l'API espone registrazioni e
+trascrizioni delle chiamate. Se non le espone, si ripiega sui dati inseriti dal
+qualificatore (esito, motivo, note) e il punto "promesse al lead" resta scoperto.
+
 ## Cadenza di follow-up
 
 Proposta della KB sezione 14, non ancora decisione approvata. Una data
@@ -114,6 +145,19 @@ Ramificazioni dal motivo registrato:
 | `zona-esclusiva` | Citare la riserva solo se esiste ed è datata |
 | `fuori-target`, rifiuto esplicito | Nessun follow-up, archivio |
 
+Cosa parte da solo e cosa no, per decisione di Lorenzo:
+
+| Messaggio | Invio | Canale |
+|---|---|---|
+| Recap post call, giorno della call | Automatico | Email GHL |
+| Messaggio breve a +1 giorno lavorativo (solo senza data concordata e senza risposta) | Automatico | Email o SMS GHL |
+| Telefonata a +3 giorni | Task per Lorenzo | Telefono |
+| Risposta all'obiezione (+5), richiesta di proseguire o archiviare (+7) | Bozza e task per Lorenzo | Email o SMS dopo approvazione |
+| Promemoria su data concordata, richiesta documenti, qualsiasi altro caso | Task per Lorenzo | A scelta di Lorenzo |
+
+Il recap automatico deve rispettare il perimetro della KB: nessuna promessa
+oltre quanto detto in call, prezzo e IVA espliciti, pagamento anticipato.
+
 ## Scheda GHL
 
 Campi personalizzati da creare (nomi proposti):
@@ -135,18 +179,23 @@ calendario o dal contenuto della call.
 
 ## Esecuzione settimanale
 
-1. Elenco call LOD della settimana da Fathom.
-2. Per ogni call: trascrizione, estrazione di esito, stato, motivo, obiezione, voti, promesse a rischio.
+Venerdì pomeriggio.
+
+1. Elenco call di vendita da Fathom e chiamate di prequalifica da GHL.
+2. Per ogni call: trascrizione, estrazione di esito, stato, motivo, obiezione, voti, promesse a rischio. Per la prequalifica, le voci della relativa sezione.
 3. Abbinamento al contatto GHL; casi ambigui in coda per Lorenzo.
-4. Anteprima delle scritture su GHL. Nessuna scrittura senza conferma finché il metodo non è validato.
+4. Anteprima delle scritture su GHL, una per call. Lorenzo conferma prima di ogni scrittura.
 5. Scrittura di campi, nota, tag e task.
-6. Report di una pagina: metriche, motivi di perdita per frequenza, due obiezioni ricorrenti, promesse a rischio, un'azione da testare la settimana dopo.
+6. Notion: una riga nel database per ogni call, poi la pagina di sintesi della settimana con metriche, motivi di perdita per frequenza, due obiezioni ricorrenti, promesse a rischio, una azione da testare la settimana dopo.
+
+Le prime 4 settimane servono da baseline: il report mostra i numeri senza
+confronto con target. Poi Lorenzo li fissa.
 
 ## Livelli di automazione
 
-1. **Manuale assistito** (ora): Claude esegue i passi 1–6 su richiesta, con conferma.
-2. **Routine schedulata**: script `tools/weekly_call_review.py` il venerdì, con correzione umana dei soli casi dubbi.
-3. **Workflow GHL**: tag del motivo come trigger di attesa, task e messaggi della cadenza.
+1. **Manuale assistito** (ora): Claude esegue i passi 1–6 su richiesta, con anteprima e conferma.
+2. **Routine schedulata**: script `tools/weekly_call_review.py` il venerdì che prepara le anteprime e la bozza Notion; la conferma delle scritture resta di Lorenzo.
+3. **Workflow GHL**: tag del motivo come trigger di attesa, invio di recap e messaggio a +1 giorno, task per il resto della cadenza.
 
 Un CRM esterno non è previsto: pipeline, workflow, CAPI e task sono già in GHL.
 
@@ -156,5 +205,8 @@ Un CRM esterno non è previsto: pipeline, workflow, CAPI e task sono già in GHL
 - Creazione dei campi personalizzati in GHL (a mano o via API, con scope dedicato).
 - `tools/ghl_client.py` non scrive ancora i campi personalizzati: serve una funzione
   `set_custom_fields` che usi gli ID dei campi una volta creati.
-- Conferma che tutte le call LOD siano registrate su Fathom.
+- Conferma che tutte le call di vendita LOD siano registrate su Fathom.
+- Verifica con il token GHL dell'accesso a registrazioni e trascrizioni delle chiamate di prequalifica.
+- Struttura del database Notion (proprietà e nome) e pagina padre dove crearlo.
+- Testi del recap e del messaggio a +1 giorno, da approvare prima dell'automazione.
 - Approvazione della cadenza di follow-up e della lista motivi.
