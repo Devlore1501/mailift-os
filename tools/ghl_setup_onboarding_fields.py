@@ -1,7 +1,7 @@
 """Crea in GHL i custom field del questionario di onboarding lead gen.
 
 Specifica: clients/_mailift-team/ghl-questionario-onboarding-lead-gen.md
-Idempotente: salta i campi la cui fieldKey (contact.<chiave>) esiste già.
+Idempotente: salta i campi la cui fieldKey (contact.<chiave>) esiste già (l'API antepone da sola "contact.").
 
 Variabili richieste (ambiente o .env): GHL_API_KEY, GHL_LOCATION_ID.
 
@@ -137,7 +137,7 @@ def create(key: str, name: str, data_type: str, options: list[str] | None) -> re
         "name": name,
         "dataType": data_type,
         "model": "contact",
-        "fieldKey": f"contact.{key}",
+        "fieldKey": key,
     }
     if options:
         body["options"] = options
