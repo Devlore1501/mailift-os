@@ -454,3 +454,113 @@ Quando una classificazione è sbagliata o una creazione fallisce:
 2. Se il fallimento è un payload FiC, aggiungi il fix in `tools/fic_client.py` e
    nota il caso nelle "Note sui payload FiC" di questo workflow.
 3. Rilancia in dry-run sullo stesso estratto per verificare.
+
+---
+
+## Lezioni sessione 2026-11-19 (arretrato agosto-novembre 2026)
+
+### 1. Estratto conto Revolut in PDF italiano: ora supportato
+
+Il parser generico leggeva **0 movimenti** dagli export PDF in italiano. Il
+layout e' `23 ago 2026 CAR Manychat.com €14.55 €1 579.06`: mese abbreviato IT,
+migliaia separate da spazio, e **tre colonne di importi** (uscita / entrata /
+saldo). Dal solo testo la colonna e' ambigua, perche' ogni riga ha sempre due
+numeri (movimento + saldo) e l'ordine non dice quale sia l'uscita.
+
+`tools/parse_bank_statement.py` ha ora `parse_revolut_it_pdf()`, attivata in
+automatico da `is_revolut_it_pdf()`. La colonna si deduce dalle **coordinate x**
+del token finale del numero (uscita x1<=408, entrata <=485, oltre = saldo).
+
+Due trappole trovate:
+- **l'intestazione `Data (UTC) Descrizione` appare una volta per sezione-conto,
+  non per pagina**: se il footer di pagina chiude la tabella, dalla pagina 2 in
+  poi non legge piu' nulla (si passa da 241 a 23 movimenti). Il footer va
+  **saltato**, non trattato come fine tabella.
+- le continuazioni di descrizione stanno nella colonna descrizione (x0~175);
+  footer e riepiloghi stanno a x0<=72 o x0>=190. Senza questo filtro il testo
+  legale di Revolut finisce dentro le descrizioni dei fornitori.
+
+**Validazione obbligatoria**: `validate_balance_chain()` verifica che
+`saldo[i] - saldo[i+1] == importo[i]` su ogni coppia consecutiva dello stesso
+conto. Il parser e' corretto solo se riporta 0 incoerenze. Controlla anche che
+i totali per conto combacino col "Riepilogo saldo" e i totali per codice col
+box "Tipi di transazione" che Revolut stampa a fine sezione.
+
+### 2. Un export contiene TUTTI i conti
+
+L'export PDF include ogni sotto-conto (Main EUR/GBP/USD, LOD operativo, iva,
+tasse varie 30%). Conseguenze:
+- i **giroconti interni** (`A LOD operativo` / `Da Main` / `A Main`) compaiono
+  due volte, come uscita su un conto e entrata sull'altro. Vanno esclusi prima
+  della classificazione, altrimenti generano autofatture inesistenti (in questa
+  sessione erano 8 righe per 7.735,00 EUR).
+- i SaaS stanno sul Main, le ads sul LOD: un estratto del solo LOD non basta.
+
+### 3. Rimborsi integrali: operazione annullata, nessuna autofattura
+
+Le righe `MOR Rimborso da parte di <fornitore>` vanno accoppiate agli addebiti.
+Se un addebito e' rimborsato **per intero**, l'operazione e' annullata e non va
+autofatturata. In questa sessione: Hyros 401,38 (16/08 -> 02/09), Holo AI
+216,55 (19/10 -> 21/10), HeyGen 25,00 (12/10 -> 22/10), OpenAI 66,11 extra
+(16/10 -> 23/10), Opus Clip 29,00 x3 (ago/set/ott, tutti rimborsati il 29/10).
+Totale escluso 796,04 EUR.
+
+**Attenzione al caso diverso**: un rimborso che si riferisce a un addebito di un
+mese **gia' autofatturato** non si risolve con un'esclusione, serve una **nota
+di variazione** sul documento gia' trasmesso. Non emetterla di iniziativa: e'
+una modifica a un documento depositato, va concordata col commercialista.
+Caso aperto: rimborso Apple 26,12 del 23/08, senza addebito corrispondente nel
+periodo, quindi relativo a una delle autofatture Apple di giugno/luglio.
+
+### 4. Riconciliazione a quadratura chiusa (fallo sempre)
+
+Prima di creare, verifica che **ogni euro** delle uscite non-giroconto sia
+spiegato da una delle quattro voci:
+
+    autofatturato + rimborsato + in sospeso + italiani/esenti = uscite totali
+
+In questa sessione: 9.938,31 + 796,04 + 0 + 3.338,75 = 14.073,10 EUR, esatto al
+centesimo. Se non quadra, c'e' una riga persa dal parser o una classificazione
+silenziosamente scartata.
+
+### 5. Canonicalizzazione dei nomi fornitore
+
+Il classificatore inventa varianti del nome tra un mese e l'altro e FiC
+creerebbe **anagrafiche duplicate**. Varianti viste: `Dropbox Ireland Ltd` vs
+`Dropbox International Unlimited Company`, `Skool Inc.` vs `Skool Inc`,
+`Instantly Inc.` vs `Instantly`, `Manus AI` vs `Manus AI Inc.`.
+Prima di creare, scarica le anagrafiche esistenti
+(`GET /c/{company}/entities/suppliers`) e rimappa sul nome canonico.
+
+Caso piu' insidioso: **conflitti di paese** che cambiano l'aliquota.
+`Miro` e' stato classificato come `RealtimeBoard, Inc. dba Miro` (US, 0%) ma
+l'anagrafica e la precedente autofattura usano `RealtimeBoard BV dba Miro`
+(Paesi Bassi, 22% RC). In caso di conflitto **vince il trattamento gia'
+depositato**, salvo fattura reale che dica altro: la coerenza con quanto gia'
+trasmesso conta piu' dell'ipotesi del modello.
+
+### 6. Esclusioni italiane confermate
+
+Oltre a Google Workspace (gia' in blacklist), il classificatore esclude
+correttamente: **Hyundai Capital Bank Europe GmbH Italy** (le righe
+"PAGAMENTO DELLA RATA N°xxx DELLA PRATICA" sono rate di finanziamento da
+succursale italiana: operazione finanziaria, nessuna autofattura),
+Tspay/TeamSystem, Eni, Netsons, Nuova Sidap, Sife Arrone, HR Job SI,
+Antonino Crivello, Tora Laura, HPI Instant Ink Italy.
+
+### 7. Arretrato e periodo IVA: da segnalare, non da decidere
+
+Le TD17 si registrano entro il 15 del mese successivo all'operazione. Su un
+arretrato la prassi di questo workflow e' emetterle con **data odierna**, quindi
+finiscono nella liquidazione del trimestre corrente. Ma se il trimestre di
+competenza e' **gia' stato liquidato** la cosa va detta al commercialista:
+in questa sessione la liquidazione III trimestre 2026 (1.564,41 EUR, cod. 6033)
+era stata presentata e pagata il 14/11, mentre agosto e settembre non erano
+registrati. Il reverse charge e' neutro (IVA a debito = IVA a credito) quindi
+l'importo versato non cambia, ma la valutazione su registri e LIPE spetta a lui.
+
+### 8. `timeout` non esiste su macOS
+
+`timeout 580 python3 ...` esce con **codice 0 senza eseguire nulla**: sembra
+riuscito e non crea niente. Non usarlo. Per i batch lunghi usa un comando in
+background e verifica sempre lo stato reale su FiC prima di dichiarare fatto.
