@@ -14,6 +14,7 @@ from fastapi.responses import FileResponse, JSONResponse
 
 from app import auth
 from app.api import auth as auth_api
+from app.api import archive as archive_api
 from app.api import autofatture, history, jobs, sdi, statements, suppliers, system
 from app.db import init_db
 
@@ -60,7 +61,14 @@ _setup_logging()
 async def lifespan(app: FastAPI):
     init_db()
     logging.getLogger("app.main").info("backend lifespan start: db initialized")
+    nightly = None
+    from app.services import scheduler
+    if scheduler.enabled():
+        import asyncio
+        nightly = asyncio.create_task(scheduler.nightly_loop())
     yield
+    if nightly:
+        nightly.cancel()
     logging.getLogger("app.main").info("backend lifespan stop")
 
 
@@ -114,6 +122,7 @@ app.include_router(sdi.router)
 app.include_router(jobs.router)
 app.include_router(suppliers.router)
 app.include_router(history.router)
+app.include_router(archive_api.router)
 
 
 @app.get("/api/healthz")

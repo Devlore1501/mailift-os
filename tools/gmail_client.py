@@ -11,7 +11,7 @@ Funzioni esposte:
 Token: ogni account ha il suo file JSON salvato da gmail_oauth_setup.py.
 Le credenziali OAuth (Desktop type) sono in GMAIL_CREDENTIALS_FILE.
 
-Scopes richiesti: gmail.modify (read + archive) + gmail.send.
+Scopes richiesti: gmail.modify (read + archive) + gmail.send + drive (archivio PDF).
 """
 from __future__ import annotations
 
@@ -32,6 +32,9 @@ ROOT = Path(__file__).resolve().parent.parent
 SCOPES = [
     "https://www.googleapis.com/auth/gmail.modify",
     "https://www.googleapis.com/auth/gmail.send",
+    # Drive completo: serve per scrivere nella cartella gia' esistente del commercialista
+    # (con drive.file l'app vedrebbe solo i file creati da lei).
+    "https://www.googleapis.com/auth/drive",
 ]
 
 

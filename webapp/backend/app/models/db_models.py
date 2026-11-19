@@ -76,3 +76,46 @@ class RunHistory(Base):
     error_count: Mapped[int] = mapped_column(Integer, default=0)
     skipped_count: Mapped[int] = mapped_column(Integer, default=0)
     result_json: Mapped[list | None] = mapped_column(JSON, nullable=True)
+
+
+class ArchivedFile(Base):
+    """Registro dei PDF gia' caricati su Drive: evita di caricare due volte lo stesso file."""
+
+    __tablename__ = "archived_files"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    sha256: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    kind: Mapped[str] = mapped_column(String(16), default="document")  # document, revolut
+    period: Mapped[str] = mapped_column(String(7), default="")  # AAAA-MM
+    account: Mapped[str] = mapped_column(String(16), default="")
+    gmail_message_id: Mapped[str] = mapped_column(String(64), default="")
+    original_filename: Mapped[str] = mapped_column(String(512), default="")
+    drive_name: Mapped[str] = mapped_column(String(512), default="")
+    supplier: Mapped[str] = mapped_column(String(256), default="")
+    drive_file_id: Mapped[str] = mapped_column(String(128), default="")
+    drive_url: Mapped[str] = mapped_column(String(512), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class ProcessedMessage(Base):
+    """Email gia' esaminate (anche quelle senza PDF utili): non si riscaricano."""
+
+    __tablename__ = "processed_messages"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    account: Mapped[str] = mapped_column(String(16), index=True)
+    message_id: Mapped[str] = mapped_column(String(64), index=True)
+    outcome: Mapped[str] = mapped_column(String(32), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class ArchiveRun(Base):
+    __tablename__ = "archive_runs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    started_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    dry_run: Mapped[bool] = mapped_column(Boolean, default=True)
+    trigger: Mapped[str] = mapped_column(String(16), default="manual")  # manual, nightly
+    stats: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
