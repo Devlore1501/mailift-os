@@ -15,6 +15,7 @@ import os
 import re
 from dataclasses import dataclass, field
 from datetime import date
+from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any
 
@@ -119,6 +120,20 @@ def _normalize_name(name: str) -> str:
     n = _WS_RE.sub(" ", n).strip()
     tokens = [t for t in n.split(" ") if t and t not in _COMPANY_SUFFIX_TOKENS]
     return " ".join(tokens)
+
+
+def _round_half_up(value: float, digits: int = 2) -> float:
+    """Arrotonda per eccesso sul mezzo, come fa Fatture in Cloud.
+
+    round() di Python usa il banker's rounding: round(222.345, 2) da' 222.34,
+    mentre FiC calcola l'IVA di riga con half-up e ottiene 222.35. Su un importo
+    che cade esattamente sul mezzo centesimo lo scarto fa rifiutare il documento
+    con 422 "Il totale dei pagamenti non corrisponde al totale da pagare"
+    (visto su Meta agosto 2026: 182.25 * 1.22 = 222.345). Vedi
+    workflows/emit_autofatture.md, sessione 2026-11-19.
+    """
+    q = Decimal(1).scaleb(-digits)
+    return float(Decimal(str(value)).quantize(q, rounding=ROUND_HALF_UP))
 
 
 def vies_check(vat_number: str, timeout: float = 10.0) -> bool | None:
@@ -450,7 +465,10 @@ class FicClient:
         total_net = round(af.total_net, 2)
         # Per vat_id=10 (non soggetta, 0%) il lordo coincide col netto.
         # Per vat_id=0 (22% reverse charge UE) il lordo = netto * 1.22.
-        total_gross = round(total_net * (1 + vat_value / 100.0), 2)
+        # IVA arrotondata sulla riga con half-up, come FiC, poi sommata al netto:
+        # calcolare il lordo in un colpo solo sbaglia di 1 cent sui mezzi centesimi.
+        vat_amount = _round_half_up(total_net * vat_value / 100.0)
+        total_gross = _round_half_up(total_net + vat_amount)
         line_name = (af.lines[0].description if af.lines else f"Servizi {af.supplier_name}")[:200]
         items_list = [
             {
