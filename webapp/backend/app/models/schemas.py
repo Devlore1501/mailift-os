@@ -43,13 +43,23 @@ class Transaction(BaseModel):
     amount: float
     currency: str = "EUR"
     description: str
+    account: Optional[str] = None
+    code: Optional[str] = None
+    balance: Optional[float] = None
     raw: Optional[str] = None
+
+
+class BalanceCheck(BaseModel):
+    """Catena saldi: delta saldo tra righe consecutive == importo (PDF Revolut)."""
+    checked: int = 0
+    errors: list[str] = Field(default_factory=list)
 
 
 class ParseResponse(BaseModel):
     statement_id: str
     transactions: list[Transaction]
     outflows_count: int
+    balance_check: BalanceCheck = Field(default_factory=BalanceCheck)
 
 
 # ---------------------------------------------------------------- Jobs
@@ -84,6 +94,15 @@ class AutofatturaLinePayload(BaseModel):
     vat_rate_percent: float
 
 
+class DuplicateInfo(BaseModel):
+    """Autofattura gia' presente su FiC che potrebbe coprire gli stessi addebiti."""
+    level: Literal["duplicate", "possible"]
+    reason: str = ""
+    fic_id: Optional[int] = None
+    fic_number: Optional[str] = None
+    fic_date: Optional[str] = None
+
+
 class AutofatturaPayload(BaseModel):
     """Una autofattura proposta / editata dall'utente lato frontend."""
     id: str  # uuid client-side per tracciare la riga
@@ -104,6 +123,7 @@ class AutofatturaPayload(BaseModel):
     warning_message: str = ""
     verify_status: VerifyStatus = "pending"
     verified_data: Optional[dict[str, Any]] = None
+    duplicate: Optional[DuplicateInfo] = None
     lines: list[AutofatturaLinePayload]
 
 
@@ -115,16 +135,55 @@ class SkippedItalianItem(BaseModel):
     source_transaction: Optional[dict[str, Any]] = None
 
 
+class ExcludedItem(BaseModel):
+    """Addebito tolto prima della classificazione (giroconto, rimborso) o incerto."""
+    date: str
+    amount: float
+    currency: str = "EUR"
+    description: str = ""
+    account: Optional[str] = None
+    reason: str = ""
+    refund_date: Optional[str] = None
+
+
 class PreviewResponse(BaseModel):
     statement_id: str
     autofatture: list[AutofatturaPayload]
     skipped_italian: list[SkippedItalianItem] = Field(default_factory=list)
+    excluded: list[ExcludedItem] = Field(default_factory=list)
+    # Rimborsi senza addebito nell'estratto: nota di variazione da valutare
+    orphan_refunds: list[Transaction] = Field(default_factory=list)
+    duplicate_check_ok: bool = False
 
 
 class CreateRequest(BaseModel):
     autofatture: list[AutofatturaPayload]
     dry_run: bool = False
     statement_id: Optional[str] = None
+
+
+class SdiDocument(BaseModel):
+    id: int
+    number: str
+    date: str
+    supplier: str
+    amount_gross: float
+    ei_status: Optional[str] = None
+    rejection_reason: Optional[str] = None
+
+
+class SdiDocumentsResponse(BaseModel):
+    date: str
+    documents: list[SdiDocument]
+
+
+class SdiRequest(BaseModel):
+    doc_ids: list[int]
+
+
+class SdiSendRequest(SdiRequest):
+    # Conferma esplicita digitata dall'utente: l'invio al SDI non si annulla.
+    confirm: str
 
 
 class CreatedItem(BaseModel):

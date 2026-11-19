@@ -33,7 +33,7 @@ fi
 start_backend() {
     echo "🚀 backend su http://localhost:8000"
     cd "$BACKEND_DIR"
-    "$VENV/bin/uvicorn" app.main:app --port 8000 --reload 2>&1 | tee "$BACKEND_LOG"
+    WEBAPP_DEV=true "$VENV/bin/uvicorn" app.main:app --port 8000 --reload 2>&1 | tee "$BACKEND_LOG"
 }
 
 start_frontend() {
@@ -73,7 +73,7 @@ case "$mode" in
         echo "=========================================="
 
         # Backend in background
-        (cd "$BACKEND_DIR" && "$VENV/bin/uvicorn" app.main:app --port 8000 --reload) \
+        (cd "$BACKEND_DIR" && WEBAPP_DEV=true "$VENV/bin/uvicorn" app.main:app --port 8000 --reload) \
             > >(sed 's/^/[backend] /' | tee "$BACKEND_LOG") \
             2> >(sed 's/^/[backend] /' | tee -a "$BACKEND_LOG" >&2) &
         pids+=("$!")

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router";
 import { Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,6 +34,16 @@ export function Processing() {
       try {
         const parseRes = await parse.mutateAsync(statementId);
         setTransactions(parseRes.transactions);
+        const bc = parseRes.balance_check;
+        if (bc && bc.errors.length > 0) {
+          // Importi letti male dal PDF: meglio fermarsi prima della
+          // classificazione (a pagamento) che autofatturare cifre sbagliate.
+          setError(
+            `Catena dei saldi incoerente su ${bc.errors.length} righe: alcuni importi ` +
+              `potrebbero essere stati letti male.\n${bc.errors.slice(0, 5).join("\n")}`
+          );
+          return;
+        }
         const classifyRes = await classify.mutateAsync(statementId);
         setJobId(classifyRes.job_id);
       } catch (err) {
@@ -78,7 +88,7 @@ export function Processing() {
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Elaborazione fallita</AlertTitle>
         <AlertDescription className="mt-2 space-y-3">
-          <div className="text-xs font-mono">{error}</div>
+          <div className="whitespace-pre-line text-xs font-mono">{error}</div>
           <Button asChild size="sm" variant="outline">
             <Link to="/new">Torna indietro</Link>
           </Button>

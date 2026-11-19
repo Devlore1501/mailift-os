@@ -25,11 +25,19 @@ def _check_db() -> bool:
 
 
 def _check_gmail_tokens() -> dict[str, bool]:
-    tokens_dir = settings.PROJECT_ROOT / "tokens"
-    return {
-        "personal": (tokens_dir / "gmail_personal.json").exists(),
-        "business": (tokens_dir / "gmail_business.json").exists(),
-    }
+    """Il token deve esistere e avere un refresh_token (quelli revocati restano su disco)."""
+    import json
+
+    from gmail_client import token_path  # type: ignore
+
+    out = {}
+    for account in ("personal", "business"):
+        try:
+            data = json.loads(token_path(account).read_text())
+            out[account] = bool(data.get("refresh_token"))
+        except Exception:
+            out[account] = False
+    return out
 
 
 def _check_anthropic() -> bool:

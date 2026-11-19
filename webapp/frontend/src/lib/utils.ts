@@ -87,3 +87,11 @@ export function truncate(str: string, max: number): string {
   if (str.length <= max) return str;
   return str.slice(0, max - 1).trimEnd() + "…";
 }
+
+/** "2026-08-08" -> "agosto 2026": il mese degli addebiti coperti da un'autofattura. */
+export function formatMonth(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(`${iso.slice(0, 7)}-01T00:00:00`);
+  if (Number.isNaN(d.getTime())) return "—";
+  return new Intl.DateTimeFormat("it-IT", { month: "long", year: "numeric" }).format(d);
+}

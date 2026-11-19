@@ -1,0 +1,53 @@
+# Blueprint Render (https://render.com/docs/blueprint-spec).
+# Dashboard Render -> New -> Blueprint -> repo mailift-os, Blueprint path:
+# webapp/render.yaml. I valori con sync:false si inseriscono a mano nella
+# dashboard al primo deploy e non finiscono mai nel repo.
+services:
+  - type: web
+    name: autofatture-mailift
+    runtime: docker
+    dockerfilePath: ./webapp/Dockerfile
+    dockerContext: .
+    plan: starter            # il disco persistente richiede un piano a pagamento
+    region: frankfurt
+    healthCheckPath: /api/healthz
+    autoDeploy: false        # deploy solo quando lo lanci tu
+    buildFilter:
+      paths:
+        - webapp/**
+        - tools/parse_bank_statement.py
+        - tools/classify_transactions.py
+        - tools/autofatture_prep.py
+        - tools/run_autofatture.py
+        - tools/fic_client.py
+        - tools/send_autofatture_sdi.py
+        - tools/verify_suppliers_from_email.py
+        - tools/gmail_client.py
+    disk:
+      name: autofatture-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: WEBAPP_PASSWORD
+        sync: false
+      - key: WEBAPP_SECRET
+        generateValue: true
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: claude-opus-5-5
+      # Copiati sul disco al primo avvio, poi il server li aggiorna da solo.
+      - key: FIC_CLIENT_ID
+        sync: false
+      - key: FIC_CLIENT_SECRET
+        sync: false
+      - key: FIC_ACCESS_TOKEN
+        sync: false
+      - key: FIC_REFRESH_TOKEN
+        sync: false
+      - key: FIC_COMPANY_ID
+        value: "1484061"
+      - key: GMAIL_TOKEN_PERSONAL_JSON
+        sync: false
+      - key: GMAIL_TOKEN_BUSINESS_JSON
+        sync: false

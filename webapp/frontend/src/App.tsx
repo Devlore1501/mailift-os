@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router";
 import { Shell } from "@/components/layout/Shell";
 import { Dashboard } from "@/pages/Dashboard";
 import { NewRunLayout } from "@/pages/NewRun";
@@ -11,6 +11,7 @@ import { Results } from "@/pages/NewRun/Results";
 import { History } from "@/pages/History";
 import { HistoryDetail } from "@/pages/HistoryDetail";
 import { Settings } from "@/pages/Settings";
+import { Sdi } from "@/pages/Sdi";
 
 export function App() {
   return (
@@ -31,6 +32,7 @@ export function App() {
           <Route path="creating/:jobId" element={<Creating />} />
           <Route path="results/:jobId" element={<Results />} />
         </Route>
+        <Route path="sdi" element={<Sdi />} />
         <Route path="history" element={<History />} />
         <Route path="history/:id" element={<HistoryDetail />} />
         <Route path="settings" element={<Settings />} />

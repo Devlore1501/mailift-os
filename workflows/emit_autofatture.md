@@ -564,3 +564,36 @@ l'importo versato non cambia, ma la valutazione su registri e LIPE spetta a lui.
 `timeout 580 python3 ...` esce con **codice 0 senza eseguire nulla**: sembra
 riuscito e non crea niente. Non usarlo. Per i batch lunghi usa un comando in
 background e verifica sempre lo stato reale su FiC prima di dichiarare fatto.
+
+## Aggiornamento 2026-11-19 (webapp v3): le lezioni diventano codice
+
+Le correzioni fatte a mano nell'arretrato ago-nov ora sono deterministiche e
+condivise da CLI e webapp:
+
+- **Giroconti e rimborsi**: `tools/autofatture_prep.py` (`prepare`) toglie i
+  giroconti tra conti propri ("A <conto>" / "Da <conto>") e abbina ogni
+  "Rimborso da parte di X" all'addebito precedente con stesso importo ed
+  esercente. I rimborsi senza addebito nell'estratto finiscono in
+  `orphan_refunds`: nota di variazione da far valutare, mai compensati.
+  Sull'estratto ago-nov riproduce esattamente le esclusioni manuali
+  (8 giroconti, 7 rimborsi, Apple €26,12 orfano).
+- **Un'autofattura per fornitore per mese**: `run_autofatture.group_candidates`
+  include il mese dell'addebito nella chiave. Prima un estratto di piu' mesi
+  dava un solo documento per fornitore.
+- **Duplicati**: da ora `fic_client` scrive il mese degli addebiti nell'oggetto
+  *interno* del documento (`subject`, non `visible_subject`), es.
+  `Autofattura TD17 - Meta ... [2026-08]`. `autofatture_prep.find_duplicates`
+  lo usa per riconoscere un duplicato certo. Sui documenti vecchi senza mese
+  segnala solo "possibile duplicato" (stesso fornitore e netto, emesso dopo il
+  primo addebito). Gli abbonamenti a prezzo fisso danno falsi positivi: guardare
+  la data del documento esistente.
+- **SDI**: `send_autofatture_sdi.py` espone `verify_doc` / `send_doc` /
+  `load_batch` (ora paginato: la lista FiC si fermava ai primi 100 documenti).
+  La webapp li usa nella pagina Invio SDI con conferma "INVIA".
+- **Token FiC in memoria**: dopo un refresh `FicClient` aggiorna anche
+  `os.environ`. Prima un processo lungo (webapp) ricreava i client col token
+  vecchio.
+
+La webapp (`webapp/README.md`) ora fa tutto il flusso dal browser, anche online
+con login. Per un run normale e' la strada consigliata; la CLI resta per i casi
+fuori standard.

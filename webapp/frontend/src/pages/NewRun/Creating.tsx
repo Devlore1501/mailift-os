@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 import {
   Card,

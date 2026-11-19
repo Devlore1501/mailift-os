@@ -1,9 +1,11 @@
-import { useLocation, Link } from "react-router-dom";
-import { ChevronRight, Command as CommandIcon } from "lucide-react";
+import { useLocation, Link } from "react-router";
+import { ChevronRight, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MobileNav } from "@/components/layout/Sidebar";
+import { useAuth, useLogout } from "@/lib/queries";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { EnvironmentSwitch } from "@/components/domain/EnvironmentSwitch";
-import { cn } from "@/lib/utils";
 
 const ROUTE_LABELS: Record<string, string> = {
   "": "Dashboard",
@@ -16,6 +18,7 @@ const ROUTE_LABELS: Record<string, string> = {
   review: "Verifica righe",
   creating: "Creazione",
   results: "Risultati",
+  sdi: "Invio SDI",
 };
 
 function buildCrumbs(pathname: string) {
@@ -36,9 +39,12 @@ interface TopBarProps {
 export function TopBar({ companyName = "Mailift Srl" }: TopBarProps) {
   const { pathname } = useLocation();
   const crumbs = buildCrumbs(pathname);
+  const { data: auth } = useAuth();
+  const logout = useLogout();
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-sm supports-backdrop-filter:bg-background/60">
+      <MobileNav />
       {/* Breadcrumb */}
       <nav
         aria-label="Breadcrumb"
@@ -47,9 +53,12 @@ export function TopBar({ companyName = "Mailift Srl" }: TopBarProps) {
         {crumbs.map((c, i) => {
           const isLast = i === crumbs.length - 1;
           return (
-            <div key={c.to} className="flex items-center gap-1.5">
+            <div
+              key={c.to}
+              className={isLast ? "flex min-w-0 items-center gap-1.5" : "hidden shrink-0 items-center gap-1.5 sm:flex"}
+            >
               {i > 0 && (
-                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                <ChevronRight className="hidden h-3.5 w-3.5 shrink-0 text-muted-foreground sm:block" />
               )}
               {isLast ? (
                 <span className="truncate font-medium text-foreground">
@@ -69,23 +78,23 @@ export function TopBar({ companyName = "Mailift Srl" }: TopBarProps) {
       </nav>
 
       {/* Right cluster */}
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          className={cn(
-            "hidden items-center gap-1.5 rounded-md border border-border/60 bg-muted/40 px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted md:inline-flex"
-          )}
-          aria-label="Apri command palette"
-        >
-          <CommandIcon className="h-3 w-3" />
-          <span className="font-medium">K</span>
-        </button>
-        <Separator orientation="vertical" className="h-6" />
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <EnvironmentSwitch />
         <Separator orientation="vertical" className="h-6" />
         <Badge variant="outline" className="hidden sm:inline-flex">
           {companyName}
         </Badge>
+        {auth?.auth_enabled && (
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Esci"
+            title="Esci"
+            onClick={() => logout.mutate()}
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </header>
   );

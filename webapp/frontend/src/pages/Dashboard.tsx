@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { Plus, FileText, CheckCircle2, XCircle, FlaskConical } from "lucide-react";
 import {
   Card,

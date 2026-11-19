@@ -15,7 +15,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.db import session_scope
+from app.db import session_scope, utcnow
 from app.models.db_models import SupplierOverride
 
 
@@ -75,7 +75,7 @@ def upsert(data: dict[str, Any]) -> dict[str, Any]:
         row.vat_number = data.get("vat_number", "") or ""
         row.vat_id = int(data.get("vat_id") or 0)
         row.note = data.get("note", "") or ""
-        row.updated_at = datetime.utcnow()
+        row.updated_at = utcnow()
         db.flush()
         return _to_payload(row)
 
@@ -102,8 +102,7 @@ def apply_to_autofattura(af_dict: dict[str, Any]) -> dict[str, Any]:
         af_dict["supplier_country_iso"] = ov["country_iso"]
     if ov["vat_number"]:
         af_dict["supplier_vat_number"] = ov["vat_number"]
-    # vat_id viene ricalcolato dal workflow tramite FicClient, ma se override forza un vat_id
-    # specifico lo rispettiamo
-    if ov["vat_id"]:
-        af_dict["_override_vat_id"] = ov["vat_id"]
+    # Il vat_id non si applica: FicClient lo ricava dal paese al momento della
+    # creazione, quindi forzarlo qui mostrerebbe in anteprima un'IVA diversa da
+    # quella che finisce su FiC. Per cambiare l'IVA si corregge il paese.
     return af_dict

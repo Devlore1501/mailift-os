@@ -70,7 +70,7 @@ def _anthropic_available() -> bool:
         from anthropic import Anthropic  # type: ignore
 
         client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-        model = os.environ.get("ANTHROPIC_MODEL", "claude-opus-4-6")
+        model = os.environ.get("ANTHROPIC_MODEL", "claude-opus-5-5")
         # Ping minimale: 1 token, prompt banale
         client.messages.create(
             model=model,
@@ -274,14 +274,14 @@ def get_reject_path(relpath: str) -> Path | None:
         p.relative_to(REJECTS_DIR.resolve())
     except ValueError:
         return None
-    if not p.exists() or not p.is_file():
+    if not p.is_file() or p.suffix.lower() != ".pdf":
         return None
     return p
 
 
 def list_invoices_for_supplier(supplier_key: str) -> list[str]:
     d = INVOICES_DIR / supplier_key
-    if not d.exists():
+    if ".." in supplier_key or "/" in supplier_key or not d.exists():
         return []
     return [p.name for p in sorted(d.glob("*.pdf"))]
 
@@ -294,6 +294,6 @@ def get_invoice_path(supplier_key: str, filename: str) -> Path | None:
         p.relative_to(INVOICES_DIR.resolve())
     except ValueError:
         return None
-    if not p.exists() or not p.is_file():
+    if not p.is_file() or p.suffix.lower() != ".pdf":
         return None
     return p

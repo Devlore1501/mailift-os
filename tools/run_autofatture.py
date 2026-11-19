@@ -45,8 +45,11 @@ def _period_label(dates: list[date]) -> str:
 
 
 def group_candidates(candidates: list[dict]) -> list[AutofatturaInput]:
-    """Accorpa per (fornitore_normalizzato, type_doc, valuta) e produce
+    """Accorpa per (mese, fornitore_normalizzato, type_doc, valuta) e produce
     una autofattura con UNA SOLA riga per ciascun gruppo.
+
+    Il mese dell'addebito fa parte della chiave: un estratto di piu' mesi da'
+    un'autofattura per fornitore per mese, come nei batch emessi finora.
 
     invoice_date = data odierna (per evitare ritardi sanzionabili).
     ref_invoice_number/ref_invoice_date = dati del primo addebito del periodo,
@@ -56,6 +59,7 @@ def group_candidates(candidates: list[dict]) -> list[AutofatturaInput]:
     for c in candidates:
         src = c.get("source_transaction") or {}
         key = (
+            (src.get("date") or "")[:7],
             (c.get("supplier_name") or "").strip().lower(),
             c.get("type_doc"),
             src.get("currency", "EUR"),
@@ -64,7 +68,7 @@ def group_candidates(candidates: list[dict]) -> list[AutofatturaInput]:
 
     today = date.today()
     result: list[AutofatturaInput] = []
-    for (_name_lower, type_doc, currency), items in groups.items():
+    for (_month, _name_lower, type_doc, currency), items in groups.items():
         first = items[0]
         # Ordina cronologicamente per estrarre il primo addebito come "fattura di riferimento"
         items_sorted = sorted(

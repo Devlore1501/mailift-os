@@ -58,7 +58,7 @@ export function HealthIndicator({
         <button
           type="button"
           className={cn(
-            "flex w-full items-center gap-2 rounded-md border border-transparent px-2 py-1.5 text-left text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            "flex w-full items-center gap-2 rounded-md border border-transparent px-2 py-1.5 text-left text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
             collapsed && "justify-center px-0"
           )}
           aria-label={`Stato sistema: ${labelMap[status]}`}

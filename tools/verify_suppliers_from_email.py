@@ -170,7 +170,7 @@ def analyze_pdf(pdf_path: Path) -> dict[str, Any]:
     from anthropic import Anthropic
 
     client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-    model = os.environ.get("ANTHROPIC_MODEL", "claude-opus-4-6")
+    model = os.environ.get("ANTHROPIC_MODEL", "claude-opus-5-5")
 
     pdf_b64 = base64.standard_b64encode(pdf_path.read_bytes()).decode("ascii")
 

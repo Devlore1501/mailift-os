@@ -13,7 +13,7 @@ from datetime import datetime
 from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db import Base
+from app.db import Base, utcnow
 
 
 class Statement(Base):
@@ -22,13 +22,15 @@ class Statement(Base):
     id: Mapped[str] = mapped_column(String(32), primary_key=True)
     filename: Mapped[str] = mapped_column(String(512))
     size_bytes: Mapped[int] = mapped_column(Integer, default=0)
-    uploaded_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    uploaded_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
     parsed_transactions: Mapped[list | None] = mapped_column(JSON, nullable=True)
     candidates: Mapped[list | None] = mapped_column(JSON, nullable=True)
     grouped_preview: Mapped[list | None] = mapped_column(JSON, nullable=True)
     skipped_italian: Mapped[list | None] = mapped_column(JSON, nullable=True)
     verify_results: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    excluded: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    orphan_refunds: Mapped[list | None] = mapped_column(JSON, nullable=True)
 
 
 class Job(Base):
@@ -43,8 +45,8 @@ class Job(Base):
     current: Mapped[int] = mapped_column(Integer, default=0)
     result: Mapped[dict | list | None] = mapped_column(JSON, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, onupdate=utcnow)
     statement_id: Mapped[str | None] = mapped_column(String(32), ForeignKey("statements.id"), nullable=True)
 
 
@@ -58,7 +60,7 @@ class SupplierOverride(Base):
     vat_number: Mapped[str] = mapped_column(String(64), default="")
     vat_id: Mapped[int] = mapped_column(Integer, default=0)
     note: Mapped[str] = mapped_column(Text, default="")
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, onupdate=utcnow)
 
 
 class RunHistory(Base):
@@ -66,7 +68,7 @@ class RunHistory(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     statement_id: Mapped[str | None] = mapped_column(String(32), index=True, nullable=True)
-    started_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    started_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     dry_run: Mapped[bool] = mapped_column(Boolean, default=False)
     total_count: Mapped[int] = mapped_column(Integer, default=0)

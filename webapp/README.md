@@ -1,55 +1,91 @@
-# Autofatture Webapp v2
+# Autofatture Webapp v3
 
-Webapp locale per emettere autofatture passive (TD17/TD18/TD19 reverse charge) su Fatture in Cloud da estratti conto Revolut, con **verifica automatica dei fornitori via Gmail** e **logica IVA country-aware**.
+Webapp per emettere autofatture passive (TD17/TD18/TD19 reverse charge) su Fatture in Cloud da estratti conto Revolut, con **verifica dei fornitori via Gmail**, **controllo duplicati su FiC**, **invio al SDI** e **logica IVA country-aware**. Gira in locale o online (Docker, con login).
 
-Costruita sopra il workflow CLI in [`tools/`](../tools/) — non duplica logica fiscale, riusa `FicClient`, `parse_bank_statement`, `classify_transactions`, `verify_suppliers_from_email` come librerie Python.
+Costruita sopra il workflow CLI in [`tools/`](../tools/): non duplica logica fiscale, riusa `parse_bank_statement`, `autofatture_prep`, `classify_transactions`, `run_autofatture.group_candidates`, `fic_client`, `send_autofatture_sdi`, `verify_suppliers_from_email` come librerie Python.
 
 ## Stack
 
 | Layer | Tech |
 |---|---|
-| Backend | FastAPI + SQLAlchemy + SQLite (`.tmp/webapp.db`) |
-| Frontend | React 18 + Vite + TypeScript + Tailwind + shadcn/ui + React Query |
-| Persistenza | SQLite (4 tabelle: Statement, Job, SupplierOverride, RunHistory) |
-| Auth | Single user Mailift, nessuna autenticazione — pronto a evolvere |
+| Backend | Python 3.13, FastAPI 0.162, SQLAlchemy 2.1, SQLite |
+| Frontend | React 19, Vite 8, TypeScript 7, Tailwind 4, shadcn/ui (Radix), React Router 7, TanStack Query 5 |
+| Persistenza | SQLite (Statement, Job, SupplierOverride, RunHistory) |
+| Auth | Password unica (`WEBAPP_PASSWORD`) + cookie di sessione firmato HttpOnly/SameSite=Strict; disattivata se la variabile e' vuota |
 
-## Avvio rapido
+Versioni fissate in `backend/requirements.txt` e `frontend/package.json`, scelte tra quelle pubblicate da almeno due settimane.
+
+## Avvio in locale
 
 ```bash
 ./webapp/start.sh
 ```
 
-Apre backend (`:8000`) + frontend (`:5173`) in parallelo, logs affiancati con prefisso `[backend]` / `[frontend]`, Ctrl+C ferma entrambi. Poi vai su [http://localhost:5173](http://localhost:5173).
+Backend su `:8000` (con `/docs`), frontend Vite su `:5173` che inoltra `/api` al backend. Senza `WEBAPP_PASSWORD` non chiede login.
 
-Solo backend: `./webapp/start.sh backend`. Solo frontend: `./webapp/start.sh frontend`.
-
-## Setup one-time
-
-Già fatto se lavori dal venv del progetto. In caso servisse rifarlo:
+Per provare la versione "come online" (un solo processo che serve anche il frontend buildato):
 
 ```bash
-# 1. Python deps (sqlalchemy, fastapi, uvicorn, python-multipart, pdfplumber, anthropic)
-.venv/bin/pip install -r webapp/backend/requirements.txt
-
-# 2. Frontend deps (installa tutto: shadcn, tailwind, react-query, ecc.)
-cd webapp/frontend && npm install
+cd webapp/frontend && npm run build
+cd ../backend && WEBAPP_PASSWORD=... ../../.venv/bin/uvicorn app.main:app --port 8000
 ```
 
-## Flusso utente (wizard 6 step)
+## Flusso utente
 
-1. **Upload** — drag&drop CSV/XLSX/PDF dell'estratto conto Revolut business
-2. **Processing** — parser pandas + classificazione via Claude, identifica i fornitori soggetti a reverse charge, filtra automaticamente i fornitori italiani con IVA diretta (blacklist + defense-in-depth)
-3. **Verify Suppliers** — step centrale: per ogni fornitore del preview, il backend cerca la fattura reale in Gmail (account personal + business), scarica il PDF, filtra per Bill to Mailift, e se c'è credit Anthropic analizza il PDF con Claude per estrarre paese/P.IVA/bill-to. Questo **corregge gli errori di classificazione** del classifier AI sui paesi fornitori.
-4. **Review** — tabella editabile con VatBadge colorati (22% RC blu per UE, 0% viola per extra-UE), warning gialli per fornitori con Bill to non intestato a Mailift, icona PDF per preview delle fatture scaricate, accordion delle "transazioni escluse" (fornitori italiani filtrati). Editing inline descrizione/importo/exclude.
-5. **Creating** — job async che crea le autofatture su FiC, progress bar live, lista con icon per ogni riga
-6. **Results** — griglia card con numero FiC + link diretto + warning prominente "NON inviate al SDI, firma su FiC manualmente"
+1. **Upload**: CSV/XLSX/PDF dell'estratto Revolut (anche il PDF italiano multi-conto). Max 20 MB.
+2. **Elaborazione**:
+   - parsing, con controllo della **catena dei saldi** (se un importo e' letto male il run si ferma prima della classificazione, che e' a pagamento)
+   - esclusione deterministica di **giroconti** tra conti propri e **addebiti rimborsati** per intero (`tools/autofatture_prep.py`)
+   - classificazione AI degli addebiti restanti. Se fallisce, il run si ferma: niente candidati di riserva.
+3. **Verifica fornitori**: cerca le fatture in Gmail, controlla il "Bill to", estrae paese e P.IVA dal PDF.
+4. **Revisione**:
+   - un'autofattura **per fornitore per mese**, con IVA, paese e mese degli addebiti
+   - **duplicati su FiC**: quelli certi partono esclusi, i possibili sono segnalati con il numero del documento esistente
+   - elenco degli addebiti non autofatturati, ciascuno con il motivo
+   - rimborsi orfani da girare al commercialista (nota di variazione)
+   - in modalita' Live, conferma con riepilogo prima di creare
+5. **Creazione** su FiC. Lato server si rifa' il controllo duplicati: un duplicato certo non viene creato nemmeno se arriva dal frontend.
+6. **Risultati**, con il link alla pagina Invio SDI.
 
-## Altre pagine
+**Invio SDI** (pagina a se', anche per batch vecchi):
+- elenca le autofatture di una data con lo stato SDI
+- fa la verifica formale XML
+- invia solo dopo aver digitato `INVIA`. La verifica formale viene rifatta prima di ogni documento e quelli gia' inviati vengono saltati. L'invio e' irreversibile.
 
-- **Dashboard** — health card (FiC, DB, Gmail, Anthropic), ultimi 5 run, CTA nuovo run
-- **History** — lista run passati con filtri, dettaglio con lista autofatture
-- **Settings → Override fornitori** — CRUD di correzioni persistenti per fornitore. Es. "Lovable Labs → country US" — si applica a tutti i run futuri automaticamente.
-- **Settings → Sistema** — info backend, path DB, stato health esteso
+## Online (Docker)
+
+L'immagine (`webapp/Dockerfile`, build dalla root del repo) contiene frontend buildato + backend + solo i tools necessari. Estratti, clienti, token e `.env` restano fuori dal contesto di build (`Dockerfile.dockerignore`). Gira con un solo worker su un volume persistente montato in `/data`:
+
+| Path | Contenuto |
+|---|---|
+| `/data/webapp/` | DB SQLite, estratti caricati, log |
+| `/data/mailift.env` | token FiC: il refresh lo riscrive, per questo sta sul volume |
+| `/data/tokens/` | token Gmail |
+| `/data/tmp/` | PDF fatture fornitori scaricati |
+
+**Deploy su Render** con `webapp/render.yaml`:
+1. Dashboard → New → Blueprint, repo `mailift-os`, Blueprint path `webapp/render.yaml`.
+2. Compila i valori segreti richiesti:
+   - `WEBAPP_PASSWORD`
+   - `ANTHROPIC_API_KEY`
+   - `FIC_CLIENT_ID`, `FIC_CLIENT_SECRET`, `FIC_ACCESS_TOKEN`, `FIC_REFRESH_TOKEN`
+   - `GMAIL_TOKEN_PERSONAL_JSON`, `GMAIL_TOKEN_BUSINESS_JSON` (contenuto dei file in `tokens/`)
+3. Deploy. Al primo avvio FiC e Gmail vengono copiati su `/data`. Dopo, la fonte di verita' sono quei file: per sostituire un token si cancella il file sul disco e si riavvia.
+
+Piano Starter (serve per il disco), regione Frankfurt, HTTPS automatico, deploy solo manuale (`autoDeploy: false`).
+
+### Variabili d'ambiente
+
+| Variabile | Default | Note |
+|---|---|---|
+| `WEBAPP_PASSWORD` | vuota | vuota = nessun login (solo locale) |
+| `WEBAPP_SECRET` | casuale per processo | firma il cookie; fissala online o ogni riavvio scollega |
+| `WEBAPP_SESSION_HOURS` | 12 | durata sessione |
+| `WEBAPP_COOKIE_SECURE` | false (true nell'immagine) | cookie solo su HTTPS |
+| `WEBAPP_DATA_DIR` | `backend/.tmp` | DB e upload |
+| `MAILIFT_ENV_PATH` | `~/.secrets/mailift/.env` | file credenziali; online sul volume |
+| `WEBAPP_DRY_RUN` | false | forza dry-run per tutti |
+| `WEBAPP_DEV` | false | CORS per Vite e `/docs` (lo attiva `start.sh`) |
 
 ## Logica fiscale (chiave)
 
@@ -94,8 +130,13 @@ Stati possibili per fornitore: `pending`, `verified`, `pdf_only`, `not_found`, `
 | `GET` | `/api/history` | ultimi 50 run |
 | `GET` | `/api/history/{run_id}` | dettagli run |
 | `GET` | `/api/jobs/{id}` | polling job async |
+| `POST` | `/api/auth/login` · `/logout`, `GET /api/auth/me` | sessione (pubblici) |
+| `GET` | `/api/healthz` | liveness, pubblico, non tocca FiC |
+| `GET` | `/api/sdi/documents?date=&ids=` | autofatture su FiC con stato SDI |
+| `POST` | `/api/sdi/verify` | async, verifica formale |
+| `POST` | `/api/sdi/send` | async, richiede `confirm: "INVIA"` |
 
-Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs). Contratto completo con esempi JSON: [`webapp/design/api_contract_v2.md`](design/api_contract_v2.md).
+Tutte le `/api/*` tranne auth e healthz richiedono la sessione. Swagger UI solo in dev: [http://localhost:8000/docs](http://localhost:8000/docs). Contratto completo con esempi JSON: [`webapp/design/api_contract_v2.md`](design/api_contract_v2.md).
 
 ## Modalità dry-run
 
@@ -108,18 +149,16 @@ In dry-run il backend segue tutto il flusso ma nel create step salta la chiamata
 
 ## Test automatico
 
-Smoke test E2E completo del backend (19 step, no frontend):
+E2E del backend sull'estratto reale, **senza chiamate Anthropic e senza scritture su FiC** (classificazione sostituita dai candidati salvati in `.tmp/cand_*.json`, creazione in dry-run, SDI in sola lettura):
 
 ```bash
-# Terminal 1 — avvia backend su porta 8001 (non collide col dev server)
 cd webapp/backend
-../../.venv/bin/uvicorn app.main:app --port 8001
-
-# Terminal 2 — esegui test
-.venv/bin/python webapp/backend/tests/smoke_test_e2e.py
+../../.venv/bin/python tests/e2e_real_statement.py /tmp/autofatture-e2e
 ```
 
-Copre: health, upload, parse, classify (con fallback seed se Anthropic esausto), preview, check critici country-aware, verify suppliers reale Gmail, create dry-run, history, CRUD overrides, verify-rejects.
+Verifica login, parse + catena saldi, esclusioni, accorpamento mensile, controllo duplicati, dry-run e blocco dell'invio SDI senza conferma. Atteso sull'estratto ago-nov 2026: 66 autofatture, netto 9.938,31.
+
+Il vecchio `tests/smoke_test_e2e.py` (19 step, server su :8001) resta valido per uso locale senza password.
 
 ## Troubleshooting
 
@@ -153,7 +192,10 @@ Il PDF per quel fornitore non è stato scaricato (verify step saltato o `not_fou
 
 ```
 webapp/
-├── start.sh                  # avvio unificato backend + frontend
+├── start.sh                  # avvio unificato backend + frontend (dev)
+├── Dockerfile                # immagine unica per il deploy
+├── Dockerfile.dockerignore   # allowlist del contesto di build
+├── render.yaml               # Blueprint Render (servizio + disco)
 ├── README.md                 # questo file
 ├── backend/
 │   ├── app/
@@ -189,12 +231,10 @@ webapp/
     └── verify_pipeline_test_report.md
 ```
 
-## Cosa NON è incluso (out of scope)
+## Cosa NON e' incluso
 
-- Auth multi-user (single-user Mailift)
-- Deploy cloud (Dockerfile non creato)
-- Invio automatico al SDI (firma manuale su FiC)
-- OCR PDF scansionati (solo pdfplumber per PDF testuali)
-- Test automatici frontend (Playwright) — solo smoke test backend
-- Command palette Cmd+K
-- Editing inline di country_iso nel Review (usa Settings → Override per correzioni persistenti)
+- Multi-utente (una password, un'azienda)
+- Piu' worker / piu' istanze: job e cache sono in memoria del processo
+- OCR di PDF scansionati (solo pdfplumber su PDF testuali)
+- Test automatici frontend
+- Rinomina dei fornitori sull'anagrafica FiC esistente (es. "Dropbox Ireland" vs "Dropbox International"): si usa l'override paese, il nome resta quello del classificatore

@@ -1,10 +1,11 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router";
 import {
   AlertTriangle,
   CheckCircle2,
   ExternalLink,
   Home,
   Plus,
+  Send,
   XCircle,
 } from "lucide-react";
 import {
@@ -39,16 +40,24 @@ export function Results() {
   const created = items.filter((i) => i.status === "ok");
   const errors = items.filter((i) => i.status === "error");
   const skipped = items.filter((i) => i.status === "skipped");
+  const createdIds = created.map((i) => i.fic_id).filter((id): id is number => !!id);
 
   return (
     <div className="space-y-6">
       {!dryRun && created.length > 0 && (
         <Alert variant="warning">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Le autofatture sono state create come BOZZA</AlertTitle>
+          <AlertTitle>Create su FiC, non ancora inviate al SDI</AlertTitle>
           <AlertDescription>
-            Vai su Fatture in Cloud → Autofatture, verifica ognuna e clicca
-            <strong> Firma e invia</strong> per completare l&apos;invio al SDI.
+            <p>
+              Controllale su Fatture in Cloud, poi fai verifica formale e invio
+              dalla pagina Invio SDI.
+            </p>
+            <Button asChild size="sm" className="mt-2">
+              <Link to={`/sdi?ids=${createdIds.join(",")}`}>
+                <Send className="h-4 w-4" /> Vai all&apos;invio SDI
+              </Link>
+            </Button>
           </AlertDescription>
         </Alert>
       )}
@@ -65,7 +74,7 @@ export function Results() {
       )}
 
       {/* Created */}
-      {(created.length > 0 || skipped.length > 0) && (
+      {(created.length > 0 || (dryRun && skipped.length > 0)) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -123,6 +132,28 @@ export function Results() {
                 </Card>
               ))}
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Non create perche' gia' presenti su FiC */}
+      {!dryRun && skipped.length > 0 && (
+        <Card className="border-warning/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-warning" />
+              {skipped.length} non create: gia&apos; presenti su FiC
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-1 text-sm">
+              {skipped.map((s, i) => (
+                <li key={i} className="flex justify-between gap-3">
+                  <span className="font-medium">{s.supplier}</span>
+                  <span className="text-xs text-muted-foreground">{s.error}</span>
+                </li>
+              ))}
+            </ul>
           </CardContent>
         </Card>
       )}

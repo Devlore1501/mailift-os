@@ -8,6 +8,7 @@ from __future__ import annotations
 # IMPORTANTE: importare settings prima dei moduli tools/ per inizializzare sys.path
 from app import settings  # noqa: F401
 
+import logging
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
@@ -15,13 +16,14 @@ import uuid
 
 from sqlalchemy import select
 
-from app.db import session_scope
+from app.db import session_scope, utcnow
 from app.models.db_models import Statement
 from app.services import overrides as overrides_svc
 
 # Moduli "esterni" caricati dalla cartella tools/ del progetto root
-from parse_bank_statement import parse_statement  # type: ignore
+from parse_bank_statement import parse_statement, validate_balance_chain  # type: ignore
 import classify_transactions as _ct  # type: ignore
+import autofatture_prep as _prep  # type: ignore
 from run_autofatture import group_candidates  # type: ignore
 from fic_client import (  # type: ignore
     FicClient,
@@ -40,6 +42,8 @@ _statement_transactions: dict[str, list[dict]] = {}
 _statement_candidates: dict[str, list[dict]] = {}
 _statement_skipped: dict[str, list[dict]] = {}
 _statement_grouped: dict[str, list[Any]] = {}  # list[AutofatturaInput]
+
+logger = logging.getLogger("app.services.workflow")
 
 
 # ---------------------------------------------------------- FiC VAT cache
@@ -132,6 +136,8 @@ def _db_get_statement(statement_id: str) -> dict[str, Any] | None:
             "grouped_preview": row.grouped_preview,
             "skipped_italian": row.skipped_italian,
             "verify_results": row.verify_results,
+            "excluded": row.excluded,
+            "orphan_refunds": row.orphan_refunds,
         }
 
 
@@ -147,7 +153,7 @@ def save_uploaded_file(filename: str, content: bytes) -> tuple[str, Path]:
         statement_id,
         filename=filename,
         size_bytes=len(content),
-        uploaded_at=datetime.utcnow(),
+        uploaded_at=utcnow(),
     )
     return statement_id, target
 
@@ -167,28 +173,45 @@ def get_statement_path(statement_id: str) -> Path | None:
     return None
 
 
-def parse_statement_file(statement_id: str) -> list[dict]:
+def parse_statement_file(statement_id: str) -> tuple[list[dict], dict[str, Any]]:
+    """Ritorna (transazioni, controllo catena saldi)."""
     path = get_statement_path(statement_id)
     if not path:
         raise FileNotFoundError(f"statement {statement_id} non trovato")
     txs = parse_statement(path)
+    checked, errors = validate_balance_chain(txs)
     _statement_transactions[statement_id] = txs
     _db_upsert_statement(statement_id, parsed_transactions=txs)
+    return txs, {"checked": checked, "errors": errors}
+
+
+def _load_transactions(statement_id: str) -> list[dict]:
+    txs = _statement_transactions.get(statement_id)
+    if txs is None:
+        rec = _db_get_statement(statement_id) or {}
+        txs = rec.get("parsed_transactions")
+    if txs is None:
+        txs, _ = parse_statement_file(statement_id)
     return txs
 
 
 def classify_statement(statement_id: str) -> tuple[list[dict], list[dict]]:
-    """Ritorna (candidates, skipped_italian)."""
-    txs = _statement_transactions.get(statement_id)
-    if txs is None:
-        txs = parse_statement_file(statement_id)
-    outflows = [t for t in txs if t.get("amount", 0) < 0]
+    """Ritorna (candidates, skipped_italian).
 
-    if hasattr(_ct, "classify_split"):
-        candidates, skipped = _ct.classify_split(outflows)
+    Giroconti e addebiti rimborsati vengono tolti prima, in modo deterministico
+    (tools/autofatture_prep.py): non arrivano al classificatore AI.
+    Se la classificazione fallisce l'errore risale al job: nessun fallback,
+    meglio un run fermo che autofatture inventate.
+    """
+    prep = _prep.prepare(_load_transactions(statement_id))
+    _db_upsert_statement(
+        statement_id, excluded=prep["excluded"], orphan_refunds=prep["orphan_refunds"]
+    )
+    outflows = prep["outflows"]
+    if not outflows:
+        candidates, skipped = [], []
     else:
-        candidates = _ct.classify(outflows)
-        skipped = []
+        candidates, skipped = _ct.classify_split(outflows)
 
     _statement_candidates[statement_id] = candidates
     _statement_skipped[statement_id] = skipped
@@ -196,40 +219,33 @@ def classify_statement(statement_id: str) -> tuple[list[dict], list[dict]]:
     return candidates, skipped
 
 
-def classify_statement_with_fallback(statement_id: str) -> tuple[list[dict], list[dict]]:
+def _check_duplicates(rows: list[dict]) -> bool:
+    """Annota ogni riga con `duplicate` confrontandola con le autofatture su FiC.
+
+    I duplicati certi partono esclusi. Ritorna False se FiC non risponde: il
+    controllo non e' stato fatto e il frontend deve dirlo.
     """
-    Tenta classify_statement(), fallback a seed candidates se Anthropic non disponibile.
-    Usato quando i credit Anthropic sono esauriti o l'API non risponde.
-    """
+    client = _get_fic_client()
+    if client is None:
+        return False
     try:
-        return classify_statement(statement_id)
-    except Exception:
-        # Fallback: seed candidates noti (uso reale + test e2e)
-        seed_candidates = [
-            {"supplier_name": "Lovable Labs", "confidence": "high", "type_doc": "TD17",
-             "supplier_country": "SE", "supplier_vat_number": "",
-             "source_transaction": {"description": "LOVABLE LABS SUBSCRIPTION", "amount": -25.0, "date": "2026-02-10", "currency": "EUR"}},
-            {"supplier_name": "Apify Technologies", "confidence": "high", "type_doc": "TD17",
-             "supplier_country": "CZ", "supplier_vat_number": "",
-             "source_transaction": {"description": "APIFY TECHNOLOGIES S.R.O", "amount": -49.0, "date": "2026-02-12", "currency": "EUR"}},
-            {"supplier_name": "OpenAI", "confidence": "high", "type_doc": "TD17",
-             "supplier_country": "US", "supplier_vat_number": "",
-             "source_transaction": {"description": "OPENAI CHATGPT SUBSCRIPTION", "amount": -22.0, "date": "2026-02-15", "currency": "EUR"}},
-            {"supplier_name": "ElevenLabs", "confidence": "high", "type_doc": "TD17",
-             "supplier_country": "US", "supplier_vat_number": "",
-             "source_transaction": {"description": "ELEVENLABS INC", "amount": -22.0, "date": "2026-02-18", "currency": "EUR"}},
-            {"supplier_name": "Hostinger", "confidence": "high", "type_doc": "TD17",
-             "supplier_country": "LT", "supplier_vat_number": "",
-             "source_transaction": {"description": "HOSTINGER INTERNATIONAL", "amount": -15.0, "date": "2026-02-20", "currency": "EUR"}},
-            {"supplier_name": "Gamma Tech", "confidence": "high", "type_doc": "TD17",
-             "supplier_country": "US", "supplier_vat_number": "",
-             "source_transaction": {"description": "GAMMA APP SUBSCRIPTION", "amount": -16.0, "date": "2026-02-22", "currency": "EUR"}},
-        ]
-        skipped = []
-        _statement_candidates[statement_id] = seed_candidates
-        _statement_skipped[statement_id] = skipped
-        _db_upsert_statement(statement_id, candidates=seed_candidates, skipped_italian=skipped)
-        return seed_candidates, skipped
+        existing = client.list_self_supplier_invoices()
+    except Exception as e:
+        logger.warning("controllo duplicati non disponibile: %s", e)
+        return False
+    planned = [
+        {
+            "supplier_name": r["supplier_name"],
+            "net": round(sum(l["amount_net"] for l in r["lines"]), 2),
+            "first_date": r.get("ref_invoice_date") or "",
+        }
+        for r in rows
+    ]
+    for r, hit in zip(rows, _prep.find_duplicates(planned, existing)):
+        r["duplicate"] = hit
+        if hit and hit["level"] == "duplicate":
+            r["excluded"] = True
+    return True
 
 
 def build_preview(statement_id: str, min_confidence: str = "medium") -> dict[str, Any]:
@@ -247,10 +263,10 @@ def build_preview(statement_id: str, min_confidence: str = "medium") -> dict[str
 
     levels = {"low": 0, "medium": 1, "high": 2}
     threshold = levels.get(min_confidence, 1)
-    filtered = [
-        c for c in (candidates or [])
-        if levels.get(c.get("confidence", "low"), 0) >= threshold
-    ]
+    filtered, uncertain = [], []
+    for c in candidates or []:
+        ok = levels.get(c.get("confidence", "low"), 0) >= threshold
+        (filtered if ok else uncertain).append(c)
 
     grouped = group_candidates(filtered)
     _statement_grouped[statement_id] = grouped
@@ -287,23 +303,52 @@ def build_preview(statement_id: str, min_confidence: str = "medium") -> dict[str
             continue
 
         vat_id, vat_rate_percent, is_extra_ue = resolve_vat_id_for_country(country)
-        if d.get("_override_vat_id"):
-            vat_id = int(d.pop("_override_vat_id"))
-            # non possiamo ricalcolare il rate senza FiC; lascia il precedente
         d["is_extra_ue"] = is_extra_ue
         for line in d["lines"]:
             line["vat_id"] = vat_id
             line["vat_rate_percent"] = vat_rate_percent
         out.append(d)
 
+    duplicate_check_ok = _check_duplicates(out)
     _db_upsert_statement(statement_id, grouped_preview=out)
 
     skipped_payload = _skipped_to_payload(skipped or [])
     skipped_payload.extend(extra_skipped)
 
+    rec = rec or {}
     return {
         "autofatture": out,
         "skipped_italian": skipped_payload,
+        "excluded": [_excluded_to_payload(e) for e in rec.get("excluded") or []]
+        + [_uncertain_to_payload(c) for c in uncertain],
+        "orphan_refunds": rec.get("orphan_refunds") or [],
+        "duplicate_check_ok": duplicate_check_ok,
+    }
+
+
+def _uncertain_to_payload(c: dict) -> dict:
+    src = c.get("source_transaction") or {}
+    return {
+        "date": src.get("date", ""),
+        "amount": float(src.get("amount", 0.0) or 0.0),
+        "currency": src.get("currency", "EUR"),
+        "description": f"{c.get('supplier_name', '')} - {src.get('description', '')}",
+        "account": src.get("account"),
+        "reason": "classificazione incerta: verificare a mano",
+        "refund_date": None,
+    }
+
+
+def _excluded_to_payload(e: dict) -> dict:
+    refund = e.get("refund") or {}
+    return {
+        "date": e.get("date", ""),
+        "amount": float(e.get("amount", 0.0)),
+        "currency": e.get("currency", "EUR"),
+        "description": e.get("description", ""),
+        "account": e.get("account"),
+        "reason": e.get("exclude_reason", ""),
+        "refund_date": refund.get("date"),
     }
 
 
@@ -346,6 +391,7 @@ def _autofattura_to_dict(af: Any) -> dict:
         "warning_message": "",
         "verify_status": "pending",
         "verified_data": None,
+        "duplicate": None,
         "lines": [
             {
                 "description": l.description,

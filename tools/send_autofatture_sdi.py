@@ -29,17 +29,43 @@ ALREADY_SENT = {"pending", "processing", "sent", "delivered", "not_delivered", "
 
 
 def load_batch(c: FicClient, date: str) -> list[dict]:
-    r = c._request(
-        "GET",
-        f"/c/{c.company_id}/issued_documents",
-        params={"type": "self_supplier_invoice", "per_page": 100,
-                "fieldset": "detailed", "sort": "-id"},
-    )
-    return sorted([d for d in r.get("data", []) if d.get("date") == date],
-                  key=lambda x: x["number"])
+    docs = c.list_self_supplier_invoices(fieldset="detailed")
+    return sorted([d for d in docs if d.get("date") == date], key=lambda x: x["number"])
 
 
-def show_status(docs: list[dict]) -> None:
+def doc_label(d: dict) -> str:
+    return f"{d['number']}/{d['numeration']}"
+
+
+def rejection_reason(c: FicClient, doc_id: int) -> str | None:
+    try:
+        return str(c._request(
+            "GET", f"/c/{c.company_id}/issued_documents/{doc_id}/e_invoice/error_reason"))
+    except Exception:
+        return None
+
+
+def verify_doc(c: FicClient, d: dict) -> tuple[bool, str]:
+    """Verifica formale XML di un documento. Ritorna (ok, dettaglio)."""
+    try:
+        res = c._request("GET", f"/c/{c.company_id}/issued_documents/{d['id']}/e_invoice/xml_verify")
+    except Exception as e:
+        return False, str(e)[:200]
+    data = res.get("data") or {}
+    return bool(data.get("success")), "" if data.get("success") else str(data)
+
+
+def send_doc(c: FicClient, d: dict) -> tuple[bool, str]:
+    """Firma e invia al SDI. IRREVERSIBILE. Ritorna (ok, nome file o errore)."""
+    try:
+        res = c._request("POST", f"/c/{c.company_id}/issued_documents/{d['id']}/e_invoice/send",
+                         json={"data": {}})
+    except Exception as e:
+        return False, str(e)[:200]
+    return True, str((res.get("data") or {}).get("name") or "")
+
+
+def show_status(c: FicClient, docs: list[dict]) -> None:
     cnt: Counter = Counter()
     tot = 0.0
     for d in docs:
@@ -47,21 +73,14 @@ def show_status(docs: list[dict]) -> None:
         st = d.get("ei_status")
         cnt[st] += 1
         tot += d.get("amount_gross") or 0
-        line = f"  {d['number']}/{d['numeration']}  {(e.get('name') or '')[:40]:<42} {d.get('amount_gross'):>8.2f}  {st}"
+        line = f"  {doc_label(d)}  {(e.get('name') or '')[:40]:<42} {d.get('amount_gross'):>8.2f}  {st}"
         if st == "rejected":
-            try:
-                reason = c._request(
-                    "GET", f"/c/{c.company_id}/issued_documents/{d['id']}/e_invoice/error_reason"
-                )
-                line += f"  <- {reason}"
-            except Exception:
-                pass
+            line += f"  <- {rejection_reason(c, d['id'])}"
         print(line)
     print(f"\n{len(docs)} documenti | lordo {tot:.2f} | stati: {dict(cnt)}")
 
 
 def main() -> int:
-    global c
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", required=True, help="Data documento del batch (YYYY-MM-DD)")
     ap.add_argument("--confirm", action="store_true", help="Invia davvero al SDI (IRREVERSIBILE)")
@@ -69,34 +88,24 @@ def main() -> int:
     args = ap.parse_args()
 
     c = FicClient()
-    c.refresh_if_needed()
     docs = load_batch(c, args.date)
     if not docs:
         print(f"Nessuna autofattura con data {args.date}")
         return 1
 
     if args.status:
-        show_status(docs)
+        show_status(c, docs)
         return 0
 
     print(f"== Verifica formale su {len(docs)} documenti del {args.date} ==")
     valid, invalid = [], []
     for d in docs:
-        n = f"{d['number']}/{d['numeration']}"
         if d.get("ei_status") in ALREADY_SENT:
-            print(f"  {n} gia' inviata ({d.get('ei_status')}) - salto")
+            print(f"  {doc_label(d)} gia' inviata ({d.get('ei_status')}) - salto")
             continue
-        try:
-            res = c._request("GET", f"/c/{c.company_id}/issued_documents/{d['id']}/e_invoice/xml_verify")
-            if (res.get("data") or {}).get("success"):
-                print(f"  {n} OK")
-                valid.append(d)
-            else:
-                print(f"  {n} FAIL -> {res.get('data')}")
-                invalid.append(d)
-        except Exception as e:
-            print(f"  {n} ERRORE -> {str(e)[:200]}")
-            invalid.append(d)
+        ok, detail = verify_doc(c, d)
+        print(f"  {doc_label(d)} {'OK' if ok else 'FAIL -> ' + detail}")
+        (valid if ok else invalid).append(d)
 
     print(f"\nVerifica formale: {len(valid)} OK, {len(invalid)} da correggere")
     if invalid:
@@ -110,15 +119,9 @@ def main() -> int:
     print(f"\n== Invio al SDI di {len(valid)} documenti ==")
     sent, failed = [], []
     for d in valid:
-        n = f"{d['number']}/{d['numeration']}"
-        try:
-            res = c._request("POST", f"/c/{c.company_id}/issued_documents/{d['id']}/e_invoice/send",
-                             json={"data": {}})
-            print(f"  {n} -> {(res.get('data') or {}).get('name')}")
-            sent.append(n)
-        except Exception as e:
-            print(f"  {n} ERRORE -> {str(e)[:200]}")
-            failed.append(n)
+        ok, detail = send_doc(c, d)
+        print(f"  {doc_label(d)} -> {detail}")
+        (sent if ok else failed).append(doc_label(d))
         time.sleep(1)
 
     print(f"\nInviate: {len(sent)} | errori: {len(failed)} {failed}")

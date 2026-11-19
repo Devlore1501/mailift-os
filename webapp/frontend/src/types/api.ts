@@ -33,13 +33,22 @@ export interface Transaction {
   amount: number;
   currency: string;
   description: string;
+  account?: string | null;
+  code?: string | null;
+  balance?: number | null;
   raw: string | null;
+}
+
+export interface BalanceCheck {
+  checked: number;
+  errors: string[];
 }
 
 export interface ParseResponse {
   statement_id: string;
   transactions: Transaction[];
   outflows_count: number;
+  balance_check: BalanceCheck;
 }
 
 // -------------------- Autofatture
@@ -57,6 +66,14 @@ export interface AutofatturaLinePayload {
   amount_net: number;
   vat_id: number;
   vat_rate_percent: number;
+}
+
+export interface DuplicateInfo {
+  level: "duplicate" | "possible";
+  reason: string;
+  fic_id: number | null;
+  fic_number: string | null;
+  fic_date: string | null;
 }
 
 export interface AutofatturaPayload {
@@ -78,6 +95,7 @@ export interface AutofatturaPayload {
   warning_message: string;
   verify_status: VerifyStatus;
   verified_data: Record<string, unknown> | null;
+  duplicate: DuplicateInfo | null;
   lines: AutofatturaLinePayload[];
 }
 
@@ -89,15 +107,34 @@ export interface SkippedItalianItem {
   source_transaction: Record<string, unknown> | null;
 }
 
+export interface ExcludedItem {
+  date: string;
+  amount: number;
+  currency: string;
+  description: string;
+  account: string | null;
+  reason: string;
+  refund_date: string | null;
+}
+
 export interface PreviewResponse {
   statement_id: string;
   autofatture: AutofatturaPayload[];
   skipped_italian: SkippedItalianItem[];
+  excluded: ExcludedItem[];
+  orphan_refunds: Transaction[];
+  duplicate_check_ok: boolean;
 }
 
 // -------------------- Jobs
 export type JobStatus = "pending" | "running" | "done" | "error";
-export type JobKind = "classify" | "verify" | "create" | "generic";
+export type JobKind =
+  | "classify"
+  | "verify"
+  | "create"
+  | "sdi_verify"
+  | "sdi_send"
+  | "generic";
 
 export interface JobInfo {
   id: string;
@@ -192,6 +229,8 @@ export interface ClassifyJobResult {
   autofatture: AutofatturaPayload[];
   skipped_italian: SkippedItalianItem[];
   skipped_count: number;
+  excluded_count?: number;
+  duplicate_count?: number;
 }
 
 export interface RunHistoryItem {
@@ -207,4 +246,40 @@ export interface RunHistoryItem {
 }
 export interface RunHistoryDetail extends RunHistoryItem {
   result_json: CreatedItem[] | null;
+}
+
+// -------------------- Auth
+export interface AuthState {
+  authenticated: boolean;
+  auth_enabled?: boolean;
+}
+
+// -------------------- SDI
+export interface SdiDocument {
+  id: number;
+  number: string;
+  date: string;
+  supplier: string;
+  amount_gross: number;
+  ei_status: string | null;
+  rejection_reason: string | null;
+}
+export interface SdiDocumentsResponse {
+  date: string;
+  documents: SdiDocument[];
+}
+export type SdiItemStatus = "ok" | "invalid" | "already_sent" | "sent" | "error";
+export interface SdiJobItem {
+  id: number;
+  number: string;
+  status: SdiItemStatus;
+  detail: string;
+}
+export interface SdiJobResult {
+  items: SdiJobItem[];
+  ok?: number;
+  invalid?: number;
+  sent?: number;
+  errors?: number;
+  already_sent: number;
 }

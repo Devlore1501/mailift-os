@@ -34,7 +34,13 @@ async function parseResponse(res: Response): Promise<unknown> {
   return await res.text();
 }
 
+/** Evento globale: il backend ha risposto 401, la sessione e' scaduta. */
+export const AUTH_EXPIRED_EVENT = "auth:expired";
+
 async function handle<T>(res: Response): Promise<T> {
+  if (res.status === 401 && !res.url.includes("/api/auth/")) {
+    window.dispatchEvent(new Event(AUTH_EXPIRED_EVENT));
+  }
   if (!res.ok) {
     const body = await parseResponse(res);
     const detail =

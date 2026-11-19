@@ -17,12 +17,43 @@ import type {
   PreviewResponse,
   RunHistoryDetail,
   RunHistoryItem,
+  AuthState,
+  SdiDocumentsResponse,
   SupplierOverrideCreate,
   SupplierOverridePayload,
   UploadResponse,
   VerifyRejectItem,
   VerifyResultsResponse,
 } from "@/types/api";
+
+// -------------------- Auth
+export function useAuth() {
+  return useQuery<AuthState>({
+    queryKey: ["auth"],
+    queryFn: () => apiGet<AuthState>("/auth/me"),
+    staleTime: Infinity,
+    retry: false,
+  });
+}
+
+export function useLogin() {
+  const qc = useQueryClient();
+  return useMutation<AuthState, Error, string>({
+    mutationFn: (password) => apiPost<AuthState>("/auth/login", { password }),
+    onSuccess: () => qc.invalidateQueries(),
+  });
+}
+
+export function useLogout() {
+  const qc = useQueryClient();
+  return useMutation<AuthState, Error, void>({
+    mutationFn: () => apiPost<AuthState>("/auth/logout"),
+    onSuccess: () => {
+      qc.clear();
+      qc.setQueryData(["auth"], { authenticated: false, auth_enabled: true });
+    },
+  });
+}
 
 // -------------------- System
 export function useHealth() {
@@ -143,6 +174,29 @@ export function usePreviewQuery(
 export function useCreateAutofatture() {
   return useMutation<JobStartResponse, Error, CreateRequest>({
     mutationFn: (req) => apiPost<JobStartResponse>("/autofatture/create", req),
+  });
+}
+
+// -------------------- SDI
+export function useSdiDocuments(params: { date?: string; ids?: number[] }) {
+  const ids = params.ids?.join(",");
+  return useQuery<SdiDocumentsResponse>({
+    queryKey: ["sdi-documents", params.date ?? null, ids ?? null],
+    queryFn: () =>
+      apiGet<SdiDocumentsResponse>("/sdi/documents", { date: params.date, ids }),
+    enabled: !params.ids || params.ids.length > 0,
+  });
+}
+
+export function useSdiVerify() {
+  return useMutation<JobStartResponse, Error, number[]>({
+    mutationFn: (doc_ids) => apiPost<JobStartResponse>("/sdi/verify", { doc_ids }),
+  });
+}
+
+export function useSdiSend() {
+  return useMutation<JobStartResponse, Error, { doc_ids: number[]; confirm: string }>({
+    mutationFn: (req) => apiPost<JobStartResponse>("/sdi/send", req),
   });
 }
 

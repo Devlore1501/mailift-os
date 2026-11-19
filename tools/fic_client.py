@@ -27,7 +27,7 @@ import requests
 from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parent.parent
-ENV_PATH = Path.home() / ".secrets" / "mailift" / ".env"
+ENV_PATH = Path(os.environ.get("MAILIFT_ENV_PATH") or Path.home() / ".secrets" / "mailift" / ".env")
 if not ENV_PATH.exists():
     ENV_PATH = ROOT / ".env"  # Fallback per compatibilità
 
@@ -264,12 +264,14 @@ class FicClient:
         self.access_token = tok["access_token"]
         if "refresh_token" in tok:
             self.refresh_token = tok["refresh_token"]
-        _update_env(
-            {
-                "FIC_ACCESS_TOKEN": self.access_token,
-                "FIC_REFRESH_TOKEN": self.refresh_token,
-            }
-        )
+        updates = {
+            "FIC_ACCESS_TOKEN": self.access_token,
+            "FIC_REFRESH_TOKEN": self.refresh_token,
+        }
+        _update_env(updates)
+        # Senza questo un processo longevo (webapp) ricreerebbe i FicClient col
+        # token vecchio: load_dotenv non sovrascrive le variabili gia' presenti.
+        os.environ.update(updates)
 
     # ------------------------------------------------------------- VAT types
     def get_vat_id_for_autofattura(self, country_iso: str | None = None) -> int:
@@ -436,6 +438,22 @@ class FicClient:
         return new_supplier
 
     # ------------------------------------------------------ Self invoices
+    def list_self_supplier_invoices(self, fieldset: str = "basic") -> list[dict[str, Any]]:
+        """Tutte le autofatture passive emesse, dalla piu' recente, paginando."""
+        docs: list[dict[str, Any]] = []
+        page = 1
+        while True:
+            r = self._request(
+                "GET",
+                f"/c/{self.company_id}/issued_documents",
+                params={"type": "self_supplier_invoice", "per_page": 100,
+                        "page": page, "fieldset": fieldset, "sort": "-id"},
+            )
+            docs.extend(r.get("data") or [])
+            if page >= (r.get("last_page") or 1):
+                return docs
+            page += 1
+
     def create_self_supplier_invoice(self, af: AutofatturaInput) -> dict[str, Any]:
         """Crea un'autofattura passiva (TD17/TD18/TD19) come issued_document.
 
@@ -481,6 +499,11 @@ class FicClient:
         ]
 
         subject = f"Autofattura {af.type_doc} - {af.supplier_name}"[:200]
+        # L'oggetto interno (non quello visibile) porta il mese degli addebiti:
+        # e' la chiave con cui find_duplicates riconosce un documento gia' emesso.
+        internal_subject = subject
+        if af.ref_invoice_date:
+            internal_subject = f"{subject[:190]} [{af.ref_invoice_date:%Y-%m}]"
         numeration = os.getenv("FIC_NUMERATION", "a")
         destinatario_code = os.getenv("FIC_DESTINATARIO_CODE", "M5UXCR1")
         regime_fiscale = _regime_fiscale_for_country(country_iso or "")
@@ -558,7 +581,7 @@ class FicClient:
                 "entity": entity,
                 "date": af.invoice_date.isoformat(),
                 "currency": {"id": af.currency},
-                "subject": subject,
+                "subject": internal_subject,
                 "visible_subject": subject,
                 "items_list": items_list,
                 "payments_list": [payment],

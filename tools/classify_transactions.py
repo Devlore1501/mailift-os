@@ -147,7 +147,7 @@ def classify_split(transactions: list[dict]) -> tuple[list[dict], list[dict]]:
     from anthropic import Anthropic
 
     client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-    model = os.environ.get("ANTHROPIC_MODEL", "claude-opus-4-6")
+    model = os.environ.get("ANTHROPIC_MODEL", "claude-opus-5-5")
 
     indexed = [{"index": i, **t} for i, t in enumerate(transactions)]
     tool = _build_tool_schema()

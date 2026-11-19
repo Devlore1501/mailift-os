@@ -9,12 +9,12 @@ import threading
 import time
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any, Optional
 
 from sqlalchemy import select
 
-from app.db import session_scope
+from app.db import session_scope, utcnow
 from app.models.db_models import Job as JobRow
 
 
@@ -91,7 +91,7 @@ class JobManager:
                     row = JobRow(
                         id=job.id,
                         kind=job.kind,
-                        created_at=datetime.utcfromtimestamp(job.created_at),
+                        created_at=datetime.fromtimestamp(job.created_at, UTC).replace(tzinfo=None),
                         statement_id=job.statement_id,
                     )
                     db.add(row)
@@ -104,7 +104,7 @@ class JobManager:
                 row.result = job.result
                 row.error = job.error
                 row.statement_id = job.statement_id
-                row.updated_at = datetime.utcnow()
+                row.updated_at = utcnow()
         except Exception as e:
             # DB down non deve bloccare il job flow
             print(f"[JobManager] persist warning for {job.id}: {e}")

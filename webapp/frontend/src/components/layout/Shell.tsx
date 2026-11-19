@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet } from "react-router";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,7 +14,7 @@ export function Shell() {
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <TopBar />
-          <main className="flex-1 overflow-auto px-6 py-6">
+          <main className="flex-1 overflow-auto px-4 py-6 md:px-6">
             <Outlet />
           </main>
         </div>

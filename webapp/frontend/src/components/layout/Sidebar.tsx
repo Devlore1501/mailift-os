@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink } from "react-router";
 import {
   Home,
   Plus,
@@ -10,7 +10,15 @@ import {
   Moon,
   Sun,
   Receipt,
+  Send,
+  Menu,
 } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/lib/theme";
 import {
@@ -24,6 +32,7 @@ import { useHealth } from "@/lib/queries";
 const navItems = [
   { to: "/", label: "Dashboard", icon: Home, end: true },
   { to: "/new", label: "Nuovo run", icon: Plus, end: false },
+  { to: "/sdi", label: "Invio SDI", icon: Send, end: false },
   { to: "/history", label: "Storico", icon: History, end: false },
   { to: "/settings", label: "Impostazioni", icon: Settings, end: false },
 ];
@@ -77,7 +86,7 @@ export function Sidebar({ className }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "flex h-screen flex-col border-r border-border bg-card/50 backdrop-blur transition-[width] duration-200",
+        "sticky top-0 hidden h-screen shrink-0 flex-col border-r border-border bg-card/50 backdrop-blur-sm transition-[width] duration-200 md:flex",
         collapsed ? "w-[56px]" : "w-[240px]",
         className
       )}
@@ -115,7 +124,7 @@ export function Sidebar({ className }: SidebarProps) {
               cn(
                 "flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors",
                 "hover:bg-accent hover:text-accent-foreground",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
                 isActive
                   ? "bg-accent text-accent-foreground"
                   : "text-muted-foreground",
@@ -151,7 +160,7 @@ export function Sidebar({ className }: SidebarProps) {
           <button
             type="button"
             onClick={toggle}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Cambia tema"
           >
             {theme === "dark" ? (
@@ -163,7 +172,7 @@ export function Sidebar({ className }: SidebarProps) {
           <button
             type="button"
             onClick={() => setCollapsed((c) => !c)}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
             aria-label={collapsed ? "Espandi sidebar" : "Collassa sidebar"}
           >
             {collapsed ? (
@@ -175,5 +184,45 @@ export function Sidebar({ className }: SidebarProps) {
         </div>
       </div>
     </aside>
+  );
+}
+
+/** Navigazione da telefono: la sidebar e' nascosta sotto md, qui si apre a cassetto. */
+export function MobileNav() {
+  const [open, setOpen] = useState(false);
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <button
+          type="button"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent md:hidden"
+          aria-label="Apri menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-64 p-3">
+        <SheetTitle className="px-2 py-2 text-sm">Autofatture</SheetTitle>
+        <nav className="mt-2 space-y-0.5">
+          {navItems.map(({ to, label, icon: Icon, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              onClick={() => setOpen(false)}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-3 rounded-md px-2 py-2.5 text-sm font-medium",
+                  isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                )
+              }
+            >
+              <Icon className="h-4 w-4" />
+              {label}
+            </NavLink>
+          ))}
+        </nav>
+      </SheetContent>
+    </Sheet>
   );
 }

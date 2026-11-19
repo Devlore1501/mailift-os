@@ -1,0 +1,19 @@
+# Contesto di build = root del repo: entra solo cio' che serve all'immagine.
+# Estratti conto, clienti, token e .env restano fuori.
+*
+!tools/parse_bank_statement.py
+!tools/classify_transactions.py
+!tools/autofatture_prep.py
+!tools/run_autofatture.py
+!tools/fic_client.py
+!tools/send_autofatture_sdi.py
+!tools/verify_suppliers_from_email.py
+!tools/gmail_client.py
+!webapp/backend/requirements.txt
+!webapp/backend/app/**
+!webapp/frontend/**
+webapp/frontend/node_modules
+webapp/frontend/dist
+webapp/frontend/src_old
+**/__pycache__
+**/.tmp

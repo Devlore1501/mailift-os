@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { FileText, AlertCircle, ChevronDown } from "lucide-react";
+import { useNavigate, useParams } from "react-router";
+import { FileText, ShieldAlert, Copy } from "lucide-react";
 import { toast } from "sonner";
 import {
   Card,
@@ -24,11 +24,15 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { DuplicateBadge } from "@/components/domain/DuplicateBadge";
+import { ExcludedList } from "@/components/domain/ExcludedList";
 import { SupplierBadge } from "@/components/domain/SupplierBadge";
 import { VatBadge } from "@/components/domain/VatBadge";
 import { BillToWarning } from "@/components/domain/BillToWarning";
@@ -38,7 +42,7 @@ import {
   usePreview,
 } from "@/lib/queries";
 import { ApiError } from "@/lib/api";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatMonth } from "@/lib/utils";
 import { getStoredEnvironment } from "@/components/domain/EnvironmentSwitch";
 import type { AutofatturaPayload, PreviewResponse } from "@/types/api";
 
@@ -71,6 +75,7 @@ export function Review() {
   const [loaded, setLoaded] = useState(false);
   const [pdfOpenKey, setPdfOpenKey] = useState<string | null>(null);
   const [pdfSupplierName, setPdfSupplierName] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (!statementId || loaded) return;
@@ -113,7 +118,13 @@ export function Review() {
     return t;
   }, [preview, rowStates]);
 
+  const selected = useMemo(
+    () => (preview?.autofatture ?? []).filter((a) => rowStates[a.id] && !rowStates[a.id].excluded),
+    [preview, rowStates]
+  );
+
   const handleCreate = async () => {
+    setConfirmOpen(false);
     if (!preview) return;
     const env = getStoredEnvironment();
     const dryRun = env === "dry-run";
@@ -175,46 +186,43 @@ export function Review() {
 
   const env = getStoredEnvironment();
   const dryRun = env === "dry-run";
+  const dupCertain = preview.autofatture.filter((a) => a.duplicate?.level === "duplicate").length;
+  const dupPossible = preview.autofatture.filter((a) => a.duplicate?.level === "possible").length;
+  const selectedPossibleDup = selected.filter((a) => a.duplicate).length;
 
   return (
     <div className="space-y-6">
-      {preview.skipped_italian.length > 0 && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>
-            {preview.skipped_italian.length} transazioni escluse
-          </AlertTitle>
-          <AlertDescription>
-            <div className="mt-1 text-xs text-muted-foreground">
-              Fornitori italiani con IVA 22% diretta — non richiedono
-              autofattura.
-            </div>
-            <Accordion type="single" collapsible className="mt-2">
-              <AccordionItem value="skipped" className="border-0">
-                <AccordionTrigger className="py-2 text-xs">
-                  Mostra dettagli
-                </AccordionTrigger>
-                <AccordionContent>
-                  <ul className="space-y-1 text-xs">
-                    {preview.skipped_italian.map((s, i) => (
-                      <li
-                        key={i}
-                        className="flex items-center justify-between border-b border-border/40 py-1"
-                      >
-                        <span className="font-medium">{s.supplier_name}</span>
-                        <span className="text-muted-foreground">{s.reason}</span>
-                        <span className="tabular-nums">
-                          {formatCurrency(Math.abs(s.amount))}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+      {!preview.duplicate_check_ok && (
+        <Alert variant="destructive">
+          <ShieldAlert className="h-4 w-4" />
+          <AlertTitle>Controllo duplicati non eseguito</AlertTitle>
+          <AlertDescription className="text-xs">
+            Fatture in Cloud non ha risposto, quindi non so se queste
+            autofatture esistono gia'. Ricarica la pagina prima di crearle.
           </AlertDescription>
         </Alert>
       )}
+      {dupCertain + dupPossible > 0 && (
+        <Alert variant="warning">
+          <Copy className="h-4 w-4" />
+          <AlertTitle>
+            {dupCertain > 0 && `${dupCertain} gia' emesse (escluse)`}
+            {dupCertain > 0 && dupPossible > 0 && " · "}
+            {dupPossible > 0 && `${dupPossible} possibili duplicati`}
+          </AlertTitle>
+          <AlertDescription className="text-xs text-muted-foreground">
+            Su FiC esiste gia' un'autofattura stesso fornitore e stesso importo.
+            Gli abbonamenti a prezzo fisso si ripetono ogni mese: controlla la
+            data dell'autofattura esistente prima di includerli.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <ExcludedList
+        excluded={preview.excluded}
+        skippedItalian={preview.skipped_italian}
+        orphanRefunds={preview.orphan_refunds}
+      />
 
       <Card>
         <CardHeader>
@@ -231,6 +239,7 @@ export function Review() {
                   <TableHead className="w-10"></TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead>Fornitore</TableHead>
+                  <TableHead>Mese</TableHead>
                   <TableHead>Paese</TableHead>
                   <TableHead>IVA</TableHead>
                   <TableHead>Descrizione</TableHead>
@@ -270,11 +279,15 @@ export function Review() {
                             <BillToWarning supplier={a.supplier_name} />
                           )}
                         </div>
+                        <DuplicateBadge dup={a.duplicate} />
                         {a.supplier_vat_number && (
                           <div className="text-[10px] font-mono text-muted-foreground">
                             {a.supplier_vat_number}
                           </div>
                         )}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-xs capitalize">
+                        {formatMonth(a.ref_invoice_date)}
                       </TableCell>
                       <TableCell>
                         <SupplierBadge countryIso={a.supplier_country_iso} />
@@ -355,7 +368,7 @@ export function Review() {
           </div>
           <Button
             size="lg"
-            onClick={handleCreate}
+            onClick={() => (dryRun ? handleCreate() : setConfirmOpen(true))}
             disabled={createMut.isPending || nonExcludedCount === 0}
           >
             {dryRun
@@ -364,6 +377,39 @@ export function Review() {
           </Button>
         </CardContent>
       </Card>
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Creare {nonExcludedCount} autofatture su FiC?</DialogTitle>
+            <DialogDescription>
+              Vengono salvate su Fatture in Cloud ma non inviate al SDI: l'invio
+              e' un passaggio separato.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1 text-sm">
+            {Object.entries(totals).map(([cur, amount]) => (
+              <div key={cur} className="flex justify-between">
+                <span className="text-muted-foreground">Imponibile {cur}</span>
+                <span className="font-semibold tabular-nums">{formatCurrency(amount, cur)}</span>
+              </div>
+            ))}
+            {selectedPossibleDup > 0 && (
+              <p className="pt-2 text-warning">
+                {selectedPossibleDup} selezionate risultano possibili duplicati.
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+              Annulla
+            </Button>
+            <Button onClick={handleCreate} disabled={createMut.isPending}>
+              Crea su FiC
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <PdfPreviewDialog
         supplierKey={pdfOpenKey ?? ""}
