@@ -1,6 +1,20 @@
 {
   "version": 2,
   "skills": {
+    "caveman": {
+      "source": "juliusbrussee/caveman",
+      "commit": "a192894723a8f47e7f504c7b5041967ff1f18e55",
+      "sourceType": "github",
+      "skillPath": "skills/caveman/SKILL.md",
+      "computedHash": "b51af74aacdadbc3c2d6bb79f05db58dc521854b87f7ffabd48faf286a81ed31"
+    },
+    "caveman-compress": {
+      "source": "juliusbrussee/caveman",
+      "commit": "a192894723a8f47e7f504c7b5041967ff1f18e55",
+      "sourceType": "github",
+      "skillPath": "skills/caveman-compress/SKILL.md",
+      "computedHash": "1f627a3ac239baa859918cf64a5e89619c162e1e9787c6d97ad41c5a1cc2fdb9"
+    },
     "find-skills": {
       "source": "vercel-labs/skills",
       "commit": "57217cf86ba38148a57af9e90d14a4c049558330",
